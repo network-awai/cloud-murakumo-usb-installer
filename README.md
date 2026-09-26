@@ -5,9 +5,12 @@ nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. It never chooses or
 formats a disk automatically.
 
-Status: the ISO definition and build script are prepared, but this customized
-image has not yet been built or USB-booted. Do not replace a serving host from
-it until the image, hardware and recovery path are tested.
+Status: the customized NixOS 26.05 ISO was built and booted in a BIOS/KVM VM
+on 2026-09-26. The bundled preflight script and target templates were checked
+in the live image. See [the verification record](docs/verification-2026-09-26.md)
+for the source revision, image hash and remaining hardware checks. Physical
+USB boot, target-disk installation and recovery have not been tested; do not
+replace a serving host until those checks succeed.
 
 ## Build the bootable ISO
 
