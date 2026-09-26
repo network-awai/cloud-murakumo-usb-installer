@@ -5,6 +5,10 @@ nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. It never chooses or
 formats a disk automatically.
 
+Status: the ISO definition and build script are prepared, but this customized
+image has not yet been built or USB-booted. Do not replace a serving host from
+it until the image, hardware and recovery path are tested.
+
 ## Build the bootable ISO
 
 On a NixOS or Linux machine with Nix, use a reviewed nixpkgs checkout at an
