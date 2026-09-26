@@ -1,6 +1,6 @@
 # cloud-murakumo-usb-installer
 
-Bootable NixOS installation media and target-host configuration for Murakumo
+NixOS installation media definition and target-host configuration for Murakumo
 nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. It never chooses or
 formats a disk automatically.
