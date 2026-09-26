@@ -12,7 +12,7 @@ it until the image, hardware and recovery path are tested.
 ## Build the bootable ISO
 
 On a NixOS or Linux machine with Nix, use a reviewed nixpkgs checkout at an
-explicit commit:
+explicit commit, or the immutable store path behind a pinned NixOS channel:
 
 ```sh
 ./scripts/build-iso.sh /absolute/path/to/nixpkgs
