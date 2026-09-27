@@ -12,6 +12,11 @@ for the source revision, image hash and remaining hardware checks. Physical
 USB boot, target-disk installation and recovery have not been tested; do not
 replace a serving host until those checks succeed.
 
+Phone-only setup, Wi-Fi provisioning, Kotoba account pairing, remote model
+download and model switching are not present in this ISO. The target flow and
+qualification gates are recorded in
+[headless phone setup](docs/headless-phone-setup.md).
+
 ## Build the bootable ISO
 
 On a NixOS or Linux machine with Nix, use a reviewed nixpkgs checkout at an
