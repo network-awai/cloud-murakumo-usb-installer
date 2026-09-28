@@ -12,11 +12,11 @@ for the source revision, image hash and remaining hardware checks. Physical
 USB boot, target-disk installation and recovery have not been tested; do not
 replace a serving host until those checks succeed.
 
-Phone-only setup, Wi-Fi provisioning, Kotoba account pairing, remote model
+Phone-only setup, Wi-Fi provisioning, Kotoba authority pairing, remote model
 download and model switching are not present in this source. A read-only local
-inference check has been added to the source, but the 2026-09-26 ISO predates
-it and a new image has not yet been built. The check does not install or start
-a model server.
+inference check and a factory device claim responder for `murakumo.cloud` have
+been added to the source, but the 2026-09-26 ISO predates both and a new image
+has not yet been built. Neither component installs or starts a model server.
 The target flow and qualification gates are recorded in
 [headless phone setup](docs/headless-phone-setup.md).
 
@@ -33,8 +33,8 @@ The script prints the nixpkgs commit and produces `result/iso/*.iso`. Review
 that commit and record the ISO SHA-256 before writing a USB stick. Use the
 [official NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation)
 for USB writing, partitioning, mounting and `nixos-install`. An ISO built from
-this source includes the read-only preflight and local-inference checks and
-target templates under `/etc/murakumo/`,
+this source includes the read-only preflight and local-inference checks,
+device claim agent and target templates under `/etc/murakumo/`,
 but does not run an install automatically.
 
 ## Install a target host
@@ -46,7 +46,8 @@ but does not run an install automatically.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
 4. Copy `/etc/murakumo/node-base.nix`,
-   `/etc/murakumo/node-readiness.mjs`, and an edited copy of
+   `/etc/murakumo/node-readiness.mjs`,
+   `/etc/murakumo/device-claim.mjs`, and an edited copy of
    `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
    latter to `configuration.nix`). Set a real SSH public
    key, confirm UEFI or replace its boot loader settings, and review the
@@ -64,6 +65,15 @@ but does not run an install automatically.
    [cloud-murakumo-installer](https://github.com/network-awai/cloud-murakumo-installer).
    Follow the [buyer and operator path](docs/buyer-operator-path.md) for local
    AI access, optional community participation and account boundaries.
+
+Factory provisioning is a separate operator step after installation: generate
+one device key and one label per shipped unit with
+`sudo node /etc/murakumo/device-claim.mjs provision --model 'Murakumo 2609'`.
+The command prints a claim URL and registration JSON containing the factory
+token. Keep that output private; print the URL as the unit's QR label and
+register the JSON through the operator-only `murakumo.cloud` device API near
+dispatch. The node must never hold that API's admin token. See the
+[buyer and operator path](docs/buyer-operator-path.md) for the exact boundary.
 
 The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help, but its
 GPU was llvmpipe. Bare-metal Radeon 680M, Prism Vulkan, model throughput,

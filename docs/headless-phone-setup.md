@@ -2,8 +2,10 @@
 
 Status: design and qualification plan. The ISO built on 2026-09-26 does not
 implement this flow. Do not describe that ISO as a phone-configurable server.
-The current source adds a read-only local inference check for after a manual
-OS and model-server installation; it does not implement phone setup.
+The current source adds a read-only local inference check and a
+`murakumo.cloud` factory device claim responder for after a manual OS install.
+These do not implement phone-only setup, Wi-Fi provisioning, or the separate
+`auth.kotoba.cloud` authority flow described below.
 
 ## Target and ownership
 
