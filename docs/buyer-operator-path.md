@@ -60,7 +60,25 @@ the private factory key never needs a copy in a user's home directory. Use
 the exact model ID returned by the local model server; replace the example
 value below. `check` enrolls and reports a heartbeat without taking jobs.
 Only after the operator has admitted the Community node and confirmed the
-model should `join` be used for unattended participation.
+model should `join` be used for unattended participation. The NixOS module
+keeps Community participation disabled by default. To opt in, install the CLI
+release that supports `--idle-only` and add this to the host configuration:
+
+```nix
+services.murakumoCommunity = {
+  enable = true;
+  cli = "/opt/murakumo/bin/murakumo";
+  model = "YOUR_MODEL_ID";
+  localUrl = "http://127.0.0.1:11434/v1";
+};
+```
+
+The service checks a real local completion before starting, reuses the factory
+DID, and withholds new Community jobs and free-slot heartbeats while the host
+has high CPU load or low free memory. A job already claimed is allowed to
+finish. Disable the option and rebuild the host to stop participation. This
+host check does not see every GPU-only workload, so physical coexistence and
+buyer control still need validation before a retail promise.
 
 ```sh
 sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
