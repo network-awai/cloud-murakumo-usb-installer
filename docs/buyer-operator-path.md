@@ -71,6 +71,20 @@ sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
   murakumo node join --model YOUR_MODEL_ID
 ```
 
+After the same DID has served an accepted paid job, the person operating the
+unit can inspect and request withdrawal of its earned credits. Replace the
+example address with a wallet address you control. The payout request is
+signed by the device key; the credits are debited when accepted, and an
+operator must separately approve and settle the USDC transfer. The site's
+buyer Passkey does not yet authorize this request.
+
+```sh
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  murakumo node earnings
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  murakumo node payout --credits 5000 --to YOUR_0x_WALLET_ADDRESS
+```
+
 Once that check passes, a user on the node can call the same local API. For
 example, with a server on port 11434:
 
