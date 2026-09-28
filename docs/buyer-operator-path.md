@@ -13,7 +13,7 @@ node, but no new ISO or physical unit has been verified with it.
 | Local AI | Operator supplies an OpenAI-compatible model server and reviewed model. | `node /etc/murakumo/node-readiness.mjs --model MODEL_ID --local-url http://127.0.0.1:11434/v1` returns success from that exact model. |
 | Factory identity | On each installed unit, the operator provisions a unique Ed25519 device key and label, then registers the factory DID and token with the operator-only `murakumo.cloud` API near dispatch. | The private key stays on the device; a distinct printed label and a factory row exist for that unit. |
 | Buyer device claim | The buyer signs in at `murakumo.cloud`, scans the label, and the powered-on node signs the pending challenge. The node then sends signed heartbeats. | The site records a single claimed owner and a fresh signed heartbeat. This is a site device claim, separate from `auth.kotoba.cloud` authority pairing. |
-| Optional community participation | Operator installs Murakumo CLI, runs `murakumo node init`, `doctor`, then `check`; `join` runs in the foreground. | Admission and fresh heartbeat are visible. They do not prove job placement. |
+| Optional community participation | Operator installs a Murakumo CLI version that supports `MURAKUMO_NODE_IDENTITY_FILE`, then runs `doctor`, `check`, and foreground `join` with the factory device identity. Do not run `node init` for a factory-provisioned unit. | The Community node reports the same DID as the buyer-claimed device, followed by admission and a fresh model-ready heartbeat. These do not prove job placement. |
 | Rewards | Inference credits and reward accounting are separate from CLI join. | A completed, accepted job and an actual reward ledger entry are needed. No automatic reward or cash redemption is implemented by this installer. |
 
 The supported command sequence for the CLI is documented in
@@ -47,10 +47,29 @@ challenge. A successful claim changes the site device row to `claimed`; a
 subsequent signed heartbeat confirms that the same key is online. A heartbeat
 reports identity/liveness only, not model readiness or inference capability.
 
-The site claim and the Community inference provider are separate identities
-today. A claimed buyer unit is not automatically a paid provider. Joining
-Community still needs its own admission, an accepted completed inference job,
-and a reward ledger entry before any reward can be asserted.
+The site claim and the Community inference provider can use the same device
+identity when the CLI is started with the root-readable factory identity file.
+This binds their device DID, but does not delegate the device's earned credits
+to the buyer's account. A claimed buyer unit is not automatically a paid
+provider. Joining Community still needs its own admission, an accepted
+completed inference job, and a reward ledger entry before any reward can be
+asserted.
+
+After installing the updated Murakumo CLI, run it as root for this check so
+the private factory key never needs a copy in a user's home directory. Use
+the exact model ID returned by the local model server; replace the example
+value below. `check` enrolls and reports a heartbeat without taking jobs.
+Only after the operator has admitted the Community node and confirmed the
+model should `join` be used for unattended participation.
+
+```sh
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  murakumo node doctor --model YOUR_MODEL_ID
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  murakumo node check --model YOUR_MODEL_ID
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  murakumo node join --model YOUR_MODEL_ID
+```
 
 Once that check passes, a user on the node can call the same local API. For
 example, with a server on port 11434:
