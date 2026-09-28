@@ -12,10 +12,11 @@ separate Kotoba authority pairing or a Community provider enrollment.
 ## Checks run on the macOS development host
 
 - `npx --yes node@22 --test test/device-claim.test.mjs test/node-readiness.test.mjs`:
-  7 tests passed, 0 failed. Device claim tests cover a unique, private
+  8 tests passed, 0 failed. Device claim tests cover a unique, private
   provisioned identity and canonical label; signing and verification of the
-  site's exact challenge and heartbeat message formats; and refusal of expired
-  or absent challenges and non-HTTPS remote origins.
+  site's exact challenge and heartbeat message formats over a real loopback
+  HTTP connection; and refusal of expired or absent challenges and non-HTTPS
+  remote origins.
 - `git diff --check`: passed.
 - The signed message format was compared with
   `grant.device-attest/signing-input` and `heartbeat-signing-input`, and the QR
