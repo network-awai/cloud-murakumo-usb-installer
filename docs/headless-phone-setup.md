@@ -2,6 +2,8 @@
 
 Status: design and qualification plan. The ISO built on 2026-09-26 does not
 implement this flow. Do not describe that ISO as a phone-configurable server.
+The current source adds a read-only local inference check for after a manual
+OS and model-server installation; it does not implement phone setup.
 
 ## Target and ownership
 

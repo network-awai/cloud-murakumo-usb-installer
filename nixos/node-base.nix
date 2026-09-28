@@ -8,6 +8,7 @@
     nodejs_22
     vulkan-tools
   ];
+  environment.etc."murakumo/node-readiness.mjs".source = ./node-readiness.mjs;
   # Hardware, disks, model server, credentials, admission and firewall are
   # supplied by the operator's host configuration.
 }
