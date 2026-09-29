@@ -90,18 +90,28 @@ sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
 ```
 
 After the same DID has served an accepted paid job, the person operating the
-unit can inspect and request withdrawal of its earned credits. Replace the
-example address with a wallet address you control. The payout request is
-signed by the device key; the credits are debited when accepted, and an
-operator must separately approve and settle the USDC transfer. The site's
-buyer Passkey does not yet authorize this request.
+unit can inspect its earned credits. A payout request needs two independent
+approvals: the buyer signs in to the draft `murakumo.cloud` device console and
+authorizes one exact destination and credit amount, then the device signs the
+same request. The buyer copies the two-minute authorization into a private
+mode-0600 file on the node. The credits are debited when the API accepts the
+request; an operator must separately approve and settle the USDC transfer.
+This cross-service path passed a local integration test with a model fixture,
+but the site/API changes are draft and are not a live payout flow.
 
 ```sh
 sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
   murakumo node earnings
 sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
-  murakumo node payout --credits 5000 --to YOUR_0x_WALLET_ADDRESS
+  murakumo node payout --credits 5000 --to YOUR_0x_WALLET_ADDRESS \
+  --owner-token-file /absolute/private/buyer-authorization.txt
 ```
+
+Only a qualified Community node can take explicitly public work. The current
+node worker can execute a `full-shard` job with `input.trust-tier=public` and
+the exact local model ID; private `host-large-model` jobs remain outside the
+Community pool. This has been exercised only with a local model fixture; an
+accepted job on a shipped unit remains an open acceptance check.
 
 Once that check passes, a user on the node can call the same local API. For
 example, with a server on port 11434:
