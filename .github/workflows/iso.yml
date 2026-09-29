@@ -1,0 +1,81 @@
+name: Build Murakumo installer ISO
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/iso.yml'
+      - 'nixos/**'
+      - 'scripts/build-iso.sh'
+  pull_request:
+    paths:
+      - '.github/workflows/iso.yml'
+      - 'nixos/**'
+      - 'scripts/build-iso.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Verify factory identity and local model checks
+        run: node --test test/device-claim.test.mjs test/node-readiness.test.mjs
+
+      - name: Install Nix
+        uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
+        with:
+          installer-version: 2.35.2
+
+      - name: Fetch reviewed NixOS source
+        shell: bash
+        run: |
+          set -euo pipefail
+          nixpkgs="$RUNNER_TEMP/nixpkgs"
+          git init -q "$nixpkgs"
+          git -C "$nixpkgs" -c protocol.version=2 fetch --depth 1 --filter=blob:none \
+            https://github.com/NixOS/nixpkgs.git \
+            f5c082a40f7571c266e74e80ae2e68aadd8a9fc7
+          git -C "$nixpkgs" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$nixpkgs" rev-parse HEAD)" = \
+            f5c082a40f7571c266e74e80ae2e68aadd8a9fc7
+
+      - name: Build x86-64 installer ISO
+        shell: bash
+        run: ./scripts/build-iso.sh "$RUNNER_TEMP/nixpkgs"
+
+      - name: Record exact image identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          iso=(result/iso/*.iso)
+          test "${#iso[@]}" -eq 1
+          sha256sum "${iso[0]}" | tee iso.sha256
+          stat -c '%n %s bytes' "${iso[0]}" | tee iso-size.txt
+          printf '%s\n' "$GITHUB_SHA" > installer-source-revision.txt
+          printf '%s\n' f5c082a40f7571c266e74e80ae2e68aadd8a9fc7 \
+            > nixpkgs-revision.txt
+
+      - name: Upload image and build identity
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: murakumo-installer-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 3
+          path: |
+            result/iso/*.iso
+            iso.sha256
+            iso-size.txt
+            installer-source-revision.txt
+            nixpkgs-revision.txt
