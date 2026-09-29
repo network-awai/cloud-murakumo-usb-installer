@@ -46,6 +46,7 @@ but does not run an install automatically.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
 4. Copy `/etc/murakumo/node-base.nix`,
+   `/etc/murakumo/community.nix`,
    `/etc/murakumo/node-readiness.mjs`,
    `/etc/murakumo/device-claim.mjs`, and an edited copy of
    `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
