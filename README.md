@@ -10,7 +10,7 @@ QEMU VMs on 2026-09-30. The bundled preflight script and target templates,
 including `community.nix`, were checked in the live image. See [the current
 verification record](docs/verification-2026-09-30.md) for the exact image hash
 and remaining hardware checks. Physical
-USB boot, target-disk installation and recovery have not been tested; do not
+USB boot, physical target-disk installation and recovery have not been tested; do not
 replace a serving host until those checks succeed.
 
 Phone-only setup, Wi-Fi provisioning, Kotoba authority pairing, remote model
