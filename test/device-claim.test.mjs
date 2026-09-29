@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createPublicKey, verify } from 'node:crypto';
 import { createServer } from 'node:http';
-import { mkdtemp, rm, stat } from 'node:fs/promises';
+import { mkdtemp, rm, stat, symlink } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import {
   claimOrigin, claimSigningInput, heartbeatSigningInput, loadIdentity,
   pollClaim, provision, sendHeartbeat,
@@ -35,6 +37,23 @@ test('factory provision creates one private device key and canonical buyer label
     await assert.rejects(() => provision({ state, model: 'Murakumo 2609',
                                           origin: 'http://127.0.0.1:8181' }), /EEXIST/);
   });
+});
+
+test('factory CLI runs through the symlink used by NixOS /etc', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'murakumo-symlink-'));
+  try {
+    const entry = join(dir, 'device-claim.mjs');
+    const state = join(dir, 'identity.json');
+    await symlink(fileURLToPath(new URL('../nixos/device-claim.mjs', import.meta.url)), entry);
+    const run = spawnSync(process.execPath, [entry, 'provision', '--state', state,
+      '--model', 'Murakumo 2609', '--origin', 'http://127.0.0.1:8741'],
+    { encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    assert.equal((await stat(state)).mode & 0o777, 0o600);
+    assert.match(JSON.parse(run.stdout).did, /^did:key:z6Mk/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test('device answers a claim and sends a signed heartbeat over loopback HTTP', async () => {

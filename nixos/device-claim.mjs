@@ -4,8 +4,9 @@
 import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync,
          randomBytes, sign } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { realpathSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const spkiPrefix = Buffer.from('302a300506032b6570032100', 'hex');
@@ -226,6 +227,7 @@ async function main() {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] &&
+    realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   main().catch(error => { console.error(error.message); process.exitCode = 1; });
 }
