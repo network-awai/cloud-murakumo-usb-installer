@@ -1,7 +1,7 @@
 # Headless phone setup for Murakumo NixOS
 
-Status: design and qualification plan. The ISO built on 2026-09-26 does not
-implement this flow. Do not describe that ISO as a phone-configurable server.
+Status: design and qualification plan. The revised ISO built on 2026-09-30 does
+not implement this flow. Do not describe that ISO as a phone-configurable server.
 The current source adds a read-only local inference check and a
 `murakumo.cloud` factory device claim responder for after a manual OS install.
 These do not implement phone-only setup, Wi-Fi provisioning, or the separate
@@ -89,6 +89,6 @@ because its bytes downloaded.
 - Serving: verify Radeon 680M/Vulkan, chosen model download and digest,
   switch/rollback, local inference, Murakumo admission, and restart recovery.
 
-Until every relevant gate passes, the 2026-09-26 ISO remains a manual recovery
+Until every relevant gate passes, the 2026-09-30 ISO remains a manual recovery
 and installation image. It is not a headless phone installer or a production
 Murakumo server image.

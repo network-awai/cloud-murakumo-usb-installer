@@ -5,18 +5,18 @@ nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. It never chooses or
 formats a disk automatically.
 
-Status: the customized NixOS 26.05 ISO was built and booted in a BIOS/KVM VM
-on 2026-09-26. The bundled preflight script and target templates were checked
-in the live image. See [the verification record](docs/verification-2026-09-26.md)
-for the source revision, image hash and remaining hardware checks. Physical
+Status: the revised NixOS 26.05 ISO was built and booted in BIOS and UEFI
+QEMU VMs on 2026-09-30. The bundled preflight script and target templates,
+including `community.nix`, were checked in the live image. See [the current
+verification record](docs/verification-2026-09-30.md) for the exact image hash
+and remaining hardware checks. Physical
 USB boot, target-disk installation and recovery have not been tested; do not
 replace a serving host until those checks succeed.
 
 Phone-only setup, Wi-Fi provisioning, Kotoba authority pairing, remote model
 download and model switching are not present in this source. A read-only local
-inference check and a factory device claim responder for `murakumo.cloud` have
-been added to the source, but the 2026-09-26 ISO predates both and a new image
-has not yet been built. Neither component installs or starts a model server.
+inference check and a factory device claim responder for `murakumo.cloud` are
+included in the revised image. Neither component installs or starts a model server.
 The target flow and qualification gates are recorded in
 [headless phone setup](docs/headless-phone-setup.md).
 
@@ -76,8 +76,8 @@ register the JSON through the operator-only `murakumo.cloud` device API near
 dispatch. The node must never hold that API's admin token. See the
 [buyer and operator path](docs/buyer-operator-path.md) for the exact boundary.
 
-The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help, but its
-GPU was llvmpipe. Bare-metal Radeon 680M, Prism Vulkan, model throughput,
+The 2026-09-30 NixOS 26.05 VM pilot booted with an emulated GPU. Bare-metal
+Radeon 680M, Prism Vulkan, model throughput,
 concurrency and restart recovery remain unverified. Keep the serving Ubuntu
 installation until those checks and a recovery plan succeed.
 
