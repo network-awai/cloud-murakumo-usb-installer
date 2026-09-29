@@ -26,6 +26,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Verify factory identity and local model checks
+        run: node --test test/device-claim.test.mjs test/node-readiness.test.mjs
+
       - name: Install Nix
         uses: NixOS/nix-installer-action@62c1943b776c509394b550f3f983adc14e9212d6 # v1.0.0
         with:
