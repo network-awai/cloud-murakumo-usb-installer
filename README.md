@@ -36,7 +36,8 @@ but does not run an install automatically.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `/etc/murakumo/node-base.nix` and an edited copy of
+4. Copy `/etc/murakumo/node-base.nix`, `/etc/murakumo/node-provider.nix`
+   and an edited copy of
    `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
    latter to `configuration.nix`). Set a real SSH public
    key, confirm UEFI or replace its boot loader settings, and review the
@@ -44,6 +45,48 @@ but does not run an install automatically.
 5. Reboot from the installed disk. Confirm remote access, RADV/Vulkan and
    the chosen model server on physical hardware. Then install the node CLI
    from [cloud-murakumo-installer](https://github.com/network-awai/cloud-murakumo-installer).
+
+## Opt in to idle inference after buyer claim
+
+The base profile leaves the provider service disabled. The shipped device must
+first have its factory DID and private key provisioned, the buyer must claim
+that DID, and an exact model must be running locally. Neither installation nor
+a heartbeat proves Community admission or paid-job eligibility.
+
+Once the CLI release is published, install its verified launcher outside home
+directories so the restricted service can run it:
+
+```sh
+sudo env MURAKUMO_INSTALL_DIR=/opt/murakumo-cli \
+  MURAKUMO_BIN_DIR=/opt/murakumo-bin sh install.sh
+sudo test -f /var/lib/murakumo/device-identity.json
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  /opt/murakumo-bin/murakumo node doctor \
+  --model YOUR_EXACT_MODEL_ID --local-url http://127.0.0.1:11434/v1
+```
+
+The factory identity file must be private (mode `0600`) and match the DID
+registered for this physical device. Never replace it with another identity
+after the buyer claim. Add this to the target's `configuration.nix` only after
+the local `doctor` check passes:
+
+```nix
+services.murakumoProvider = {
+  enable = true;
+  name = "murakumo-node";
+  model = "YOUR_EXACT_MODEL_ID";
+  localUrl = "http://127.0.0.1:11434/v1";
+  idleOnly = true;
+};
+```
+
+Run `sudo nixos-rebuild switch`, then inspect
+`systemctl status murakumo-provider` and
+`journalctl -u murakumo-provider -b`. The unit waits for the network, restarts
+after a failure and reads the identity through systemd's private credentials.
+It does not download a model, bypass admission or guarantee a paid job. If the
+model server needs a private API token, configure that separately before
+enabling the service; this template does not embed one in the Nix store.
 
 The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help, but its
 GPU was llvmpipe. Bare-metal Radeon 680M, Prism Vulkan, model throughput,
