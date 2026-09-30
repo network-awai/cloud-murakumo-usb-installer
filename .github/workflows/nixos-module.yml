@@ -24,5 +24,6 @@ jobs:
       - name: Parse and evaluate the opt-in service
         run: |
           nix-instantiate --parse nixos/node-provider.nix >/dev/null
+          nix-instantiate --parse nixos/node-claim.nix >/dev/null
           nix-instantiate --eval --strict --json \
             --expr 'import ./tests/node-provider-eval.nix { nixpkgsPath = ./nixpkgs; }'

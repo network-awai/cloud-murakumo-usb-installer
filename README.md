@@ -36,7 +36,8 @@ but does not run an install automatically.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `/etc/murakumo/node-base.nix`, `/etc/murakumo/node-provider.nix`
+4. Copy `/etc/murakumo/node-base.nix`, `/etc/murakumo/node-provider.nix`,
+   and `/etc/murakumo/node-claim.nix`
    and an edited copy of
    `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
    latter to `configuration.nix`). Set a real SSH public
@@ -48,10 +49,13 @@ but does not run an install automatically.
 
 ## Opt in to idle inference after buyer claim
 
-The base profile leaves the provider service disabled. The shipped device must
-first have its factory DID and private key provisioned, the buyer must claim
-that DID, and an exact model must be running locally. Neither installation nor
-a heartbeat proves Community admission or paid-job eligibility.
+The base profile leaves both the claim responder and provider service disabled.
+Before shipping, provision each physical device with its own DID and Ed25519
+private key, register that DID and its matching claim token with the site, and
+put the claim URL or QR code on that device's label. The factory key must never
+appear on the label or in the Nix store. The registered DID and device identity
+must match. This process still requires a real device and site registration;
+installing the OS alone cannot produce a claimable unit.
 
 Once the CLI release is published, install its verified launcher outside home
 directories so the restricted service can run it:
@@ -67,8 +71,25 @@ sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
 
 The factory identity file must be private (mode `0600`) and match the DID
 registered for this physical device. Never replace it with another identity
-after the buyer claim. Add this to the target's `configuration.nix` only after
-the local `doctor` check passes:
+after the buyer claim. To let the device answer the buyer's short-lived claim
+challenge, enable the responder on the target after the published CLI is
+installed:
+
+```nix
+services.murakumoClaimResponder.enable = true;
+```
+
+Run `sudo nixos-rebuild switch` and check
+`systemctl status murakumo-claim-responder.timer`. The timer calls
+`murakumo node claim-once` every 15 seconds and signs only the pending
+challenge for this DID. It uses systemd's private credentials and does not
+require a model server or buyer password. The buyer must still complete the
+claim in their browser. A local `claim-once` success only proves that the
+device responded to a challenge; it does not prove that ownership changed.
+
+After the buyer claim and a local `doctor` check, an exact model must be
+running locally before idle inference can be enabled. Add this to the target's
+`configuration.nix`:
 
 ```nix
 services.murakumoProvider = {

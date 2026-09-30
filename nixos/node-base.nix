@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  imports = [ ./node-provider.nix ];
+  imports = [ ./node-provider.nix ./node-claim.nix ];
 
   # Base for a NixOS Murakumo node after the OS is installed.
   services.tailscale.enable = true;

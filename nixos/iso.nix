@@ -5,6 +5,7 @@
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
   environment.etc."murakumo/node-provider.nix".source = ./node-provider.nix;
+  environment.etc."murakumo/node-claim.nix".source = ./node-claim.nix;
   environment.etc."murakumo/configuration.example.nix".source = ./configuration.example.nix;
   # This image boots an installation environment. It does not select a disk,
   # partition, format, or invoke nixos-install automatically.
