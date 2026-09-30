@@ -1,18 +1,15 @@
 { nixpkgsPath }:
 let
-  pkgs = import nixpkgsPath { system = "x86_64-linux"; };
-  evaluate = enabled: pkgs.lib.nixosSystem {
+  evaluate = enabled: import (nixpkgsPath + "/nixos") {
     system = "x86_64-linux";
-    modules = [
-      ../nixos/node-base.nix
-      {
-        networking.hostName = "murakumo-test";
-        services.murakumoProvider = {
-          enable = enabled;
-          model = "test-model";
-        };
-      }
-    ];
+    configuration = {
+      imports = [ ../nixos/node-base.nix ];
+      networking.hostName = "murakumo-test";
+      services.murakumoProvider = {
+        enable = enabled;
+        model = "test-model";
+      };
+    };
   };
   disabled = evaluate false;
   enabled = evaluate true;
