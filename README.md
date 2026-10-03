@@ -36,7 +36,7 @@ but does not run an install automatically.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `/etc/murakumo/node-base.nix` and an edited copy of
+4. Copy `/etc/murakumo/node-base.nix`, `/etc/murakumo/account-link.mjs`, and an edited copy of
    `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
    latter to `configuration.nix`). Set a real SSH public
    key, confirm UEFI or replace its boot loader settings, and review the
@@ -54,3 +54,23 @@ installation until those checks and a recovery plan succeed.
 `cloud-murakumo-usb-installer` owns NixOS boot media and OS installation.
 Windows node installation is a separate future platform path and is not
 advertised as supported by the current CLI script.
+
+## Passwordless account registration
+
+The example enables `services.murakumoAccountLink.enable`. On the installed system,
+TTY1 shows a five-minute QR/device code and the public Device ID. Scan it with a phone,
+compare the full Device ID, and approve using the existing Murakumo Passkey sign-in.
+The node does not request an account ID/password. Administrative SSH access is configured
+separately with the operator's public key; account linking does not grant remote shell access.
+
+The node keeps a local signing key with mode 0600 and a public registration receipt.
+On reboot it verifies registration online. Revocation fails closed; an intentional local
+relink uses `node /etc/murakumo/account-link.mjs --relink`, preserving the device key.
+No model service or fleet worker is enabled by account linking.
+
+This requires the matching Portal/Worker registration routes and database migration to be
+published. The local integration tests use an explicitly labelled authentication verdict
+fixture; they do not verify a real Passkey ceremony. The latest-main standalone module
+has not yet been rebuilt into an ISO or evaluated by Nix in this integration run.
+
+Run `node --test test/account-link.test.mjs` for the registration client tests.
