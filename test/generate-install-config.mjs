@@ -7,5 +7,5 @@ for (const mode of ['bios', 'uefi']) {
   mkdirSync(destination);
   writeFileSync(join(destination, 'hardware-configuration.nix'), '{ ... }: { boot.initrd.availableKernelModules = [ "virtio_pci" "virtio_blk" "nvme" ]; }\n');
   for (const name of ['node-base.nix', 'account-link.mjs']) copyFileSync(join(repo, 'nixos', name), join(destination, name));
-  writeFileSync(join(destination, 'configuration.nix'), targetConfiguration({uefi: mode === 'uefi', disk: '/dev/nvme0n1', rootUuid: '01010101-0202-0303-0404-050505050505', bootUuid: '1234-ABCD'}));
+  writeFileSync(join(destination, 'configuration.nix'), targetConfiguration({uefi: mode === 'uefi', disk: mode === 'uefi' ? '/dev/nvme0n1' : '/dev/vda', rootUuid: '01010101-0202-0303-0404-050505050505', bootUuid: '1234-ABCD'}));
 }

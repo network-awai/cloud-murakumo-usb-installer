@@ -1,6 +1,9 @@
 # Guided automatic internal-disk installation
 
 1. Connect AC power and preferably wired Ethernet, then boot the new ISO.
+   For an NVMe target, select the **UEFI USB** entry in the firmware boot menu.
+   BIOS-mode NVMe installation is refused before erasure; SATA/virtio disks
+   remain supported in BIOS mode. The installer displays the current boot mode.
    TTY1 opens the disk selection screen. USB, removable, hotplug, read-only,
    mounted, swap and mapped disks are excluded; disks must be at least 16 GiB.
    No disk is installed without explicit approval, even with one candidate.

@@ -19,6 +19,12 @@ test('a changed or newly mounted disk is refused after approval', () => {
 test('NVMe/eMMC and SATA/virtio partition paths are correct', () => {
   for (const [disk,path] of [['/dev/nvme0n1','/dev/nvme0n1p2'],['/dev/mmcblk0','/dev/mmcblk0p2'],['/dev/sda','/dev/sda2'],['/dev/vda','/dev/vda2']]) assert.equal(partitionPath(disk,2),path);
 });
+test('NVMe is refused in BIOS mode before any destructive preparation', () => {
+  assert.equal(diskReason(nvme, {uefi:true}), null);
+  assert.match(diskReason(nvme, {uefi:false}), /UEFI/);
+  assert.throws(()=>verifyDisk([nvme],nvme.path,fingerprint(nvme),{uefi:false}));
+  assert.equal(diskReason({...nvme,path:'/dev/sda',tran:'sata'},{uefi:false}),null);
+});
 test('installed configuration enables registration and supports both boot modes', () => {
   const options={disk:nvme.path,rootUuid:'root-id',bootUuid:'ABCD-1234'};
   const uefi=targetConfiguration({...options,uefi:true}),bios=targetConfiguration({...options,uefi:false});
