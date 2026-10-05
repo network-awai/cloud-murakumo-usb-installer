@@ -37,3 +37,7 @@ test('unpublished registration service is distinct from an approval refusal',asy
   const d=await dir();await assert.rejects(link({dir:d,display:()=>{},fetcher:async()=>new Response('{"error":"unknown devices route"}',{status:404})}),{code:'service'});
   assert.equal(await savedLink(d),null);
 });
+test('server expiry returns the new-QR recovery state',async()=>{
+  const d=await dir();await assert.rejects(link({dir:d,onFlow:()=>{},display:()=>{},fetcher:async(url)=>url.endsWith('/start')?new Response(JSON.stringify(flow),{status:201}):new Response('{"error":"expired_code"}',{status:410})}),{code:'expired'});
+  assert.equal(await savedLink(d),null);
+});

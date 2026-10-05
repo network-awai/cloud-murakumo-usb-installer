@@ -109,6 +109,7 @@ export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetch
     try {reply=await post('/api/devices/link/poll',{flowId:flow.flowId,pollToken,deviceDid:id.did,challenge,deviceProof:proof});}
     catch(e){signal?.throwIfAborted();if(e instanceof LinkError)throw e;onProgress('reconnecting');display('Retrying connection...');await pause(2000);continue;}
     if(reply.status===202){onProgress('waiting');await pause(2000);continue;}
+    if(reply.status===410)throw new LinkError(reply.data.error==='registration_revoked'?'revoked':'expired','Approval expired or registration revoked.');
     if(reply.status!==200)throw Error('authority refused device proof');
     signal?.throwIfAborted();
     const receipt=validateReceipt(reply.data,flow,id,challenge,model);
