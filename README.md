@@ -10,7 +10,7 @@ See [the guided installation procedure](docs/automatic-install.md). Initial
 password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
 Status: guided disk installation was added on 2026-10-05. See
-[the current verification record](docs/verification-2026-10-05.md) for the
+[the current offline verification record](docs/verification-offline-2026-10-05.md) for the
 reviewed source, ISO hash and VM checks. Physical PC installation, real phone
 Passkey linking and inference still require separate verification. The
 [2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
