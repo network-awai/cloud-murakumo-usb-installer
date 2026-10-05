@@ -3,14 +3,16 @@
 NixOS installation media definition and target-host configuration for Murakumo
 nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
-installer on boot: select and approve the internal disk, then the bundled OS
+installer on boot: choose Wi-Fi, Ethernet or offline continuation, then select
+and approve the internal disk. The bundled OS
 is copied and installed without Internet or host-side compilation. Registration
-waits until the installed PC is connected to a network.
+opens the same network guide after the installed PC boots. See
+[network onboarding](docs/network-onboarding.md).
 See [the guided installation procedure](docs/automatic-install.md). Initial
 password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
 Status: guided disk installation was added on 2026-10-05. See
-[the current offline verification record](docs/verification-offline-2026-10-05.md) for the
+[the network UI verification record](docs/verification-network-ui-2026-10-05.md) for the
 reviewed source, ISO hash and VM checks. Physical PC installation, real phone
 Passkey linking and inference still require separate verification. The
 [2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
@@ -44,11 +46,13 @@ The steps below are the manual recovery/custom configuration path.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `/etc/murakumo/node-base.nix`, `/etc/murakumo/account-link.mjs`, and an edited copy of
-   `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
-   latter to `configuration.nix`). Set a real SSH public
-   key, confirm UEFI or replace its boot loader settings, and review the
-   network and filesystem configuration before `nixos-install`.
+4. Copy `node-base.nix`, `console-ui.nix`, `network-setup.mjs`, `setup-ui.mjs`
+   and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
+   an edited `configuration.example.nix` renamed to `configuration.nix`. For
+   the guided network screen, set `networking.networkmanager.enable = true`
+   and `networking.useDHCP = false` in that edited configuration. Set a real
+   SSH public key, confirm UEFI or replace the boot loader settings, and review
+   the network and filesystem configuration before `nixos-install`.
 5. Reboot from the installed disk. Confirm remote access, RADV/Vulkan and
    the chosen model server on physical hardware. Then install the node CLI
    from [cloud-murakumo-installer](https://github.com/network-awai/cloud-murakumo-installer).

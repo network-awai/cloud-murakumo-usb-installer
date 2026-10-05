@@ -5,30 +5,33 @@
    USB sticks must be rewritten; earlier images downloaded/built on the PC.
    For NVMe select the **UEFI USB** entry in the firmware boot menu.
    BIOS-mode NVMe installation is refused; BIOS SATA/virtio uses GRUB.
-2. Select the disk by its path, model, capacity and serial. This replaces the
+2. The network screen opens automatically. Choose Wi-Fi (scan, select, masked
+   password), Ethernet, or continue without networking. No command entry is
+   needed. Already connected networks go straight to connection confirmation.
+   See [network onboarding](network-onboarding.md).
+3. Select the disk by its path, model, capacity and serial. This replaces the
    whole disk, including Windows and recovery partitions. USB, removable,
    hotplug, read-only, mounted, swap and mapped disks are excluded. Targets
    must be at least 16 GiB. No maintenance password is requested.
-3. Before erasing, the installer checks that the complete prebuilt system and
+4. Before erasing, the installer checks that the complete prebuilt system and
    its Nix store references are on the USB. No `nix-build` or network downloads
    run on the PC. UEFI and BIOS installed systems are built when creating the
    ISO, with generic x86_64 storage drivers and Intel/AMD microcode/firmware.
-4. Review the target again and type `ERASE /dev/<chosen-disk>` exactly.
+5. Review the target again and type `ERASE /dev/<chosen-disk>` exactly.
    Disk identity and usage are rechecked. GPT partitioning, formatting,
    copying of the shipped OS and installation of its bootloader run
    automatically. Network substituters are disabled. UEFI uses systemd-boot's
    fallback path; BIOS generates its GRUB menu and installs GRUB only onto the
    explicitly selected whole disk.
-5. On success, press OK to restart. Remove the USB as the PC restarts and boot
-   the internal disk. Without networking, it displays **OS installed; waiting
-   for network for account registration**. This is a successful offline OS
-   installation, not completed Murakumo account registration.
-6. Later connect wired Ethernet or configure Wi-Fi from Ctrl+Alt+F2. Once a
-   default route exists, registration starts. Matching published Worker/Portal
-   routes and migrations are still required. Scan its QR with a phone, compare
-   the full Device ID and approve with your Murakumo Passkey.
+6. On success, press OK to restart. Remove the USB as the PC restarts and boot
+   the internal disk. The network and registration screen opens automatically.
+   “Register later” displays a completed-installation screen with reconnect and
+   shutdown choices; offline continuation never blocks OS installation.
+7. Choose a connection and continue to phone registration. Matching published
+   Worker/Portal routes and migrations are still required. Scan its QR with a
+   phone, compare the full Device ID and approve with your Murakumo Passkey.
 
-Maintenance on Ctrl+Alt+F2 logs in locally as `root` automatically. Anyone with
+Maintenance on Alt+F2 logs in locally as `root` automatically. Anyone with
 physical console access can administer this node. Root's password is locked and
 SSH is disabled; no empty-password remote login is enabled.
 
