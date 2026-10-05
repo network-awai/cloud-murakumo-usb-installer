@@ -40,7 +40,7 @@ export function targetConfiguration({uefi, disk, rootUuid, bootUuid}) {
     # Local maintenance password is added outside the public Nix store.
     users.users.root.hashedPasswordFile = "/etc/murakumo-root-password";
     system.stateVersion = "26.05";
-  };
+  }
 `;
 }
 function run(program, args, options = {}) {
@@ -54,7 +54,7 @@ function inventory() {
   return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS'])).blockdevices;
 }
 function dialog(args) {
-  const result = spawnSync('dialog', ['--stdout', '--title', 'Murakumo installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
+  const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'Murakumo installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
   if (result.error) throw result.error;
   if (result.status !== 0) throw Error('Cancelled. No further installation steps will run.');
   return result.stdout.toString();
