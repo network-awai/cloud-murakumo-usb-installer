@@ -81,3 +81,5 @@ comes from frozen local review commit `bf6e9adc`; installer changes do not
 publish its Worker/Portal dependencies.
 
 Run `node --test test/*.test.mjs` for registration and disk safety tests.
+On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`
+to parse and evaluate both generated boot configurations with Nix.
