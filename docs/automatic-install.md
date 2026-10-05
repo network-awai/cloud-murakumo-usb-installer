@@ -1,42 +1,51 @@
-# Guided automatic internal-disk installation
+# Offline automatic internal-disk installation
 
-1. Connect AC power and preferably wired Ethernet, then boot the new ISO.
-   For an NVMe target, select the **UEFI USB** entry in the firmware boot menu.
-   BIOS-mode NVMe installation is refused before erasure; SATA/virtio disks
-   remain supported in BIOS mode. The installer displays the current boot mode.
-   TTY1 opens the disk selection screen. USB, removable, hotplug, read-only,
-   mounted, swap and mapped disks are excluded; disks must be at least 16 GiB.
-   No disk is installed without explicit approval, even with one candidate.
+1. Connect AC power and boot the new **offline** ISO. Internet is not needed
+   for OS installation or the first internal-disk boot. Previously written
+   USB sticks must be rewritten; earlier images downloaded/built on the PC.
+   For NVMe select the **UEFI USB** entry in the firmware boot menu.
+   BIOS-mode NVMe installation is refused; BIOS SATA/virtio uses GRUB.
 2. Select the disk by its path, model, capacity and serial. This replaces the
-   whole disk, including Windows and recovery partitions. No maintenance
-   password is requested.
-3. The installer detects UEFI/BIOS, generates hardware configuration and builds
-   NixOS before erasing. Network/cache/build failures at this stage leave the
-   disk untouched. Internet and sufficient RAM for the live Nix store are
-   required; this is not an offline installation image.
-4. Review the disk again and type `ERASE /dev/<chosen-disk>` exactly. Disk
-   identity and usage are rechecked. GPT partitioning, formatting, configuration
-   copying and installation of the prepared system then run automatically.
-   UEFI uses systemd-boot's fallback path without changing firmware variables;
-   BIOS uses GRUB. Persistent Wi-Fi profiles are copied without printing
-   credentials.
-5. On success, press OK to reboot and remove the USB as the PC restarts. With networking and matching published registration services, the installed
-   system displays the Murakumo QR. Scan it with a phone,
-   compare the full Device ID, and approve with your Murakumo Passkey.
+   whole disk, including Windows and recovery partitions. USB, removable,
+   hotplug, read-only, mounted, swap and mapped disks are excluded. Targets
+   must be at least 16 GiB. No maintenance password is requested.
+3. Before erasing, the installer checks that the complete prebuilt system and
+   its Nix store references are on the USB. No `nix-build` or network downloads
+   run on the PC. UEFI and BIOS installed systems are built when creating the
+   ISO, with generic x86_64 storage drivers and Intel/AMD microcode/firmware.
+4. Review the target again and type `ERASE /dev/<chosen-disk>` exactly.
+   Disk identity and usage are rechecked. GPT partitioning, formatting,
+   copying of the shipped OS and installation of its bootloader run
+   automatically. Network substituters are disabled. UEFI uses systemd-boot's
+   fallback path; BIOS generates its GRUB menu and installs GRUB only onto the
+   explicitly selected whole disk.
+5. On success, press OK to restart. Remove the USB as the PC restarts and boot
+   the internal disk. Without networking, it displays **OS installed; waiting
+   for network for account registration**. This is a successful offline OS
+   installation, not completed Murakumo account registration.
+6. Later connect wired Ethernet or configure Wi-Fi from Ctrl+Alt+F2. Once a
+   default route exists, registration starts. Matching published Worker/Portal
+   routes and migrations are still required. Scan its QR with a phone, compare
+   the full Device ID and approve with your Murakumo Passkey.
 
-Maintenance is available on Ctrl+Alt+F2 with automatic local `root` login.
-Anyone with physical console access can administer this node. The root password
-is locked and SSH is disabled; no blank-password remote login is enabled. For Wi-Fi on the live ISO, use Ctrl+Alt+F2
-and `sudo nmtui`, then restart with `sudo systemctl start murakumo-install`.
+Maintenance on Ctrl+Alt+F2 logs in locally as `root` automatically. Anyone with
+physical console access can administer this node. Root's password is locked and
+SSH is disabled; no empty-password remote login is enabled.
 
-Cancellation does not trigger another install. A failure after formatting may
-leave a partial installation: do not blindly repeat erasure. Use the live
-recovery console, `journalctl -u murakumo-install`, and
-`sh /etc/murakumo/preflight.sh`. Firmware may still select another Windows disk;
-use its boot menu to select the installed disk.
+The generic prebuilt systems mount labels `MURAKUMO_ROOT` and `MURA_BOOT`.
+If another attached disk already carries either label, installation stops
+before erasure. Disconnect the conflicting disk. This avoids booting or mounting
+another installed node's disk by mistake. UUIDs are still randomized at format.
+Detected host settings are saved as `/etc/nixos/detected-hardware.nix` for later
+review, and are not imported into the prebuilt generic system. To customize the
+host later, review its generated configuration and rebuild with network access
+or an appropriate complete local build cache.
 
-Registration needs matching published Worker/Portal routes and migrations.
-This change does not publish those dependencies or qualify a real phone
-Passkey ceremony. Account linking enables no model server or fleet worker;
-physical networking, GPU/model performance and actual inference remain separate
-acceptance checks.
+Cancellation never automatically repeats installation. Failure after formatting
+may leave a partial installation: use the recovery console and do not blindly
+repeat erasure. Use `journalctl -u murakumo-install` and
+`sh /etc/murakumo/preflight.sh` for service/hardware diagnostics.
+
+Offline OS installation does not publish registration dependencies, qualify a
+real phone Passkey ceremony or enable a model server/fleet worker. Physical
+networking, GPU/model performance and actual inference remain separate checks.

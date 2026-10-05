@@ -1,25 +1,44 @@
 { modulesPath, pkgs, ... }:
+let
+  target = mode: (import (pkgs.path + "/nixos") {
+    system = pkgs.stdenv.hostPlatform.system;
+    configuration = ./. + "/offline-${mode}.nix";
+  }).config.system.build.toplevel;
+  uefi = target "uefi";
+  bios = target "bios";
+in
 {
   imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ];
   # Keep boot diagnostics from overwriting the disk selection screen.
   boot.consoleLogLevel = 3;
   boot.kernelParams = [ "quiet" "systemd.show_status=false" "rd.systemd.show_status=false" ];
-  environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog parted dosfstools e2fsprogs ];
+  environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog parted dosfstools e2fsprogs grub2 ];
   environment.etc."murakumo/installation-media".text = "Murakumo installer\n";
   environment.etc."murakumo/install-disk.mjs".source = ../scripts/install-disk.mjs;
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
   environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
   environment.etc."murakumo/configuration.example.nix".source = ./configuration.example.nix;
+  # Include complete installed systems, not just installation tools.
+  isoImage.storeContents = [ uefi bios ];
+  environment.etc."murakumo/offline-systems.json".text = builtins.toJSON {
+    version = 1;
+    uefi = toString uefi;
+    bios = toString bios;
+    rootLabel = "MURAKUMO_ROOT";
+    bootLabel = "MURA_BOOT";
+  };
+  environment.etc."murakumo/offline-base.nix".source = ./offline-base.nix;
+  environment.etc."murakumo/offline-uefi.nix".source = ./offline-uefi.nix;
+  environment.etc."murakumo/offline-bios.nix".source = ./offline-bios.nix;
   # Enter the guided installer on boot. Formatting requires explicit disk approval.
   systemd.services."getty@tty1".enable = false;
   systemd.services.murakumo-install = {
     description = "Guided automatic Murakumo disk installation";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "network-online.target" ];
-    after = [ "network-online.target" "systemd-vconsole-setup.service" ];
+    after = [ "systemd-vconsole-setup.service" "register-nix-paths.service" ];
     conflicts = [ "getty@tty1.service" ];
-    path = with pkgs; [ nodejs_22 dialog parted dosfstools e2fsprogs util-linux systemd coreutils nixos-install-tools nix ];
+    path = with pkgs; [ nodejs_22 dialog parted dosfstools e2fsprogs grub2 util-linux systemd coreutils nixos-install-tools nix ];
     environment.TERM = "linux";
     environment.NIX_PATH = "nixpkgs=${pkgs.path}";
     serviceConfig = {

@@ -16,13 +16,21 @@
   systemd.services.murakumo-account-link = lib.mkIf config.services.murakumoAccountLink.enable {
     description = "Register this Murakumo device using a phone Passkey";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "network-online.target" ];
-    after = [ "network-online.target" ];
+    wants = [ "network.target" ];
+    after = [ "network.target" ];
     conflicts = [ "getty@tty1.service" ];
     path = [ pkgs.qrencode ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      ExecStartPre = pkgs.writeShellScript "murakumo-wait-for-network" ''
+        echo "Murakumo OS is installed. Waiting for network for account registration."
+        echo "Local maintenance: Ctrl+Alt+F2. OS installation does not need Internet."
+        until ${pkgs.iproute2}/bin/ip -4 route show default | ${pkgs.gnugrep}/bin/grep -q '^default' ||
+              ${pkgs.iproute2}/bin/ip -6 route show default | ${pkgs.gnugrep}/bin/grep -q '^default'; do
+          ${pkgs.coreutils}/bin/sleep 5
+        done
+      '';
       ExecStart = "${pkgs.nodejs_22}/bin/node /etc/murakumo/account-link.mjs";
       StateDirectory = "murakumo";
       StateDirectoryMode = "0700";

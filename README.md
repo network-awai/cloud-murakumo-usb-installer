@@ -3,8 +3,9 @@
 NixOS installation media definition and target-host configuration for Murakumo
 nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
-installer on boot: select and approve the internal disk, then preparation,
-partitioning, installation and first-boot registration setup run automatically.
+installer on boot: select and approve the internal disk, then the bundled OS
+is copied and installed without Internet or host-side compilation. Registration
+waits until the installed PC is connected to a network.
 See [the guided installation procedure](docs/automatic-install.md). Initial
 password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
@@ -81,6 +82,6 @@ fixture; they do not verify a real Passkey ceremony. The registration module
 comes from frozen local review commit `bf6e9adc`; installer changes do not
 publish its Worker/Portal dependencies.
 
-Run `node --test test/*.test.mjs` for registration and disk safety tests.
+Run `node --test test/*.test.mjs` for registration and offline/disk safety tests.
 On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`
 to parse and evaluate both generated boot configurations with Nix.

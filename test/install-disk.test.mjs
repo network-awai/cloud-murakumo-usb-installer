@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {diskReason, fingerprint, verifyDisk, partitionPath, targetConfiguration} from '../scripts/install-disk.mjs';
+import {diskReason, fingerprint, verifyDisk, partitionPath, targetConfiguration, verifyLabels, offlineSystem, ROOT_LABEL, BOOT_LABEL} from '../scripts/install-disk.mjs';
 const nvme = {path:'/dev/nvme0n1', 'maj:min':'259:0', type:'disk', size:512*1024**3, model:'Internal SSD', serial:'NVME-A', wwn:'id-a', tran:'nvme', rm:false, hotplug:false, ro:false, mountpoints:[null], children:[{path:'/dev/nvme0n1p1',type:'part',mountpoints:[null],fstype:'ntfs'}]};
 test('unmounted Windows disk is eligible, boot USB is never eligible', () => {
   assert.equal(diskReason(nvme), null);
@@ -25,17 +25,24 @@ test('NVMe is refused in BIOS mode before any destructive preparation', () => {
   assert.throws(()=>verifyDisk([nvme],nvme.path,fingerprint(nvme),{uefi:false}));
   assert.equal(diskReason({...nvme,path:'/dev/sda',tran:'sata'},{uefi:false}),null);
 });
-test('installed configuration enables registration and supports both boot modes', () => {
-  const options={disk:nvme.path,rootUuid:'root-id',bootUuid:'ABCD-1234'};
-  const uefi=targetConfiguration({...options,uefi:true}),bios=targetConfiguration({...options,uefi:false});
-  assert.match(uefi,/murakumoAccountLink.enable = true/);
-  assert.match(uefi,/systemd-boot.enable = true/);
-  assert.match(uefi,/canTouchEfiVariables = false/);
-  assert.match(uefi,/ABCD-1234/);
-  assert.match(bios,/grub.device = "\/dev\/nvme0n1"/);
-  assert.doesNotMatch(bios,/systemd-boot|ABCD-1234/);
-  assert.match(bios,/hashedPassword = "!"/);
-  assert.match(bios,/autologinUser = "root"/);
-  assert.match(bios,/services.openssh.enable = false/);
-  assert.doesNotMatch(bios,/hashedPasswordFile|initialPassword|REPLACE_WITH/);
+test('installed configuration imports the shipped mode without host compilation', () => {
+  assert.match(targetConfiguration({uefi:true}), /offline-uefi.nix/);
+  assert.match(targetConfiguration({uefi:false}), /offline-bios.nix/);
+});
+test('reserved filesystem labels on another disk are refused before erasure', () => {
+  const selected={...nvme,children:[{label:ROOT_LABEL}]};
+  assert.doesNotThrow(()=>verifyLabels([selected],selected.path));
+  for (const label of [ROOT_LABEL,BOOT_LABEL]) {
+    assert.throws(()=>verifyLabels([selected,{path:'/dev/sda',children:[{label}]}],selected.path));
+  }
+});
+test('offline manifest must identify the supported shipped system and labels', () => {
+  const manifest={version:1,rootLabel:ROOT_LABEL,bootLabel:BOOT_LABEL,
+    uefi:'/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-nixos-system-murakumo-node-26.05',
+    bios:'/nix/store/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-nixos-system-murakumo-node-26.05'};
+  assert.equal(offlineSystem(manifest,true),manifest.uefi);
+  assert.equal(offlineSystem(manifest,false),manifest.bios);
+  for (const change of [{version:2},{rootLabel:'other'},{bootLabel:'other'},{uefi:undefined},{uefi:'/tmp/system'},{uefi:manifest.uefi+';reboot'}]) {
+    assert.throws(()=>offlineSystem({...manifest,...change},true));
+  }
 });
