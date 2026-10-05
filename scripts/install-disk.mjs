@@ -38,8 +38,10 @@ export function targetConfiguration({uefi, disk, rootUuid, bootUuid}) {
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = false;` : `boot.loader.grub.enable = true;
     boot.loader.grub.device = "${disk}";`}
-    # Local maintenance password is added outside the public Nix store.
-    users.users.root.hashedPasswordFile = "/etc/murakumo-root-password";
+    # Physical console maintenance needs no installer password.
+    users.users.root.hashedPassword = "!";
+    services.getty.autologinUser = "root";
+    services.openssh.enable = false;
     system.stateVersion = "26.05";
   }
 `;
@@ -71,10 +73,6 @@ async function main() {
   const target = eligible.find(d => d.path === selected);
   if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
   const identity = fingerprint(target);
-  const password = dialog(['--passwordbox', 'Set a local maintenance password (separate from your phone Passkey). At least 12 characters.', '0', '0']);
-  if (password.length < 12) throw Error('Maintenance password must have at least 12 characters.');
-  if (password !== dialog(['--passwordbox', 'Repeat the maintenance password.', '0', '0'])) throw Error('Passwords do not match.');
-  const hash = capture('mkpasswd', ['--method=sha-512', '--stdin'], {input: password + '\n'});
   const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
   for (const name of ['node-base.nix', 'account-link.mjs']) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
   const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
@@ -105,7 +103,6 @@ async function main() {
     run('mkdir', ['-p', `${mount}/etc/nixos`, `${mount}/etc/NetworkManager`, `${mount}/boot`]);
     if (uefi) run('mount', [boot, `${mount}/boot`]);
     for (const name of ['configuration.nix', 'hardware-configuration.nix', 'node-base.nix', 'account-link.mjs']) copyFileSync(join(directory, name), `${mount}/etc/nixos/${name}`);
-    writeFileSync(`${mount}/etc/murakumo-root-password`, hash + '\n', {mode: 0o600});
     // Copy persistent Wi-Fi profiles, never print them or put them in the Nix store.
     if (existsSync('/etc/NetworkManager/system-connections')) run('cp', ['-a', '/etc/NetworkManager/system-connections', `${mount}/etc/NetworkManager/`]);
     run('nixos-install', ['--root', mount, '--system', system, '--no-root-passwd', '--no-channel-copy']);

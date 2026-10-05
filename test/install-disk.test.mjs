@@ -34,6 +34,8 @@ test('installed configuration enables registration and supports both boot modes'
   assert.match(uefi,/ABCD-1234/);
   assert.match(bios,/grub.device = "\/dev\/nvme0n1"/);
   assert.doesNotMatch(bios,/systemd-boot|ABCD-1234/);
-  assert.match(bios,/hashedPasswordFile/);
-  assert.doesNotMatch(bios,/initialPassword|hashedPassword =|REPLACE_WITH/);
+  assert.match(bios,/hashedPassword = "!"/);
+  assert.match(bios,/autologinUser = "root"/);
+  assert.match(bios,/services.openssh.enable = false/);
+  assert.doesNotMatch(bios,/hashedPasswordFile|initialPassword|REPLACE_WITH/);
 });
