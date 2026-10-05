@@ -51,3 +51,9 @@ test('TLS/captive probe failure is not reported as successful connectivity',asyn
   const backend=networkBackend(()=>({status:0}),async()=>{throw Error('offline');});
   assert.deepEqual(await backend.probe(),{internet:false,murakumo:false});
 });
+
+test('saved connection that becomes ready at the chooser skips scanning and secrets',async()=>{
+  let checks=0;
+  const f=fixture(['wifi','next'],[],{devices:()=>[{name:'wlan0',type:'wifi',connected:++checks > 1}],scan:()=>{throw Error('must not scan');}});
+  assert.equal(await setupNetwork(f),'connected');assert.equal(f.calls.length,0);
+});

@@ -126,5 +126,9 @@ async function main() {
   run('systemctl', ['reboot']);
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
-  main().catch(error => { console.error(`\nInstallation stopped: ${error.message}\nDo not repeat an erase if installation failed after formatting. Use Ctrl+Alt+F2 for recovery and logs.`); process.exitCode = 1; });
+  main().catch(error => { console.error(`\nInstallation stopped: ${error.message}\nDo not repeat an erase if installation failed after formatting. Use Alt+F2 for recovery and logs.`); try {
+      const ja = process.env.MURAKUMO_UI_LANG === 'ja';
+      dialog(['--msgbox', ja ? `インストールを停止しました。\n${error.message}\n消去後に失敗した場合、消去を繰り返さないでください。Alt+F2で保守画面へ移動できます。` : `Installation stopped: ${error.message}\nDo not repeat an erase after formatting. Alt+F2 opens maintenance.`, '0', '0']);
+    } catch {}
+    process.exitCode = 1; });
 }

@@ -45,6 +45,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.bash}/bin/bash /etc/murakumo/launch-ui ${pkgs.nodejs_22}/bin/node /etc/murakumo/install-disk.mjs";
+      RuntimeDirectory = "murakumo-ui";
+      RuntimeDirectoryMode = "0700";
       StandardInput = "tty-force";
       StandardOutput = "tty";
       StandardError = "tty";

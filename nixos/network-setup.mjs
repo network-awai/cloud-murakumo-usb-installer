@@ -27,7 +27,7 @@ export function networks(value) {
 }
 export function dialogUI(stage) {
   function screen(args) {
-    const r = spawnSync('dialog', ['--clear', '--stdout', '--no-collapse', '--title', 'Murakumo',
+    const r = spawnSync('dialog', [...(args.includes('--infobox') ? [] : ['--clear']), '--stdout', '--no-collapse', '--title', 'Murakumo',
       '--backtitle', stage === 'installer' ? text('1 ネット接続 → 2 インストール → 3 スマホで登録', '1 Network → 2 Install → 3 Phone registration') : text('インストール完了 · ネット接続 → スマホで登録', 'OS installed · Network → Phone registration'),
       '--ok-label', text('次へ', 'Continue'), '--cancel-label', text('戻る', 'Back'), ...args],
       {stdio: ['inherit','pipe','inherit'], env: {...process.env, TERM: 'linux', LC_ALL: 'C.UTF-8'}});
@@ -35,7 +35,7 @@ export function dialogUI(stage) {
     return r.status === 0 ? r.stdout.toString().replace(/\n$/, '') : null;
   }
   return {
-    menu: (message, items) => screen(['--menu',message,'0','0','9',...items.flat()]),
+    menu: (message, items) => screen(['--no-tags','--menu',message,'0','0','9',...items.flat()]),
     input: message => screen(['--inputbox',message,'0','0']),
     password: message => screen(['--insecure','--passwordbox',message,'0','0']),
     message: message => screen(['--msgbox',message,'0','0']),
@@ -106,6 +106,7 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
     }
     const device = devices.length === 1 ? devices[0].name : ui.menu(text('接続に使う機器を選んでください','Choose a network adapter'), devices.map(d => [d.name,displayText(d.name)]));
     if (!device) continue;
+    if (devices.some(d => d.name === device && d.connected)) { const result = await check(); if (result) return result; continue; }
     let connected;
     if (choice === 'wired') {
       ui.busy(text('LANケーブルをルーターへ接続してください。接続を確認しています…','Connect the Ethernet cable to your router. Checking…'));
