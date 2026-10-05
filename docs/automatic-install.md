@@ -17,7 +17,7 @@
    UEFI uses systemd-boot's fallback path without changing firmware variables;
    BIOS uses GRUB. Password hashes stay in a root-only file outside the public
    Nix store. Persistent Wi-Fi profiles are copied without printing credentials.
-5. On success, remove the USB and press OK to reboot. The installed system
+5. On success, press OK to reboot and remove the USB as the PC restarts. The installed system
    displays the Murakumo QR when networking is ready. Scan it with a phone,
    compare the full Device ID, and approve with your Murakumo Passkey.
 

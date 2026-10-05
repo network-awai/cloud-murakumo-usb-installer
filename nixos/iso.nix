@@ -1,6 +1,9 @@
 { modulesPath, pkgs, ... }:
 {
   imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ];
+  # Keep boot diagnostics from overwriting the disk selection screen.
+  boot.consoleLogLevel = 3;
+  boot.kernelParams = [ "quiet" "systemd.show_status=false" "rd.systemd.show_status=false" ];
   environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog parted dosfstools e2fsprogs mkpasswd ];
   environment.etc."murakumo/installation-media".text = "Murakumo installer\n";
   environment.etc."murakumo/install-disk.mjs".source = ../scripts/install-disk.mjs;
@@ -14,7 +17,7 @@
     description = "Guided automatic Murakumo disk installation";
     wantedBy = [ "multi-user.target" ];
     wants = [ "network-online.target" ];
-    after = [ "network-online.target" ];
+    after = [ "network-online.target" "systemd-vconsole-setup.service" ];
     conflicts = [ "getty@tty1.service" ];
     path = with pkgs; [ nodejs_22 dialog parted dosfstools e2fsprogs mkpasswd util-linux systemd coreutils nixos-install-tools nix ];
     environment.TERM = "linux";

@@ -111,7 +111,7 @@ async function main() {
   } finally {
     if (mounted) run('umount', ['--recursive', mount]);
   }
-  dialog(['--msgbox', 'Installation completed. Remove the USB, then press OK to reboot from the internal disk. The Murakumo QR will appear when the network is ready. Phone registration requires the matching production service; model inference is a separate step.', '0', '0']);
+  dialog(['--msgbox', 'Installation completed. Press OK to restart. Remove the USB as the PC restarts, then boot the internal disk. The Murakumo QR requires networking and the matching production service. Model inference is a separate step.', '0', '0']);
   run('systemctl', ['reboot']);
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
