@@ -65,13 +65,13 @@ async function main() {
   if (!existsSync('/etc/murakumo/installation-media')) throw Error('This is not Murakumo installation media.');
   const disks = inventory(), eligible = disks.filter(d => !diskReason(d));
   if (!eligible.length) throw Error('No unused internal disk of at least 16 GiB. Use the recovery console to inspect disks.');
-  const selected = dialog(['--menu', 'Select the internal disk to REPLACE. All its partitions, including Windows, will be erased. The USB is excluded. Internet and AC power are required.', '22', '90', '10', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
+  const selected = dialog(['--menu', 'Select the internal disk to REPLACE. All its partitions, including Windows, will be erased. The USB is excluded. Internet and AC power are required.', '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
   const target = eligible.find(d => d.path === selected);
   if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
   const identity = fingerprint(target);
-  const password = dialog(['--passwordbox', 'Set a local maintenance password (separate from your phone Passkey). At least 12 characters.', '10', '80']);
+  const password = dialog(['--passwordbox', 'Set a local maintenance password (separate from your phone Passkey). At least 12 characters.', '0', '0']);
   if (password.length < 12) throw Error('Maintenance password must have at least 12 characters.');
-  if (password !== dialog(['--passwordbox', 'Repeat the maintenance password.', '10', '80'])) throw Error('Passwords do not match.');
+  if (password !== dialog(['--passwordbox', 'Repeat the maintenance password.', '0', '0'])) throw Error('Passwords do not match.');
   const hash = capture('mkpasswd', ['--method=sha-512', '--stdin'], {input: password + '\n'});
   const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
   for (const name of ['node-base.nix', 'account-link.mjs']) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
@@ -83,7 +83,7 @@ async function main() {
   run('nix-build', ['<nixpkgs/nixos>', '-A', 'system', '-I', `nixos-config=${directory}/configuration.nix`, '--out-link', outLink]);
   const system = realpathSync(outLink);
   const phrase = `ERASE ${selected}`;
-  const approval = dialog(['--inputbox', `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA, INCLUDING WINDOWS, WILL BE LOST.\nType exactly: ${phrase}`, '17', '90']);
+  const approval = dialog(['--inputbox', `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA, INCLUDING WINDOWS, WILL BE LOST.\nType exactly: ${phrase}`, '0', '0']);
   if (approval !== phrase) throw Error('Erase confirmation did not match. Nothing erased.');
   run('udevadm', ['settle']);
   verifyDisk(inventory(), selected, identity);
@@ -111,7 +111,7 @@ async function main() {
   } finally {
     if (mounted) run('umount', ['--recursive', mount]);
   }
-  dialog(['--msgbox', 'Installation completed. Remove the USB, then press OK to reboot from the internal disk. The Murakumo QR will appear when the network is ready. Phone registration requires the matching production service; model inference is a separate step.', '13', '85']);
+  dialog(['--msgbox', 'Installation completed. Remove the USB, then press OK to reboot from the internal disk. The Murakumo QR will appear when the network is ready. Phone registration requires the matching production service; model inference is a separate step.', '0', '0']);
   run('systemctl', ['reboot']);
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
