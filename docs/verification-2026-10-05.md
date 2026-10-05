@@ -1,7 +1,7 @@
 # Guided installation verification — 2026-10-05
 
-Local review only. No push, PR, merge, production deployment, physical USB rewrite
-or physical PC disk operation occurred in this change.
+Local implementation review and explicitly authorized USB update only. No push,
+PR, merge, production deployment or physical PC disk operation occurred.
 
 ## Artifact
 
@@ -56,3 +56,19 @@ Physical PC installation and recovery remain unqualified. Registration requires
 matching published Worker/Portal routes and migrations; frozen local QA alone
 cannot link a real account. Real phone Passkey, GPU/model service and actual
 fleet inference remain separate acceptance checks.
+
+## KIOXIA USB update
+
+After explicit user approval on 2026-10-05 (Asia/Tokyo), KIOXIA TransMemory
+61,949,214,720 bytes, external physical USB `/dev/disk6`, was re-identified,
+erased and written with the final ISO. macOS initially refused the raw write
+from the automation context; Terminal authentication enabled it. An interrupted
+write was restarted from byte zero before the final successful run.
+
+The final write completed with 1,662,976,000 bytes. Exactly that length was read
+back and its SHA-256 matched the ISO:
+`fd12332d0bb729cb6c601cbf7773c24066cf4cc174a2064f6bbc155428b08d4f`.
+`diskutil eject` succeeded. Evidence: `usb-write-20261005/result.json` and
+`usb-write-20261005/terminal-write.log` in the artifact directory. The USB can
+be unplugged. Physical PC installation and production registration are still
+not established by this media update.
