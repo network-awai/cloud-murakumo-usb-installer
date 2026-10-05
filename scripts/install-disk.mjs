@@ -82,7 +82,7 @@ async function main() {
   if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
   run('nix-store', ['--check-validity', ...closure]);
   const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs'];
+  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs'];
   for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
   const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
   run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);

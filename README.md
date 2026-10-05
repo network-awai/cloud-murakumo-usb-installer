@@ -46,8 +46,8 @@ The steps below are the manual recovery/custom configuration path.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `node-base.nix`, `console-ui.nix`, `network-setup.mjs`, `setup-ui.mjs`
-   and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
+4. Copy `node-base.nix`, `console-ui.nix`, `network-setup.mjs`, `setup-ui.mjs`,
+   `registration-ui.mjs` and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
    an edited `configuration.example.nix` renamed to `configuration.nix`. For
    the guided network screen, set `networking.networkmanager.enable = true`
    and `networking.useDHCP = false` in that edited configuration. Set a real

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,readFile,stat,writeFile,chmod,rm} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {identity,link,validateReceipt,didFromPublicKey} from '../nixos/account-link.mjs';
+import {identity,link,savedLink,validateReceipt,didFromPublicKey} from '../nixos/account-link.mjs';
 const flow={flowId:'f'.repeat(43),userCode:'ABCD123456',expiresIn:300,verificationUriComplete:'https://murakumo.cloud/portal/#device-link?code=ABCD123456'};
 const directories=[];
 const dir=async()=>{const value=await mkdtemp(join(tmpdir(),'murakumo-account-test-'));directories.push(value);return value;};
@@ -24,4 +24,16 @@ test('an existing factory signing identity is preserved without the factory daem
 test('a device key with group or world permissions is refused',async()=>{
   const d=await dir();await identity(d);await chmod(join(d,'account-device.json'),0o644);
   await assert.rejects(identity(d),/permissions/);
+});
+test('deferred approval never saves even if approval arrives during cancellation',async()=>{
+  const d=await dir(),controller=new AbortController();let start;
+  await assert.rejects(link({dir:d,signal:controller.signal,onFlow:()=>{},display:()=>{},fetcher:async(url,opts)=>{
+    if(url.endsWith('/start')){start=JSON.parse(opts.body);return new Response(JSON.stringify(flow),{status:201});}
+    controller.abort(new DOMException('Deferred','AbortError'));return new Response(JSON.stringify(receipt(start)));
+  }}),{name:'AbortError'});
+  assert.equal(await savedLink(d),null);
+});
+test('unpublished registration service is distinct from an approval refusal',async()=>{
+  const d=await dir();await assert.rejects(link({dir:d,display:()=>{},fetcher:async()=>new Response('{"error":"unknown devices route"}',{status:404})}),{code:'service'});
+  assert.equal(await savedLink(d),null);
 });

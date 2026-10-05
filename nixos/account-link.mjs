@@ -65,36 +65,52 @@ export function validateReceipt(r,flow,id,challenge,model){
   if(!r||r.registered!==true||r.flowId!==flow.flowId||r.deviceDid!==id.did||r.challenge!==challenge||r.model!==model||!/^did:[a-z0-9]+:\S+$/.test(r.accountDid||'')) throw Error('registration receipt binding mismatch');
   return r;
 }
-export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetcher=fetch,now=Date.now,pause=ms=>new Promise(r=>setTimeout(r,ms)),display=console.log}={}){
+export class LinkError extends Error {
+  constructor(code,message){super(message);this.code=code;}
+}
+export async function savedLink(dir='/var/lib/murakumo'){
+  try {
+    const saved=JSON.parse(await readFile(join(dir,'account-link.json'),'utf8'));
+    if(saved.version!==1||saved.authority!==authority||saved.registrationState!=='registered'||!/^did:[a-z0-9]+:\S+$/.test(saved.accountDid||'')||saved.deviceDid!==(await identity(dir)).did) throw new LinkError('invalid','Stored registration does not match this device.');
+    return saved;
+  } catch(e){if(e.code==='ENOENT')return null;throw e;}
+}
+export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetcher=fetch,now=Date.now,pause=ms=>new Promise(r=>setTimeout(r,ms)),display=console.log,onFlow,onProgress=()=>{},signal}={}){
   const id=await identity(dir);
   const challenge=accountFlowToken(),pollToken=accountFlowToken();
   const post=async(path,body)=>{
-    const response=await fetcher(authority+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});
+    signal?.throwIfAborted();
+    const response=await fetcher(authority+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(15000)]):AbortSignal.timeout(15000)});
+    if(response.status===404||response.status===503) throw new LinkError('service','Registration service is not available.');
     return {status:response.status,data:await response.json()};
   };
   try {
-    const saved=JSON.parse(await readFile(join(dir,'account-link.json'),'utf8'));
+    const saved=await savedLink(dir);
+    if(!saved)throw Object.assign(Error('No saved registration'),{code:'ENOENT'});
     if(saved.deviceDid!==id.did||saved.authority!==authority) throw Error('stored receipt mismatch');
     const timestamp=now();
     const status=await post('/api/devices/link/status',{deviceDid:id.did,timestamp,deviceProof:sign(null,Buffer.from(['murakumo-device-link-status-v1',authority,id.did,String(timestamp)].join('\n')),id.key).toString('base64url')});
     if(status.status!==200) throw Error('registration status unavailable');
     if(status.data.registered===true&&status.data.deviceDid===id.did&&status.data.accountDid===saved.accountDid){display('Murakumo device registration verified.');return saved;}
-    throw Error('registration revoked; owner must approve re-registration after explicit local reset');
+    throw new LinkError('revoked','registration revoked; owner must approve re-registration after explicit local reset');
   } catch(e){if(e.code!=='ENOENT')throw e;}
   const message=['murakumo-device-link-start-v1',authority,id.did,challenge,model,pollToken].join('\n');
   const started=await post('/api/devices/link/start',{deviceDid:id.did,challenge,model,pollToken,deviceProof:sign(null,Buffer.from(message),id.key).toString('base64url')});
   const flow=started.data;
   if(started.status!==201||! /^[A-Za-z0-9_-]{40,128}$/.test(flow.flowId||'')||! /^[A-Z0-9_-]{10}$/.test(flow.userCode||'')||flow.expiresIn!==300||flow.verificationUriComplete!==authority+'/portal/#device-link?code='+flow.userCode) throw Error('invalid registration flow');
   display('Scan the QR with your phone and approve this device using a Passkey.\n'+flow.verificationUriComplete+'\nDevice code: '+flow.userCode+'\nDevice ID: '+id.did+'\nExpires in: 5 minutes');
-  spawnSync('qrencode',['-t','ANSIUTF8',flow.verificationUriComplete],{stdio:['ignore','inherit','ignore']});
+  if(onFlow)await onFlow({...flow,deviceDid:id.did});
+  else spawnSync('qrencode',['-t','ANSIUTF8',flow.verificationUriComplete],{stdio:['ignore','inherit','ignore']});
   const deadline=now()+300000;
   const proof=sign(null,Buffer.from(['murakumo-device-link-poll-v1',authority,flow.flowId,id.did,pollToken].join('\n')),id.key).toString('base64url');
   while(now()<deadline){
+    signal?.throwIfAborted();
     let reply;
     try {reply=await post('/api/devices/link/poll',{flowId:flow.flowId,pollToken,deviceDid:id.did,challenge,deviceProof:proof});}
-    catch {display('Retrying connection...');await pause(2000);continue;}
-    if(reply.status===202){await pause(2000);continue;}
+    catch(e){signal?.throwIfAborted();if(e instanceof LinkError)throw e;onProgress('reconnecting');display('Retrying connection...');await pause(2000);continue;}
+    if(reply.status===202){onProgress('waiting');await pause(2000);continue;}
     if(reply.status!==200)throw Error('authority refused device proof');
+    signal?.throwIfAborted();
     const receipt=validateReceipt(reply.data,flow,id,challenge,model);
     // Persist only the public approval projection; never poll secrets or cookies.
     const saved={version:1,deviceDid:id.did,accountDid:receipt.accountDid,authority,linkedAt:now(),registrationState:'registered'};
@@ -102,7 +118,7 @@ export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetch
     await writeFile(temporary,JSON.stringify(saved),{mode:0o600,flag:'wx'});await rename(temporary,target);
     display('Murakumo device registration completed using a Passkey.');return saved;
   }
-  throw Error('Approval expired. Restart to display a new QR code.');
+  throw new LinkError('expired','Approval expired. Restart to display a new QR code.');
 }
 
 function option(args,key,fallback){const i=args.indexOf(key);return i>=0?args[i+1]:fallback;}

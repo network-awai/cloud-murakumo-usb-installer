@@ -78,7 +78,7 @@ export function networkBackend(run = command, fetcher = fetch) {
     },
   };
 }
-export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), backend = networkBackend()} = {}) {
+export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), backend = networkBackend(), registered = false} = {}) {
   const later = text(stage === 'installer' ? '接続せずにインストールする' : '登録はあとで行う', stage === 'installer' ? 'Install without a connection' : 'Register later');
   const help = text('↑↓で選択、Enterで決定。Wi-Fiだけでも利用できます。', 'Select with arrows and Enter. Ethernet is optional.');
   const check = async () => {
@@ -86,9 +86,9 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
     const state = await backend.probe();
     const message = [text('ネットワーク：接続済み','Network: connected'),
       text(`インターネット：${state.internet ? '接続済み' : '確認できません'}`,`Internet: ${state.internet ? 'connected' : 'not confirmed'}`),
-      text(`Murakumo：${state.murakumo ? '到達しました（登録はこれから）' : '到達できません'}`,`Murakumo: ${state.murakumo ? 'reachable (registration pending)' : 'unreachable'}`)].join('\n');
+      text(`Murakumo：${state.murakumo ? (registered ? '到達しました（登録状態を確認できます）' : '到達しました（登録はこれから）') : '到達できません'}`,`Murakumo: ${state.murakumo ? (registered ? 'reachable (ready to verify registration)' : 'reachable (registration pending)') : 'unreachable'}`)].join('\n');
     const next = ui.menu(message, [
-      ...(state.internet ? [['next',text(stage === 'installer' ? 'インストールへ進む' : 'スマホで登録する',stage === 'installer' ? 'Continue to installation' : 'Register using your phone')]] : []),
+      ...(state.internet ? [['next',text(stage === 'installer' ? 'インストールへ進む' : registered ? '登録状態を確認する' : 'スマホで登録する',stage === 'installer' ? 'Continue to installation' : registered ? 'Verify registration' : 'Register using your phone')]] : []),
       ['settings',text('接続方法を変更・再試行','Change connection / retry')], ['later',later],
     ]);
     return next === 'next' ? 'connected' : next === 'later' ? 'offline' : null;

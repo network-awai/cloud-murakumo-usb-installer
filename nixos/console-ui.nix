@@ -4,6 +4,7 @@
   environment.systemPackages = with pkgs; [ dialog fbterm networkmanager ];
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
   environment.etc."murakumo/setup-ui.mjs".source = ./setup-ui.mjs;
+  environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
   environment.etc."murakumo/launch-ui".source = pkgs.writeShellScript "murakumo-console-ui" ''
     export TERM=linux LC_ALL=C.UTF-8
     if [ -c /dev/fb0 ]; then
