@@ -47,11 +47,17 @@ merge, production deployment or physical PC installation occurred.
 ## USB handoff
 
 KIOXIA TransMemory 61,949,214,720 bytes, external physical USB disk6, was
-re-identified. A guarded, executable `usb-write-passwordless-20261005/`
-`Murakumo-USB.command` is prepared with the new ISO hash and complete read-back
-verification, but has not run. Automatic approval review rejected the new
-payload's USB write pending explicit user approval. The USB remains on the
-previous `71723c1` artifact; no new physical write is claimed.
+re-identified before the write. After automatic approval review initially
+held the changed payload, the user explicitly approved this version with
+「上書きして」. Terminal authentication then enabled the guarded writer.
+
+The final ISO was written successfully: 1,662,976,000 bytes, 110.158421 seconds.
+Exactly 1,662,976,000 bytes were read back, and USB SHA-256 matched the ISO:
+`5057f97a19a4e3dee8ea3fd34b29232cb2b21a4acf3e0b8b2d36c6d783067a8f`.
+`diskutil eject` succeeded. Evidence: `usb-write-passwordless-20261005/`
+`result.json` (`readback-verified-and-ejected`) and `write.log` in the artifact
+directory. The KIOXIA now contains the password-free `e6433e6` installer and can
+be unplugged. No physical PC disk operation is claimed by this USB update.
 
 ## Remaining acceptance
 
