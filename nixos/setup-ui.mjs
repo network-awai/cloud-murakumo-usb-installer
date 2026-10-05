@@ -1,5 +1,5 @@
-import {dialogUI, setupNetwork, text} from './network-setup.mjs';
-import {link} from './account-link.mjs';
+import {dialogUI, setupNetwork, text} from '/etc/murakumo/network-setup.mjs';
+import {link} from '/etc/murakumo/account-link.mjs';
 import {spawnSync} from 'node:child_process';
 
 const ui = dialogUI('installed');
