@@ -8,15 +8,16 @@ let
   bios = target "bios";
 in
 {
-  imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ];
+  imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ./console-ui.nix ];
   # Keep boot diagnostics from overwriting the disk selection screen.
   boot.consoleLogLevel = 3;
   boot.kernelParams = [ "quiet" "systemd.show_status=false" "rd.systemd.show_status=false" ];
-  environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog parted dosfstools e2fsprogs grub2 ];
+  environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog networkmanager iproute2 parted dosfstools e2fsprogs grub2 ];
   environment.etc."murakumo/installation-media".text = "Murakumo installer\n";
   environment.etc."murakumo/install-disk.mjs".source = ../scripts/install-disk.mjs;
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
+  environment.etc."murakumo/console-ui.nix".source = ./console-ui.nix;
   environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
   environment.etc."murakumo/configuration.example.nix".source = ./configuration.example.nix;
   # Include complete installed systems, not just installation tools.
@@ -36,14 +37,14 @@ in
   systemd.services.murakumo-install = {
     description = "Guided automatic Murakumo disk installation";
     wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-vconsole-setup.service" "register-nix-paths.service" ];
+    after = [ "systemd-vconsole-setup.service" "register-nix-paths.service" "NetworkManager.service" ];
     conflicts = [ "getty@tty1.service" ];
-    path = with pkgs; [ nodejs_22 dialog parted dosfstools e2fsprogs grub2 util-linux systemd coreutils nixos-install-tools nix ];
+    path = with pkgs; [ nodejs_22 dialog networkmanager iproute2 parted dosfstools e2fsprogs grub2 util-linux systemd coreutils nixos-install-tools nix ];
     environment.TERM = "linux";
     environment.NIX_PATH = "nixpkgs=${pkgs.path}";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.nodejs_22}/bin/node /etc/murakumo/install-disk.mjs";
+      ExecStart = "${pkgs.bash}/bin/bash /etc/murakumo/launch-ui ${pkgs.nodejs_22}/bin/node /etc/murakumo/install-disk.mjs";
       StandardInput = "tty-force";
       StandardOutput = "tty";
       StandardError = "tty";

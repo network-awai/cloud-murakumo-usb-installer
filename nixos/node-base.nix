@@ -1,6 +1,7 @@
 { pkgs, lib, config, ... }:
 {
   options.services.murakumoAccountLink.enable = lib.mkEnableOption "passwordless first-boot Murakumo registration";
+  imports = [ ./console-ui.nix ];
   config = {
   # Base for a NixOS Murakumo node after the OS is installed.
   services.tailscale.enable = true;
@@ -19,19 +20,12 @@
     wants = [ "network.target" ];
     after = [ "network.target" ];
     conflicts = [ "getty@tty1.service" ];
-    path = [ pkgs.qrencode ];
+    path = with pkgs; [ qrencode dialog networkmanager iproute2 systemd ];
+    environment.HOME = "/var/lib/murakumo";
     serviceConfig = {
       Type = "simple";
       RemainAfterExit = true;
-      ExecStart = pkgs.writeShellScript "murakumo-account-registration" ''
-        echo "Murakumo OS is installed. Waiting for network for account registration."
-        echo "Local maintenance: Ctrl+Alt+F2. OS installation does not need Internet."
-        until ${pkgs.iproute2}/bin/ip -4 route show default | ${pkgs.gnugrep}/bin/grep -q '^default' ||
-              ${pkgs.iproute2}/bin/ip -6 route show default | ${pkgs.gnugrep}/bin/grep -q '^default'; do
-          ${pkgs.coreutils}/bin/sleep 5
-        done
-        exec ${pkgs.nodejs_22}/bin/node /etc/murakumo/account-link.mjs
-      '';
+      ExecStart = "${pkgs.bash}/bin/bash /etc/murakumo/launch-ui ${pkgs.nodejs_22}/bin/node /etc/murakumo/setup-ui.mjs";
       StateDirectory = "murakumo";
       StateDirectoryMode = "0700";
       StandardInput = "tty-force";

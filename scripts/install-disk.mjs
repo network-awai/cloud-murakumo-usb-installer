@@ -66,10 +66,12 @@ async function main() {
   if (process.getuid() !== 0) throw Error('Run as root.');
   // The launcher is deliberately available only on the installation medium.
   if (!existsSync('/etc/murakumo/installation-media')) throw Error('This is not Murakumo installation media.');
+  const {setupNetwork, text} = await import("/etc/murakumo/network-setup.mjs");
+  await setupNetwork({stage: "installer"});
   const uefi = existsSync('/sys/firmware/efi');
   const disks = inventory(), eligible = disks.filter(d => !diskReason(d, {uefi}));
   if (!eligible.length) throw Error('No unused internal disk of at least 16 GiB. NVMe requires restarting with the UEFI USB entry. Use the recovery console to inspect disks.');
-  const selected = dialog(['--menu', `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires the UEFI USB entry)'}. Select the internal disk to REPLACE. All its partitions, including Windows, will be erased. The USB is excluded. Installation works offline. AC power is required.`, '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
+  const selected = dialog(['--menu', text(`起動方式：${uefi ? 'UEFI' : 'BIOS（NVMeにはUEFI起動が必要です）'}。インストール先の内蔵ディスクを選んでください。Windowsを含む、選んだディスクの全データを消去します。USBは対象外です。電源を接続してください。`, `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires UEFI)'}. Choose the internal disk to REPLACE. All data including Windows will be erased. USB is excluded. Connect AC power.`), '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
   const target = eligible.find(d => d.path === selected);
   if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
   const identity = fingerprint(target);
@@ -80,7 +82,7 @@ async function main() {
   if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
   run('nix-store', ['--check-validity', ...closure]);
   const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix'];
+  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs'];
   for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
   const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
   run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);
@@ -88,7 +90,7 @@ async function main() {
   run('mv', [join(directory, 'hardware-configuration.nix'), join(directory, 'detected-hardware.nix')]);
   writeFileSync(join(directory, 'configuration.nix'), targetConfiguration({uefi}));
   const phrase = `ERASE ${selected}`;
-  const approval = dialog(['--inputbox', `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA, INCLUDING WINDOWS, WILL BE LOST.\nType exactly: ${phrase}`, '0', '0']);
+  const approval = dialog(['--inputbox', text(`消去するディスク：${selected}\n機種：${String(target.model || '').trim()}\n容量：${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\n製造番号：${target.serial || target.wwn || '不明'}\nWindowsを含む全データが失われます。\n次の文字をそのまま入力してください：${phrase}`, `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA INCLUDING WINDOWS WILL BE LOST.\nType exactly: ${phrase}`), '0', '0']);
   if (approval !== phrase) throw Error('Erase confirmation did not match. Nothing erased.');
   run('udevadm', ['settle']);
   const current = inventory();
@@ -120,7 +122,7 @@ async function main() {
   } finally {
     if (mounted) run('umount', ['--recursive', mount]);
   }
-  dialog(['--msgbox', 'Installation completed. Press OK to restart. Remove the USB as the PC restarts, then boot the internal disk. OS installation is complete without Internet. Connect networking later for the Murakumo QR and matching production service. Model inference is a separate step.', '0', '0']);
+  dialog(['--msgbox', text('インストールが完了しました。次へ進むと再起動します。再起動時にUSBを外し、内蔵ディスクから起動してください。次の画面でネット接続とスマホでの登録をご案内します。登録はあとで行うこともできます。', 'Installation completed. Continue to restart, remove the USB, and boot the internal disk. The next screen guides network setup and phone registration. You can register later.'), '0', '0']);
   run('systemctl', ['reboot']);
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {
