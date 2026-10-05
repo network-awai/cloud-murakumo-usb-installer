@@ -2,8 +2,10 @@
 
 NixOS installation media definition and target-host configuration for Murakumo
 nodes. This repository owns the OS installation boundary: boot media, disk
-selection, target configuration, recovery and rollback. It never chooses or
-formats a disk automatically.
+selection, target configuration, recovery and rollback. The ISO opens a guided
+installer on boot: select and approve the internal disk, then preparation,
+partitioning, installation and first-boot registration setup run automatically.
+See [the guided installation procedure](docs/automatic-install.md).
 
 Status: the customized NixOS 26.05 ISO was built and booted in a BIOS/KVM VM
 on 2026-09-26. The bundled preflight script and target templates were checked
@@ -26,9 +28,13 @@ that commit and record the ISO SHA-256 before writing a USB stick. Use the
 [official NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation)
 for USB writing, partitioning, mounting and `nixos-install`. The ISO includes
 the read-only preflight script and target templates under `/etc/murakumo/`,
-but does not run an install automatically.
+and the guided installer. Previously written USB sticks must be rewritten with
+the new ISO separately, after confirming and approving the USB's erasure.
 
 ## Install a target host
+
+The normal path is now [guided installation](docs/automatic-install.md).
+The steps below are the manual recovery/custom configuration path.
 
 1. Boot the USB media. Run `sh /etc/murakumo/preflight.sh` to inspect boot
    mode, disks, network interfaces and GPU devices.
@@ -70,7 +76,8 @@ No model service or fleet worker is enabled by account linking.
 
 This requires the matching Portal/Worker registration routes and database migration to be
 published. The local integration tests use an explicitly labelled authentication verdict
-fixture; they do not verify a real Passkey ceremony. The latest-main standalone module
-has not yet been rebuilt into an ISO or evaluated by Nix in this integration run.
+fixture; they do not verify a real Passkey ceremony. The registration module
+comes from frozen local review commit `bf6e9adc`; installer changes do not
+publish its Worker/Portal dependencies.
 
-Run `node --test test/account-link.test.mjs` for the registration client tests.
+Run `node --test test/*.test.mjs` for registration and disk safety tests.

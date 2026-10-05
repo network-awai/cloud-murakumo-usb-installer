@@ -1,0 +1,38 @@
+# Guided automatic internal-disk installation
+
+1. Connect AC power and preferably wired Ethernet, then boot the new ISO.
+   TTY1 opens the disk selection screen. USB, removable, hotplug, read-only,
+   mounted, swap and mapped disks are excluded; disks must be at least 16 GiB.
+   No disk is installed without explicit approval, even with one candidate.
+2. Select the disk by its path, model, capacity and serial. This replaces the
+   whole disk, including Windows and recovery partitions. Set and repeat a
+   local maintenance password of at least 12 characters.
+3. The installer detects UEFI/BIOS, generates hardware configuration and builds
+   NixOS before erasing. Network/cache/build failures at this stage leave the
+   disk untouched. Internet and sufficient RAM for the live Nix store are
+   required; this is not an offline installation image.
+4. Review the disk again and type `ERASE /dev/<chosen-disk>` exactly. Disk
+   identity and usage are rechecked. GPT partitioning, formatting, configuration
+   copying and installation of the prepared system then run automatically.
+   UEFI uses systemd-boot's fallback path without changing firmware variables;
+   BIOS uses GRUB. Password hashes stay in a root-only file outside the public
+   Nix store. Persistent Wi-Fi profiles are copied without printing credentials.
+5. On success, remove the USB and press OK to reboot. The installed system
+   displays the Murakumo QR when networking is ready. Scan it with a phone,
+   compare the full Device ID, and approve with your Murakumo Passkey.
+
+Maintenance is available on Ctrl+Alt+F2 as `root` with the maintenance password.
+SSH is not enabled automatically. For Wi-Fi on the live ISO, use Ctrl+Alt+F2
+and `sudo nmtui`, then restart with `sudo systemctl start murakumo-install`.
+
+Cancellation does not trigger another install. A failure after formatting may
+leave a partial installation: do not blindly repeat erasure. Use the live
+recovery console, `journalctl -u murakumo-install`, and
+`sh /etc/murakumo/preflight.sh`. Firmware may still select another Windows disk;
+use its boot menu to select the installed disk.
+
+Registration needs matching published Worker/Portal routes and migrations.
+This change does not publish those dependencies or qualify a real phone
+Passkey ceremony. Account linking enables no model server or fleet worker;
+physical networking, GPU/model performance and actual inference remain separate
+acceptance checks.
