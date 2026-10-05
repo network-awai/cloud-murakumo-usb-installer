@@ -5,7 +5,8 @@ nodes. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
 installer on boot: select and approve the internal disk, then preparation,
 partitioning, installation and first-boot registration setup run automatically.
-See [the guided installation procedure](docs/automatic-install.md).
+See [the guided installation procedure](docs/automatic-install.md). Initial
+password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
 Status: guided disk installation was added on 2026-10-05. See
 [the current verification record](docs/verification-2026-10-05.md) for the
