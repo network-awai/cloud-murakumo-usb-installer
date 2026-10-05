@@ -21,17 +21,17 @@
     conflicts = [ "getty@tty1.service" ];
     path = [ pkgs.qrencode ];
     serviceConfig = {
-      Type = "oneshot";
+      Type = "simple";
       RemainAfterExit = true;
-      ExecStartPre = pkgs.writeShellScript "murakumo-wait-for-network" ''
+      ExecStart = pkgs.writeShellScript "murakumo-account-registration" ''
         echo "Murakumo OS is installed. Waiting for network for account registration."
         echo "Local maintenance: Ctrl+Alt+F2. OS installation does not need Internet."
         until ${pkgs.iproute2}/bin/ip -4 route show default | ${pkgs.gnugrep}/bin/grep -q '^default' ||
               ${pkgs.iproute2}/bin/ip -6 route show default | ${pkgs.gnugrep}/bin/grep -q '^default'; do
           ${pkgs.coreutils}/bin/sleep 5
         done
+        exec ${pkgs.nodejs_22}/bin/node /etc/murakumo/account-link.mjs
       '';
-      ExecStart = "${pkgs.nodejs_22}/bin/node /etc/murakumo/account-link.mjs";
       StateDirectory = "murakumo";
       StateDirectoryMode = "0700";
       StandardInput = "tty-force";
