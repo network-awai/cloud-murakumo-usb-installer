@@ -7,12 +7,12 @@ installer on boot: select and approve the internal disk, then preparation,
 partitioning, installation and first-boot registration setup run automatically.
 See [the guided installation procedure](docs/automatic-install.md).
 
-Status: the customized NixOS 26.05 ISO was built and booted in a BIOS/KVM VM
-on 2026-09-26. The bundled preflight script and target templates were checked
-in the live image. See [the verification record](docs/verification-2026-09-26.md)
-for the source revision, image hash and remaining hardware checks. Physical
-USB boot, target-disk installation and recovery have not been tested; do not
-replace a serving host until those checks succeed.
+Status: guided disk installation was added on 2026-10-05. See
+[the current verification record](docs/verification-2026-10-05.md) for the
+reviewed source, ISO hash and VM checks. Physical PC installation, real phone
+Passkey linking and inference still require separate verification. The
+[2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
+installation image.
 
 ## Build the bootable ISO
 
