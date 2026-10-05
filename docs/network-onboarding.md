@@ -21,7 +21,7 @@ switch or command entry is needed for ordinary Wi-Fi or Ethernet onboarding.
 5. Offline continuation does not block OS installation. Its saved Wi-Fi profiles
    are copied into the installed OS. At first boot, “register later” displays a
    completed-installation screen with reconnect/register and shutdown choices.
-6. Online continuation enters the existing QR/Passkey registration protocol.
+6. Online continuation enters the [QR/Passkey account-linking flow](account-onboarding.md).
    Registration errors return to an actionable screen. The protocol's identity,
    approval binding and public receipt validation remain unchanged. Registration
    completion does not configure a model server or establish fleet inference.

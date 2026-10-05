@@ -8,11 +8,13 @@ and approve the internal disk. The bundled OS
 is copied and installed without Internet or host-side compilation. Registration
 opens the same network guide after the installed PC boots. See
 [network onboarding](docs/network-onboarding.md).
+The [account-linking guide](docs/account-onboarding.md) continues through a phone
+QR, Passkey approval, cancellation/retry and saved versus online-verified status.
 See [the guided installation procedure](docs/automatic-install.md). Initial
 password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
-Status: guided disk installation was added on 2026-10-05. See
-[the network UI verification record](docs/verification-network-ui-2026-10-05.md) for the
+Status: guided disk installation and account onboarding were added on 2026-10-05. See
+[the account onboarding verification record](docs/verification-account-onboarding-2026-10-05.md) for the
 reviewed source, ISO hash and VM checks. Physical PC installation, real phone
 Passkey linking and inference still require separate verification. The
 [2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
