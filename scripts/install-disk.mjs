@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {spawnSync} from 'node:child_process';
-import {existsSync, mkdtempSync, copyFileSync, writeFileSync, realpathSync, readFileSync, readdirSync} from 'node:fs';
+import {existsSync, mkdtempSync, copyFileSync, writeFileSync, realpathSync, readFileSync, readdirSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
@@ -75,10 +75,13 @@ function capture(program, args, options = {}) { return run(program, args, {...op
 function inventory() {
   return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
 }
-function dialog(args) {
+function dialog(args, {allowCancel = false} = {}) {
   const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'Murakumo installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
   if (result.error) throw result.error;
-  if (result.status !== 0) throw Error('Cancelled. No further installation steps will run.');
+  if (result.status !== 0) {
+    if (allowCancel) return null;
+    throw Error('Cancelled. No further installation steps will run.');
+  }
   return result.stdout.toString();
 }
 async function main() {
@@ -88,30 +91,35 @@ async function main() {
   const {setupNetwork, text} = await import("/etc/murakumo/network-setup.mjs");
   await setupNetwork({stage: "installer"});
   const uefi = existsSync('/sys/firmware/efi');
-  const disks = inventory(), eligible = disks.filter(d => !diskReason(d, {uefi}));
-  if (!eligible.length) throw Error('No unused internal disk of at least 16 GiB. NVMe requires restarting with the UEFI USB entry. Use the recovery console to inspect disks.');
-  const selected = dialog(['--menu', text(`起動方式：${uefi ? 'UEFI' : 'BIOS（NVMeにはUEFI起動が必要です）'}。インストール先の内蔵ディスクを選んでください。Windowsを含む、選んだディスクの全データを消去します。USBは対象外です。電源を接続してください。`, `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires UEFI)'}. Choose the internal disk to REPLACE. All data including Windows will be erased. USB is excluded. Connect AC power.`), '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
-  const target = eligible.find(d => d.path === selected);
-  if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
-  const identity = fingerprint(target);
-  const system = offlineSystem(JSON.parse(readFileSync('/etc/murakumo/offline-systems.json', 'utf8')), uefi);
-  dialog(['--infobox', text('USB内のOSを確認しています…', 'Checking the offline OS…'), '0', '0']);
-  const closure = capture('nix-store', ['--query', '--requisites', system]).split('\n').filter(Boolean);
-  if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
-  run('nix-store', ['--check-validity', ...closure]);
-  const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs'];
-  for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
-  const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
-  const otherUuids = disks.filter(d => d.path !== selected).flatMap(tree).map(d => String(d.uuid || '').toUpperCase());
-  if (otherUuids.includes(rootUuid.toUpperCase()) || otherUuids.includes(`${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`)) throw Error('Generated UUID conflicts with another disk. Nothing erased.');
-  run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);
-  // Retain hardware detection for later review; the shipped system is generic.
-  run('mv', [join(directory, 'hardware-configuration.nix'), join(directory, 'detected-hardware.nix')]);
-  writeFileSync(join(directory, 'configuration.nix'), targetConfiguration({uefi, rootUuid, bootUuid: `${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`}));
-  const phrase = `ERASE ${selected}`;
-  const approval = dialog(['--inputbox', text(`消去するディスク：${selected}\n機種：${String(target.model || '').trim()}\n容量：${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\n製造番号：${target.serial || target.wwn || '不明'}\nWindowsを含む全データが失われます。\n次の文字をそのまま入力してください：${phrase}`, `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA INCLUDING WINDOWS WILL BE LOST.\nType exactly: ${phrase}`), '0', '0']);
-  if (approval !== phrase) throw Error('Erase confirmation did not match. Nothing erased.');
+  let selected, target, identity, system, directory, configFiles, rootUuid, bootUuid;
+  for (;;) {
+    const disks = inventory(), eligible = disks.filter(d => !diskReason(d, {uefi}));
+    if (!eligible.length) throw Error('No unused internal disk of at least 16 GiB. NVMe requires restarting with the UEFI USB entry. Use the recovery console to inspect disks.');
+    selected = dialog(['--menu', text(`起動方式：${uefi ? 'UEFI' : 'BIOS（NVMeにはUEFI起動が必要です）'}。インストール先の内蔵ディスクを選んでください。Windowsを含む、選んだディスクの全データを消去します。USBは対象外です。電源を接続してください。`, `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires UEFI)'}. Choose the internal disk to REPLACE. All data including Windows will be erased. USB is excluded. Connect AC power.`), '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
+    target = eligible.find(d => d.path === selected);
+    if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
+    identity = fingerprint(target);
+    system = offlineSystem(JSON.parse(readFileSync('/etc/murakumo/offline-systems.json', 'utf8')), uefi);
+    dialog(['--infobox', text('USB内のOSを確認しています…', 'Checking the offline OS…'), '0', '0']);
+    const closure = capture('nix-store', ['--query', '--requisites', system]).split('\n').filter(Boolean);
+    if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
+    run('nix-store', ['--check-validity', ...closure]);
+    directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
+    configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs'];
+    for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
+    rootUuid = randomUUID(); bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
+    const otherUuids = disks.filter(d => d.path !== selected).flatMap(tree).map(d => String(d.uuid || '').toUpperCase());
+    if (otherUuids.includes(rootUuid.toUpperCase()) || otherUuids.includes(`${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`)) throw Error('Generated UUID conflicts with another disk. Nothing erased.');
+    run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);
+    // Retain hardware detection for later review; the shipped system is generic.
+    run('mv', [join(directory, 'hardware-configuration.nix'), join(directory, 'detected-hardware.nix')]);
+    writeFileSync(join(directory, 'configuration.nix'), targetConfiguration({uefi, rootUuid, bootUuid: `${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`}));
+    const phrase = `ERASE ${selected}`;
+    const approval = dialog(['--inputbox', text(`消去するディスク：${selected}\n機種：${String(target.model || '').trim()}\n容量：${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\n製造番号：${target.serial || target.wwn || '不明'}\nWindowsを含む全データが失われます。\n次の文字をそのまま入力してください：${phrase}`, `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA INCLUDING WINDOWS WILL BE LOST.\nType exactly: ${phrase}`), '0', '0'], {allowCancel:true});
+    if (approval === null) {rmSync(directory, {recursive:true, force:true});continue;}
+    if (approval !== phrase) throw Error('Erase confirmation did not match. Nothing erased.');
+    break;
+  }
   run('udevadm', ['settle']);
   const current = inventory();
   verifyDisk(current, selected, identity, {uefi});

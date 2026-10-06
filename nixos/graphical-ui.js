@@ -1,6 +1,6 @@
 #!/usr/bin/env gjs
 imports.gi.versions.Gtk='4.0';
-const {Gtk,Gdk,Gio,GLib,Pango}=imports.gi;
+const {Gtk,Gdk,Gio,GLib,Pango,GdkPixbuf}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
 let content,window,active=null,backend=null;
@@ -11,13 +11,20 @@ function button(text,callback,cls='secondary'){
 }
 function clear(){while(content.get_first_child())content.remove(content.get_first_child());}
 function show(title,message){clear();content.append(label(title,'heading'));if(message)content.append(label(message));}
-function heading(type,message){
+function heading(type,message,args){
+  if(type==='--menu'){
+    const ids=args.slice(args.indexOf(type)+5).filter((_,i)=>i%2===0);
+    if(ids.includes('wifi')&&ids.includes('wired'))return 'ネットに接続';
+    if(ids.some(x=>x.startsWith('/dev/')))return 'インストール先を選ぶ';
+    if(ids.includes('retry'))return 'アカウントの連携を確認';
+    if(ids.includes('network'))return 'Murakumoのセットアップ';
+  }
   if(type==='--textbox')return 'アカウントを連携';
   if(type==='--passwordbox')return 'Wi-Fiに接続';
   if(message.includes('ERASE /dev/'))return 'このディスクにインストール';
   if(/\/dev\/(nvme|sd|vd|mmcblk)/.test(message))return 'インストール先を選ぶ';
-  if(/完了|completed/.test(message))return '準備ができました';
-  if(/停止|stopped|できません|unavailable|failed/i.test(message))return '操作を確認してください';
+  if(type==='--msgbox'&&/インストールが完了|Installation completed/.test(message))return '準備ができました';
+  if(/停止|stopped|できません|見つかりません|unavailable|failed/i.test(message))return '操作を確認してください';
   if(/インストールしています|Installing/.test(message))return 'Murakumo OSをインストール';
   if(/準備しています|Preparing|確認しています|Checking|Verifying/.test(message))return '準備しています';
   return 'Murakumoへようこそ';
@@ -34,7 +41,7 @@ function serve(request,connection,input){
     try{connection.get_output_stream().write_all(ByteArray.fromString(JSON.stringify({status,value})+'\n'),null);}catch{}
     connection.close(null);active=null;
   };
-  show(heading(type,message),type==='--textbox'?'スマホでQRを読み取り、Passkeyでログインしてください。端末IDとコードを確認して承認すると、自動で次へ進みます。':message.replace(/次の文字をそのまま入力してください：ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
+  show(heading(type,message,args),type==='--textbox'?'スマホでQRを読み取り、Passkeyでログインしてください。\n端末IDとコードを確認して承認すると、自動で次へ進みます。':message.replace(/次の文字をそのまま入力してください：ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
   if(type==='--menu'){
     const choices=args.slice(i+5);
     const list=box(Gtk.Orientation.VERTICAL,10);
@@ -43,12 +50,12 @@ function serve(request,connection,input){
       const b=new Gtk.Button();b.add_css_class('choice');
       const row=box(Gtk.Orientation.HORIZONTAL,16);
       const disk=key.startsWith('/dev/');
-      const icon=new Gtk.Image({icon_name:disk?'drive-harddisk-symbolic':key==='wifi'?'network-wireless-symbolic':key==='wired'?'network-wired-symbolic':'go-next-symbolic',pixel_size:28});row.append(icon);
+      const icon=new Gtk.Image({icon_name:disk?'drive-harddisk-symbolic':key==='wifi'?'network-wireless-signal-excellent-symbolic':key==='wired'?'network-wired-symbolic':'go-next-symbolic',pixel_size:28});row.append(icon);
       const words=box(Gtk.Orientation.VERTICAL,4);words.hexpand=true;words.append(label(disk?text.split('|')[0].trim():text,'choice-title'));
       if(disk)words.append(label(text.split('|').slice(1).join(' · ')+' · '+key,'muted'));
       row.append(words);row.append(new Gtk.Image({icon_name:'go-next-symbolic',pixel_size:18}));b.set_child(row);b.connect('clicked',()=>respond(0,key));list.append(b);
     }
-    const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);
+    const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);list.get_first_child()?.grab_focus();
   }else if(type==='--inputbox'||type==='--passwordbox'){
     const phrase=message.match(/ERASE \/dev\/(?:nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+)/)?.[0];
     if(phrase){
@@ -56,11 +63,11 @@ function serve(request,connection,input){
       const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;
       controls.append(button('戻る',()=>respond(1)));
       const erase=button('消去してインストール',()=>respond(0,phrase),'destructive');erase.sensitive=false;
-      agree.connect('toggled',()=>erase.sensitive=agree.active);controls.append(erase);content.append(controls);
+      agree.connect('toggled',()=>erase.sensitive=agree.active);controls.append(erase);content.append(controls);agree.grab_focus();
     }else{
       const entry=type==='--passwordbox'?new Gtk.PasswordEntry({show_peek_icon:true}):new Gtk.Entry();entry.add_css_class('input');content.append(entry);
       const submit=()=>{const value=entry.get_text();entry.set_text('');respond(0,value);};entry.connect('activate',submit);
-      const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button('戻る',()=>{entry.set_text('');respond(1);}));controls.append(button('接続する',submit,'primary'));content.append(controls);entry.grab_focus();
+      const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button('戻る',()=>{entry.set_text('');respond(1);}));controls.append(button(type==='--passwordbox'?'接続する':'次へ',submit,'primary'));content.append(controls);entry.grab_focus();
     }
   }else if(type==='--textbox'){
     // Only the existing registration controller's private file is accepted.
@@ -71,16 +78,20 @@ function serve(request,connection,input){
     const png=message+'.png';
     const qr=Gio.Subprocess.new(['qrencode','-o',png,'-s','7','-m','2',uri],Gio.SubprocessFlags.NONE);
     if(!qr.wait_check(null))throw Error('QR generation failed');
-    const picture=Gtk.Picture.new_for_filename(png);picture.set_size_request(300,300);picture.can_shrink=true;picture.halign=Gtk.Align.CENTER;content.append(picture);
-    for(const line of text.split('\n').filter(x=>/^(Code:|Device ID:)/.test(x)))content.append(label(line,'muted'));
-    content.append(label('承認待ち · 有効期限5分','muted'));content.append(button('あとで登録',()=>respond(1)));
+    // Fixed-size, crisp QR modules keep long approval URIs within the page.
+    const pixels=GdkPixbuf.Pixbuf.new_from_file(png).scale_simple(300,300,GdkPixbuf.InterpType.NEAREST);
+    const picture=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(pixels));picture.set_size_request(300,300);picture.can_shrink=true;
+    const row=box(Gtk.Orientation.HORIZONTAL,24),details=box(Gtk.Orientation.VERTICAL,16);details.hexpand=true;details.valign=Gtk.Align.CENTER;
+    row.append(picture);row.append(details);
+    for(const line of text.split('\n').filter(x=>/^(Code:|Device ID:)/.test(x)))details.append(label(line,'muted'));
+    details.append(label('承認待ち · 有効期限5分','muted'));const later=button('あとで登録',()=>respond(1));details.append(later);content.append(row);later.grab_focus();
   }else if(type==='--infobox'||type==='--pause'){
     const spinner=new Gtk.Spinner({spinning:true,width_request:40,height_request:40,halign:Gtk.Align.START});content.append(spinner);
     // Busy updates are acknowledged immediately; installation runs separately
     // from the UI event loop. Pauses retain the caller's retry pacing.
     if(type==='--pause')GLib.timeout_add(GLib.PRIORITY_DEFAULT,2000,()=>{respond(0);return GLib.SOURCE_REMOVE;});else respond(0);
   }else{
-    content.append(button(/再起動|restart/i.test(message)?'再起動する':'続ける',()=>respond(0),'primary'));
+    const next=button(/再起動|restart/i.test(message)?'再起動する':'続ける',()=>respond(0),'primary');content.append(next);next.grab_focus();
   }
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{

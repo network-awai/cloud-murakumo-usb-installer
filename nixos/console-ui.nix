@@ -5,7 +5,7 @@ let
     version = "1";
     dontUnpack = true;
     nativeBuildInputs = [ pkgs.wrapGAppsHook4 pkgs.gobject-introspection ];
-    buildInputs = [ pkgs.gtk4 pkgs.gjs ];
+    buildInputs = [ pkgs.gtk4 pkgs.gjs pkgs.adwaita-icon-theme ];
     installPhase = ''
       mkdir -p $out/bin
       cp ${./graphical-ui.js} $out/bin/murakumo-setup-ui
