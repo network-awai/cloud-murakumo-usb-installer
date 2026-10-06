@@ -1,0 +1,14 @@
+{
+  "runtime_commit": "7645df4",
+  "iso_path": "/Users/junkawasaki/github/murakumo-usb-auto-install-qa/murakumo-logo-setup-sized-20261006.iso",
+  "iso_bytes": 2303950848,
+  "iso_sha256": "879d7f6cb51471a6f9b57c2294d780469d325e9cdcf9ee73ed1b9747c9358f8c",
+  "normal_boot_network_screen": "passed",
+  "offline_vm": true,
+  "svg_original_sha256": "ce8e3ae8cd9cf859d7264e26cb13a6b0690a536564754413e8794ef152d466bf",
+  "display_fill": "#253b62",
+  "usb_written": false,
+  "usb_status": "No external physical disk listed; awaiting KIOXIA reconnection",
+  "physical_pc_install": false,
+  "real_account_linked": false
+}
