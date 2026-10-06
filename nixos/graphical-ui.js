@@ -43,7 +43,7 @@ function serve(request,connection,input){
     try{connection.get_output_stream().write_all(ByteArray.fromString(JSON.stringify({status,value})+'\n'),null);}catch{}
     connection.close(null);active=null;
   };
-  show(heading(type,message,args),type==='--textbox'?tr('スマホでQRを読み取り、Passkeyでログインしてください。\n端末IDとコードを確認して承認すると、自動で次へ進みます。','Scan the QR on a phone, or open the link on another computer.\nSign in with a Passkey, check the Device ID and code, then approve.'):message.replace(/次の文字をそのまま入力してください：ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
+  show(heading(type,message,args),type==='--textbox'?tr('スマホでQRを読むか、別のPCで表示されたURLを開いてください。\nPasskeyでログインし、端末IDとコードを確認して承認してください。','Scan the QR on a phone, or open the link on another computer.\nSign in with a Passkey, check the Device ID and code, then approve.'):message.replace(/(?:次の文字をそのまま入力してください：|Type exactly: )ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
   if(type==='--menu'){
     const choices=args.slice(i+5);
     const list=box(Gtk.Orientation.VERTICAL,10);
