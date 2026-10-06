@@ -1,0 +1,9 @@
+NAME         SIZE SERIAL             LABEL                      UUID                                 MOUNTPOINTS
+loop0        2.1G                                                                                    /nix/.ro-store
+sr0          2.1G cd                 nixos-minimal-26.05-x86_64 1980-01-01-00-00-00-00               /iso
+nvme1n1       24G GRAPHICAL-SELECTED                                                                 
+├─nvme1n1p1  512M                    MURA_BOOT                  26A3-350F                            
+└─nvme1n1p2 23.5G                    MURAKUMO_ROOT              06560e0a-358c-4b67-8720-8bd8d212f042 
+nvme0n1       24G GRAPHICAL-PRESERVE                                                                 
+├─nvme0n1p1  512M                    MURA_BOOT                  2D7B-4FDF                            
+└─nvme0n1p2 23.5G                    MURAKUMO_ROOT              c7335637-2af8-408e-b79d-aa224959873b 

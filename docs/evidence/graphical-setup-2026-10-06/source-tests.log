@@ -1,0 +1,43 @@
+✔ key survives restart and private files are 0600 (8.512125ms)
+✔ approval persists public receipt only and repeated boot does not enroll again (39.259875ms)
+✔ wrong device, challenge, model or unregistered receipt never persists (2.787334ms)
+✔ disconnect retries within deadline; expired approval never succeeds (16.373416ms)
+✔ an existing factory signing identity is preserved without the factory daemon (2.535ms)
+✔ a device key with group or world permissions is refused (2.09925ms)
+✔ deferred approval never saves even if approval arrives during cancellation (3.804875ms)
+✔ unpublished registration service is distinct from an approval refusal (2.057542ms)
+✔ server expiry returns the new-QR recovery state (2.621791ms)
+✔ unmounted Windows disk is eligible, boot USB is never eligible (1.120917ms)
+✔ every mounted child, swap, mapper or installer backing disk is refused (0.133041ms)
+✔ a changed or newly mounted disk is refused after approval (0.262375ms)
+✔ NVMe/eMMC and SATA/virtio partition paths are correct (0.143292ms)
+✔ NVMe is refused in BIOS mode before any destructive preparation (0.13325ms)
+✔ installed configuration imports the shipped mode without host compilation (0.186042ms)
+✔ boot entries use installation UUIDs and replace only previous UUID parameters (0.420042ms)
+✔ offline manifest must identify the supported shipped system and labels (0.209917ms)
+✔ SSID delimiters and backslashes round trip; strongest duplicate wins (1.788917ms)
+✔ Wi-Fi secrets go to stdin, never command arguments; failures do not expose output (0.173375ms)
+✔ no NIC and Wi-Fi missing remain actionable and can finish installation offline (0.302125ms)
+✔ a saved connection skips password entry and proceeds only after connection confirmation (0.138334ms)
+✔ Wi-Fi failure returns to method selection and a second attempt succeeds (0.154667ms)
+✔ LAN association without Internet must not be presented as ready for registration (0.104166ms)
+✔ cancel Wi-Fi selection returns without connecting or erasing (0.073458ms)
+✔ TLS/captive probe failure is not reported as successful connectivity (0.44425ms)
+✔ saved connection that becomes ready at the chooser skips scanning and secrets (0.745708ms)
+✔ phone approval closes QR before returning the bound account (1.691834ms)
+✔ defer aborts poll and leaves no completion message (0.166667ms)
+✔ expiry closes QR before actionable error; service failure needs no QR (0.213417ms)
+✔ service unavailable offers retry directly, then defer without background claims (2.128458ms)
+✔ offline install finishes on a page, connect resumes phone approval and shows owner (0.197834ms)
+✔ phone cancellation returns to finished page without silently retrying (0.103209ms)
+✔ expired approval closes QR before showing retry options (0.270167ms)
+✔ unreadable saved receipt blocks claims but still allows network settings and shutdown (0.241458ms)
+✔ network and unexpected registration errors stay in the guide; shutdown failure can retry (1.174833ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 214.189583
