@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile,stat,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,stat,rm,mkdir,copyFile,symlink} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {completeLocal,readLocal} from '../nixos/local-setup.mjs';
@@ -40,4 +40,15 @@ test('language selection persists Japanese and English and rejects arbitrary val
  process.env.MURAKUMO_UI_LANG='ja';process.env.MURAKUMO_UI_LANGUAGE_SELECTED='1';
  assert.equal(chooseLanguage({menu:()=>assert.fail('duplicate chooser')},dir),'ja');assert.equal(readLanguage(dir),'ja');
  assert.throws(()=>saveLanguage('other',dir),/Unsupported/);assert.equal(readLanguage(dir),'ja');
+});
+
+test('bundled local setup loads through an etc-style symlink and preserves its identity dependency',async t=>{
+ const dir=await directory(t),bundle=join(dir,'store-bundle'),etc=join(dir,'etc');
+ await mkdir(bundle);await mkdir(etc);
+ for(const name of ['local-setup.mjs','account-link.mjs'])await copyFile(new URL('../nixos/'+name,import.meta.url),join(bundle,name));
+ await symlink(join(bundle,'local-setup.mjs'),join(etc,'local-setup.mjs'));
+ const loaded=await import(new URL('file://'+join(etc,'local-setup.mjs')));
+ const state=await loaded.completeLocal(join(dir,'state'));
+ assert.deepEqual(await loaded.readLocal(join(dir,'state')),state);
+ assert.equal(await savedLink(join(dir,'state')),null);
 });

@@ -1,5 +1,12 @@
 { pkgs, ... }:
 let
+  # Node resolves /etc symlinks to their store paths before relative imports.
+  # Keep the local setup module and its identity dependency in one directory.
+  localSetup = pkgs.runCommand "murakumo-local-setup" {} ''
+    mkdir -p $out
+    cp ${./local-setup.mjs} $out/local-setup.mjs
+    cp ${./account-link.mjs} $out/account-link.mjs
+  '';
   logo = pkgs.runCommand "murakumo-logo.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
     # Preserve the supplied source; only the displayed fill color changes.
     sed 's/fill="#ffffff"/fill="#253b62"/g' ${./murakumo-logo.svg} > logo.svg
@@ -31,7 +38,7 @@ in {
   environment.etc."murakumo/graphical-ui.js".source = ./graphical-ui.js;
   environment.etc."murakumo/graphical-dialog.mjs".source = ./graphical-dialog.mjs;
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
-  environment.etc."murakumo/local-setup.mjs".source = ./local-setup.mjs;
+  environment.etc."murakumo/local-setup.mjs".source = "${localSetup}/local-setup.mjs";
   environment.etc."murakumo/language.mjs".source = ./language.mjs;
   environment.etc."murakumo/setup-ui.mjs".source = ./setup-ui.mjs;
   environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
