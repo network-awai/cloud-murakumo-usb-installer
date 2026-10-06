@@ -73,7 +73,7 @@ function run(program, args, options = {}) {
 }
 function capture(program, args, options = {}) { return run(program, args, {...options, stdio: ['pipe', 'pipe', 'inherit']}); }
 function inventory() {
-  return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL'])).blockdevices;
+  return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
 }
 function dialog(args) {
   const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'Murakumo installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
@@ -103,6 +103,8 @@ async function main() {
   const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs'];
   for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
   const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
+  const otherUuids = disks.filter(d => d.path !== selected).flatMap(tree).map(d => String(d.uuid || '').toUpperCase());
+  if (otherUuids.includes(rootUuid.toUpperCase()) || otherUuids.includes(`${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`)) throw Error('Generated UUID conflicts with another disk. Nothing erased.');
   run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);
   // Retain hardware detection for later review; the shipped system is generic.
   run('mv', [join(directory, 'hardware-configuration.nix'), join(directory, 'detected-hardware.nix')]);
