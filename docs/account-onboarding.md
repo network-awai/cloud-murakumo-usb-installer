@@ -12,7 +12,7 @@ entered on the node. The approval lasts five minutes.
 
 The QR screen can be dismissed with Enter or Esc to register later. Cancellation
 aborts polling; even an approval response arriving during cancellation is not saved.
-Expiry returns to retry with a new QR. Temporary disconnections retry within the
+Expiry returns to a recovery page; choosing Retry creates a new QR. Temporary disconnections retry within the
 approval deadline. Unavailable registration service, revoked registration and expiry
 have distinct instructions. None of these conditions triggers disk installation or
 identity reset. The existing explicit local relink command remains a maintenance
@@ -23,6 +23,21 @@ labels the persisted receipt as saved, with online verification pending. Signed
 status verification checks that the same device remains linked to the same account.
 The UI does not label offline saved state as a newly verified online registration.
 Network settings and shutdown remain accessible after linking.
+
+## Ordinary setup needs no maintenance commands
+
+After a successful connection, the guide prepares phone registration. If the
+service is unavailable or rejects the flow, a stable page shows that the OS is
+already installed, with Retry registration, Wi-Fi / Ethernet settings, Register
+later, and Shut down. Retry goes directly to registration without asking for the
+Wi-Fi password again. Only an explicit retry starts another registration attempt;
+there is no service restart loop for ordinary failures.
+
+Register later, or closing the QR, opens the installation-complete page. From that
+page the owner can connect and resume registration or shut down. Network-check
+failures and shutdown failures remain actionable in the guide. An unreadable saved
+receipt blocks new claims while keeping network settings and shutdown available;
+it never resets the saved identity or changes account ownership automatically.
 
 The private identity remains in /var/lib/murakumo with private permissions. The
 saved approval projection contains no polling secret, account cookie or password.
