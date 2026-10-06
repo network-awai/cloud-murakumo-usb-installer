@@ -1,10 +1,10 @@
 #!/usr/bin/env gjs
 imports.gi.versions.Gtk='4.0';
-const {Gtk,Gdk,Gio,GLib}=imports.gi;
+const {Gtk,Gdk,Gio,GLib,Pango}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
 let content,window,active=null,backend=null;
-const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:true,xalign:0,selectable:false});w.add_css_class(cls);return w;};
+const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
 function button(text,callback,cls='secondary'){
   const w=new Gtk.Button({label:text});w.add_css_class(cls);w.connect('clicked',callback);return w;
@@ -131,6 +131,6 @@ app.connect('activate',()=>{
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
   // Marker precedes spawn: compositor failure must never trigger a second erase.
   GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/started','1');backend=launcher.spawnv(ARGV);
-  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_exit_status()));if(!active)show(child.get_successful()?'セットアップを完了しました':'セットアップを停止しました','再起動・再インストールを繰り返さず、状態を確認してください。');});
+  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_if_exited()?child.get_exit_status():1));if(!active)show(child.get_successful()?'セットアップを完了しました':'セットアップを停止しました','再起動・再インストールを繰り返さず、状態を確認してください。');});
 });
 app.run([]);
