@@ -19,5 +19,5 @@ trap '/bin/rm -f "$policy"' EXIT
 /usr/sbin/chown root:wheel "$policy"
 /bin/chmod 440 "$policy"
 /bin/mv "$policy" "$rule"
-/usr/sbin/visudo -c
+/usr/sbin/visudo -cf "$rule"
 /bin/echo 'KIOXIA-only passwordless helper installed.'

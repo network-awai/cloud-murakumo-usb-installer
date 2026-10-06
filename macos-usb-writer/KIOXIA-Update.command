@@ -4,6 +4,16 @@ set -o pipefail
 qa=/Users/junkawasaki/github/murakumo-usb-auto-install-qa
 helper=/Library/PrivilegedHelperTools/cloud.murakumo.kioxia-writer
 log="$qa/usb-write-guided-20261006/passwordless-write.log"
+reset_request() {
+/opt/homebrew/opt/python@3.14/bin/python3.14 - <<'PYRESET'
+import json,os
+from pathlib import Path
+p=Path('/Users/junkawasaki/github/murakumo-usb-auto-install-qa/usb-write-request.json')
+r=json.loads(p.read_text());r['action']='check'
+tmp=p.with_suffix('.tmp');tmp.write_text(json.dumps(r)+'\n');os.chmod(tmp,0o600);tmp.replace(p)
+PYRESET
+}
+trap reset_request EXIT
 # Preparation is unprivileged. The root helper accepts no paths or arguments.
 /opt/homebrew/opt/python@3.14/bin/python3.14 - <<'PY'
 import json,os

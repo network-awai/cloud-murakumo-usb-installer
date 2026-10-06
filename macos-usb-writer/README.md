@@ -34,13 +34,18 @@ Build: xcrun swiftc -O USBWriter.swift -o <QA>/murakumo-usb-writer. Test build u
 macOS removable-volume/TCC access is separate from sudo authentication. The prior
 AppleScript privileged write failed with Operation not permitted. A no-password
 sudo rule alone does not establish disk access. This environment's CUA connector
-refused Terminal access, so one-time user launch is required; no attempt is made
-to bypass that restriction or automatically grant Full Disk Access.
+refused Terminal access, so the initial setup was launched by the user. After
+installation, the compiled helper runs through the normal command tool without
+a password or a Terminal UI session. No Full Disk Access setting was changed.
 
 To remove the capability, an administrator removes only
 /private/etc/sudoers.d/murakumo-kioxia-writer and
 /Library/PrivilegedHelperTools/cloud.murakumo.kioxia-writer.
 
-Status on 2026-10-06: helper built and target selection tests passed; setup and
-password-free real USB write remain unverified until the user executes setup.
-No new ISO was successfully written to the physical USB by this preparation.
+Status on 2026-10-06: helper installed by the user; the dedicated sudoers rule
+parses, root ownership and permissions match, and a preflight with ignored cached
+credentials runs without a password. An unrelated finch-lima sudoers permissions
+warning stopped the original global post-install check; it is not modified.
+Installer validation is now scoped to this rule. Real USB write verification is
+completed without another password, matching all 2011299840 readback bytes and
+safely ejecting the USB. See docs/verification-passwordless-usb-2026-10-06.md.
