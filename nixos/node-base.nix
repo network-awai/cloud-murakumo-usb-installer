@@ -15,7 +15,7 @@
   environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
   systemd.services."getty@tty1".enable = lib.mkIf config.services.murakumoAccountLink.enable false;
   systemd.services.murakumo-account-link = lib.mkIf config.services.murakumoAccountLink.enable {
-    description = "Register this Murakumo device using a phone Passkey";
+    description = "Set up this Murakumo device locally or link an account";
     wantedBy = [ "multi-user.target" ];
     wants = [ "network.target" "seatd.service" ];
     after = [ "network.target" "seatd.service" ];

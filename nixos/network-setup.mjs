@@ -28,7 +28,7 @@ export function networks(value) {
 export function dialogUI(stage) {
   function screen(args) {
     const r = spawnSync('dialog', [...(args.includes('--infobox') ? [] : ['--clear']), '--stdout', '--no-collapse', '--title', 'Murakumo',
-      '--backtitle', stage === 'installer' ? text('1 ネット接続 → 2 インストール → 3 スマホで登録', '1 Network → 2 Install → 3 Phone registration') : text('インストール完了 · ネット接続 → スマホで登録', 'OS installed · Network → Phone registration'),
+      '--backtitle', stage === 'installer' ? text('1 ネット接続 → 2 インストール → 3 セットアップ', '1 Network → 2 Install → 3 Setup') : text('インストール完了 · ネット接続 → アカウント連携', 'OS installed · Network → Account linking'),
       '--ok-label', text('次へ', 'Continue'), '--cancel-label', text('戻る', 'Back'), ...args],
       {stdio: ['inherit','pipe','inherit'], env: {...process.env, TERM: 'linux', LC_ALL: 'C.UTF-8'}});
     if (r.error) throw r.error;
@@ -88,7 +88,7 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
       text(`インターネット：${state.internet ? '接続済み' : '確認できません'}`,`Internet: ${state.internet ? 'connected' : 'not confirmed'}`),
       text(`Murakumo：${state.murakumo ? (registered ? '到達しました（登録状態を確認できます）' : '到達しました（登録はこれから）') : '到達できません'}`,`Murakumo: ${state.murakumo ? (registered ? 'reachable (ready to verify registration)' : 'reachable (registration pending)') : 'unreachable'}`)].join('\n');
     const next = ui.menu(message, [
-      ...(state.internet ? [['next',text(stage === 'installer' ? 'インストールへ進む' : registered ? '登録状態を確認する' : 'スマホで登録する',stage === 'installer' ? 'Continue to installation' : registered ? 'Verify registration' : 'Register using your phone')]] : []),
+      ...(state.internet ? [['next',text(stage === 'installer' ? 'インストールへ進む' : registered ? '登録状態を確認する' : 'アカウント連携する',stage === 'installer' ? 'Continue to installation' : registered ? 'Verify registration' : 'Link an account')]] : []),
       ['settings',text('接続方法を変更・再試行','Change connection / retry')], ['later',later],
     ]);
     return next === 'next' ? 'connected' : next === 'later' ? 'offline' : null;

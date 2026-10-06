@@ -3,7 +3,8 @@ imports.gi.versions.Gtk='4.0';
 const {Gtk,Gdk,Gio,GLib,Pango,GdkPixbuf}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
-let content,window,active=null,backend=null;
+let content,window,steps,footer,active=null,backend=null,language='ja';
+const tr=(ja,en)=>language==='ja'?ja:en;
 const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:cls!=='brand',wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
 function button(text,callback,cls='secondary'){
@@ -14,20 +15,21 @@ function show(title,message){clear();content.append(label(title,'heading'));if(m
 function heading(type,message,args){
   if(type==='--menu'){
     const ids=args.slice(args.indexOf(type)+5).filter((_,i)=>i%2===0);
-    if(ids.includes('wifi')&&ids.includes('wired'))return 'ネットに接続';
-    if(ids.some(x=>x.startsWith('/dev/')))return 'インストール先を選ぶ';
-    if(ids.includes('retry'))return 'アカウントの連携を確認';
-    if(ids.includes('network'))return 'Murakumoのセットアップ';
+    if(ids.includes('wifi')&&ids.includes('wired'))return tr('ネットに接続','Connect to a network');
+    if(ids.some(x=>x.startsWith('/dev/')))return tr('インストール先を選ぶ','Choose an installation disk');
+    if(ids.includes('retry'))return tr('アカウントの連携を確認','Check account linking');
+    if(ids.includes('local'))return tr('使い方を選ぶ','Choose how to use this device');
+    if(ids.includes('network'))return tr('Murakumoのセットアップ','Set up Murakumo');
   }
-  if(type==='--textbox')return 'アカウントを連携';
-  if(type==='--passwordbox')return 'Wi-Fiに接続';
-  if(message.includes('ERASE /dev/'))return 'このディスクにインストール';
-  if(/\/dev\/(nvme|sd|vd|mmcblk)/.test(message))return 'インストール先を選ぶ';
-  if(type==='--msgbox'&&/インストールが完了|Installation completed/.test(message))return '準備ができました';
-  if(/停止|stopped|できません|見つかりません|unavailable|failed/i.test(message))return '操作を確認してください';
-  if(/インストールしています|Installing/.test(message))return 'Murakumo OSをインストール';
-  if(/準備しています|Preparing|確認しています|Checking|Verifying/.test(message))return '準備しています';
-  return 'Murakumoへようこそ';
+  if(type==='--textbox')return tr('アカウントを連携','Link an account');
+  if(type==='--passwordbox')return tr('Wi-Fiに接続','Connect to Wi-Fi');
+  if(message.includes('ERASE /dev/'))return tr('このディスクにインストール','Install on this disk');
+  if(/\/dev\/(nvme|sd|vd|mmcblk)/.test(message))return tr('インストール先を選ぶ','Choose an installation disk');
+  if(type==='--msgbox'&&/インストールが完了|Installation completed/.test(message))return tr('準備ができました','Ready to continue');
+  if(/停止|stopped|できません|見つかりません|unavailable|failed/i.test(message))return tr('操作を確認してください','Check this operation');
+  if(/インストールしています|Installing/.test(message))return tr('Murakumo OSをインストール','Install Murakumo OS');
+  if(/準備しています|Preparing|確認しています|Checking|Verifying/.test(message))return tr('準備しています','Getting ready');
+  return tr('Murakumoへようこそ','Welcome to Murakumo');
 }
 function serve(request,connection,input){
   const args=request.args;
@@ -41,7 +43,7 @@ function serve(request,connection,input){
     try{connection.get_output_stream().write_all(ByteArray.fromString(JSON.stringify({status,value})+'\n'),null);}catch{}
     connection.close(null);active=null;
   };
-  show(heading(type,message,args),type==='--textbox'?'スマホでQRを読み取り、Passkeyでログインしてください。\n端末IDとコードを確認して承認すると、自動で次へ進みます。':message.replace(/次の文字をそのまま入力してください：ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
+  show(heading(type,message,args),type==='--textbox'?tr('スマホでQRを読み取り、Passkeyでログインしてください。\n端末IDとコードを確認して承認すると、自動で次へ進みます。','Scan the QR on a phone, or open the link on another computer.\nSign in with a Passkey, check the Device ID and code, then approve.'):message.replace(/次の文字をそのまま入力してください：ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
   if(type==='--menu'){
     const choices=args.slice(i+5);
     const list=box(Gtk.Orientation.VERTICAL,10);
@@ -59,15 +61,15 @@ function serve(request,connection,input){
   }else if(type==='--inputbox'||type==='--passwordbox'){
     const phrase=message.match(/ERASE \/dev\/(?:nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+)/)?.[0];
     if(phrase){
-      const agree=new Gtk.CheckButton({label:'このディスクの全データを消去することを確認しました'});content.append(agree);
+      const agree=new Gtk.CheckButton({label:tr('このディスクの全データを消去することを確認しました','I confirm that all data on this disk will be erased')});content.append(agree);
       const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;
-      controls.append(button('戻る',()=>respond(1)));
-      const erase=button('消去してインストール',()=>respond(0,phrase),'destructive');erase.sensitive=false;
+      controls.append(button(tr('戻る','Back'),()=>respond(1)));
+      const erase=button(tr('消去してインストール','Erase and install'),()=>respond(0,phrase),'destructive');erase.sensitive=false;
       agree.connect('toggled',()=>erase.sensitive=agree.active);controls.append(erase);content.append(controls);agree.grab_focus();
     }else{
       const entry=type==='--passwordbox'?new Gtk.PasswordEntry({show_peek_icon:true}):new Gtk.Entry();entry.add_css_class('input');content.append(entry);
       const submit=()=>{const value=entry.get_text();entry.set_text('');respond(0,value);};entry.connect('activate',submit);
-      const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button('戻る',()=>{entry.set_text('');respond(1);}));controls.append(button(type==='--passwordbox'?'接続する':'次へ',submit,'primary'));content.append(controls);entry.grab_focus();
+      const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button(tr('戻る','Back'),()=>{entry.set_text('');respond(1);}));controls.append(button(type==='--passwordbox'?tr('接続する','Connect'):tr('次へ','Continue'),submit,'primary'));content.append(controls);entry.grab_focus();
     }
   }else if(type==='--textbox'){
     // Only the existing registration controller's private file is accepted.
@@ -84,19 +86,20 @@ function serve(request,connection,input){
     const row=box(Gtk.Orientation.HORIZONTAL,24),details=box(Gtk.Orientation.VERTICAL,16);details.hexpand=true;details.valign=Gtk.Align.CENTER;
     row.append(picture);row.append(details);
     for(const line of text.split('\n').filter(x=>/^(Code:|Device ID:)/.test(x)))details.append(label(line,'muted'));
-    details.append(label('承認待ち · 有効期限5分','muted'));const later=button('あとで登録',()=>respond(1));details.append(later);content.append(row);later.grab_focus();
+    const address=new Gtk.Label({label:uri,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:28,xalign:0,selectable:true});address.add_css_class('muted');details.append(address);
+    details.append(label(tr('承認待ち · 有効期限5分','Waiting for approval · Expires in 5 minutes'),'muted'));const later=button(tr('あとで登録','Link later'),()=>respond(1));details.append(later);content.append(row);later.grab_focus();
   }else if(type==='--infobox'||type==='--pause'){
     const spinner=new Gtk.Spinner({spinning:true,width_request:40,height_request:40,halign:Gtk.Align.START});content.append(spinner);
     // Busy updates are acknowledged immediately; installation runs separately
     // from the UI event loop. Pauses retain the caller's retry pacing.
     if(type==='--pause')GLib.timeout_add(GLib.PRIORITY_DEFAULT,2000,()=>{respond(0);return GLib.SOURCE_REMOVE;});else respond(0);
   }else{
-    const next=button(/再起動|restart/i.test(message)?'再起動する':'続ける',()=>respond(0),'primary');content.append(next);next.grab_focus();
+    const next=button(/再起動|restart/i.test(message)?tr('再起動する','Restart'):tr('続ける','Continue'),()=>respond(0),'primary');content.append(next);next.grab_focus();
   }
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{stream.read_line_finish_utf8(result);}catch{}
-      if(active===token){active=null;show('準備しています','次の画面へ進んでいます…');}
+      if(active===token){active=null;show(tr('準備しています','Getting ready'),tr('次の画面へ進んでいます…','Continuing to the next screen…'));}
       try{connection.close(null);}catch{}
     });
   }
@@ -129,9 +132,9 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');
   const logoPixels=GdkPixbuf.Pixbuf.new_from_file('/etc/murakumo/logo.png').scale_simple(240,37,GdkPixbuf.InterpType.BILINEAR);
   const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
-  card.append(label('ネット接続    ›    インストール    ›    アカウント連携','steps'));
-  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);outer.append(label('Murakumo OS · インストールはオフラインでも完了できます','muted'));
-  const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show('Murakumoへようこそ','セットアップを準備しています…');window.fullscreen();window.present();
+  steps=label('ネット接続    ›    インストール    ›    セットアップ','steps');card.append(steps);
+  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('Murakumo OS · インストールはオフラインでも完了できます','muted');outer.append(footer);
+  const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show(tr('Murakumoへようこそ','Welcome to Murakumo'),'セットアップを準備しています…');window.fullscreen();window.present();
   const socketPath=GLib.getenv('MURAKUMO_UI_SOCKET');
   if(!socketPath||!socketPath.startsWith('/run/murakumo-ui/'))throw Error('Missing private socket');
   const service=new Gio.SocketService();service.add_address(new Gio.UnixSocketAddress({path:socketPath}),Gio.SocketType.STREAM,Gio.SocketProtocol.DEFAULT,null);Gio.File.new_for_path(socketPath).set_attribute_uint32('unix::mode',0o600,Gio.FileQueryInfoFlags.NONE,null);
@@ -139,12 +142,21 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
     const input=new Gio.DataInputStream({base_stream:connection.get_input_stream()});
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{const [line]=stream.read_line_finish_utf8(result);if(!line||line.length>1048576)throw Error('Invalid request');serve(JSON.parse(line),connection,input);}
-      catch(e){logError(e);try{connection.close(null);}catch{}show('画面を表示できません','操作を停止しました。電源を切らず、保守担当者にご連絡ください。');}
+      catch(e){logError(e);try{connection.close(null);}catch{}show(tr('画面を表示できません','Unable to display the screen'),tr('操作を停止しました。電源を切らず、保守担当者にご連絡ください。','Operation stopped. Keep power connected and contact maintenance.'));}
     });return true;
   });service.start();
+  const startBackend=selected=>{
+  language=selected;steps.set_label(tr('ネット接続    ›    インストール    ›    セットアップ','Network    ›    Install    ›    Setup'));footer.set_label(tr('Murakumo OS · インストールはオフラインでも完了できます','Murakumo OS · Installation works offline'));
+  show(tr('Murakumoへようこそ','Welcome to Murakumo'),tr('セットアップを準備しています…','Preparing setup…'));
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
+  launcher.setenv('MURAKUMO_UI_LANG',language,true);launcher.setenv('MURAKUMO_UI_LANGUAGE_SELECTED','1',true);
   // Marker precedes spawn: compositor failure must never trigger a second erase.
   GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/started','1');backend=launcher.spawnv(ARGV);
-  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_if_exited()?child.get_exit_status():1));if(!active){const ok=child.get_successful();show(ok?'セットアップを完了しました':'セットアップを停止しました',ok?'まもなく再起動または電源の終了を行います。':'再インストールを繰り返さず、状態を確認してください。');if(!ok)content.append(button('電源を切る',()=>Gio.Subprocess.new(['systemctl','poweroff'],Gio.SubprocessFlags.NONE)));}});
+  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_if_exited()?child.get_exit_status():1));if(!active){const ok=child.get_successful();show(ok?tr('セットアップを完了しました','Setup completed'):tr('セットアップを停止しました','Setup stopped'),ok?tr('まもなく再起動または電源の終了を行います。','Restart or shutdown will follow shortly.'):tr('再インストールを繰り返さず、状態を確認してください。','Check the device status before reinstalling.'));if(!ok)content.append(button(tr('電源を切る','Shut down'),()=>Gio.Subprocess.new(['systemctl','poweroff'],Gio.SubprocessFlags.NONE)));}});
+  };
+  show('言語を選択 / Choose your language','日本語 または English を選んでください。 / Select Japanese or English.');
+  let preferred='ja';
+  try{const [ok,data]=GLib.file_get_contents('/var/lib/murakumo/ui-language');const value=ByteArray.toString(data).trim();if(ok&&['ja','en'].includes(value))preferred=value;}catch{}
+  for(const value of [preferred,preferred==='ja'?'en':'ja'])content.append(button(value==='ja'?'日本語':'English',()=>startBackend(value),'choice'));
 });
 app.run([]);

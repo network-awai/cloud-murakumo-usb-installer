@@ -81,7 +81,10 @@ export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetch
   const post=async(path,body)=>{
     signal?.throwIfAborted();
     const response=await fetcher(authority+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),redirect:'error',signal:signal?AbortSignal.any([signal,AbortSignal.timeout(15000)]):AbortSignal.timeout(15000)});
-    if(response.status===404||response.status===503) throw new LinkError('service','Registration service is not available.');
+    if(response.status===404||response.status===503) {
+      await response.body?.cancel();
+      throw Object.assign(new LinkError('service','Registration service is not available.'),{status:response.status});
+    }
     return {status:response.status,data:await response.json()};
   };
   try {

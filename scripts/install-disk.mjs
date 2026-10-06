@@ -4,6 +4,7 @@ import {existsSync, mkdtempSync, copyFileSync, writeFileSync, realpathSync, read
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
+
 import {fileURLToPath} from 'node:url';
 
 const MIN_SIZE = 16 * 1024 ** 3;
@@ -88,7 +89,9 @@ async function main() {
   if (process.getuid() !== 0) throw Error('Run as root.');
   // The launcher is deliberately available only on the installation medium.
   if (!existsSync('/etc/murakumo/installation-media')) throw Error('This is not Murakumo installation media.');
-  const {setupNetwork, text} = await import("/etc/murakumo/network-setup.mjs");
+  const {chooseLanguage} = await import("/etc/murakumo/language.mjs");
+  const {dialogUI, setupNetwork, text} = await import("/etc/murakumo/network-setup.mjs");
+  chooseLanguage(dialogUI("installer"));
   await setupNetwork({stage: "installer"});
   const uefi = existsSync('/sys/firmware/efi');
   let selected, target, identity, system, directory, configFiles, rootUuid, bootUuid;
@@ -105,7 +108,7 @@ async function main() {
     if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
     run('nix-store', ['--check-validity', ...closure]);
     directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-    configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg'];
+    configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs'];
     for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
     rootUuid = randomUUID(); bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
     const otherUuids = disks.filter(d => d.path !== selected).flatMap(tree).map(d => String(d.uuid || '').toUpperCase());
@@ -144,6 +147,9 @@ async function main() {
     run('mkdir', ['-p', `${mount}/etc/nixos`, `${mount}/etc/NetworkManager`, `${mount}/boot`]);
     if (uefi) run('mount', [boot, `${mount}/boot`]);
     for (const name of ['configuration.nix', 'detected-hardware.nix', ...configFiles]) copyFileSync(join(directory, name), `${mount}/etc/nixos/${name}`);
+    run('mkdir', ['-p', `${mount}/var/lib/murakumo`]);
+    run('chmod', ['0700', `${mount}/var/lib/murakumo`]);
+    if (existsSync('/var/lib/murakumo/ui-language')) copyFileSync('/var/lib/murakumo/ui-language', `${mount}/var/lib/murakumo/ui-language`);
     // Copy persistent Wi-Fi profiles, never print them or put them in the Nix store.
     if (existsSync('/etc/NetworkManager/system-connections')) run('cp', ['-a', '/etc/NetworkManager/system-connections', `${mount}/etc/NetworkManager/`]);
     dialog(['--infobox', text('Murakumo OSをインストールしています…\nネット接続は不要です。電源を切らずにお待ちください。', 'Installing Murakumo OS… Keep the power connected.'), '0', '0']);
@@ -154,7 +160,7 @@ async function main() {
   } finally {
     if (mounted) run('umount', ['--recursive', mount]);
   }
-  dialog(['--msgbox', text('インストールが完了しました。次へ進むと再起動します。再起動時にUSBを外し、内蔵ディスクから起動してください。次の画面でネット接続とスマホでの登録をご案内します。登録はあとで行うこともできます。', 'Installation completed. Continue to restart, remove the USB, and boot the internal disk. The next screen guides network setup and phone registration. You can register later.'), '0', '0']);
+  dialog(['--msgbox', text('インストールが完了しました。次へ進むと再起動します。再起動時にUSBを外し、内蔵ディスクから起動してください。次の画面で、この端末だけで完了するか、アカウントに連携するかを選べます。', 'Installation completed. Continue to restart, remove the USB, and boot the internal disk. Next, choose local setup or account linking.'), '0', '0']);
   run('systemctl', ['reboot']);
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === realpathSync(process.argv[1])) {

@@ -6,6 +6,7 @@ async function guide(actions,{readSaved=async()=>null,network=async()=> 'connect
   const screens=[],events=[];
   await runSetup({t,readSaved,
     ui:{busy:()=>{},menu:(message,items)=>{
+      if(message.startsWith('Choose how to use'))return 'connect';
       screens.push(message);const action=actions.shift();assert.notEqual(action,undefined,'unexpected screen');
       if(action!==null)assert.ok(items.some(([key])=>key===action),`missing action ${action}`);return action;
     }},
@@ -44,7 +45,7 @@ test('unreadable saved receipt blocks claims but still allows network settings a
 });
 test('network and unexpected registration errors stay in the guide; shutdown failure can retry',async()=>{
   let shutdowns=0,networks=0;
-  const {screens}=await guide(['connect','network','shutdown','shutdown'],{
+  const {screens}=await guide(['connect','retry','shutdown','shutdown'],{
     network:async()=>{if(!networks++)throw Error();return 'connected';},
     register:async()=>{throw Error('invalid registration flow');},
     poweroff:async()=>++shutdowns>1});

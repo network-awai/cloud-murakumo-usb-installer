@@ -31,6 +31,8 @@ in {
   environment.etc."murakumo/graphical-ui.js".source = ./graphical-ui.js;
   environment.etc."murakumo/graphical-dialog.mjs".source = ./graphical-dialog.mjs;
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
+  environment.etc."murakumo/local-setup.mjs".source = ./local-setup.mjs;
+  environment.etc."murakumo/language.mjs".source = ./language.mjs;
   environment.etc."murakumo/setup-ui.mjs".source = ./setup-ui.mjs;
   environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
   environment.etc."murakumo/launch-ui".source = pkgs.writeShellScript "murakumo-console-ui" ''
