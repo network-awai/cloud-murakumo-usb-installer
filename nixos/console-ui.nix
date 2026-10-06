@@ -35,6 +35,8 @@ in {
     export LIBSEAT_BACKEND=seatd
     export XDG_RUNTIME_DIR="$session" WAYLAND_DISPLAY=murakumo-wayland
     export MURAKUMO_UI_SOCKET="$session/ui.sock" GDK_BACKEND=wayland GSK_RENDERER=cairo
+    # Wait for input-device classification before Weston enumerates its seat.
+    ${pkgs.systemd}/bin/udevadm settle --timeout=30 || true
     ${pkgs.weston}/bin/weston --backend=drm-backend.so --shell=kiosk-shell.so --renderer=pixman --socket="$WAYLAND_DISPLAY" --idle-time=0 --log="$session/weston.log" &
     compositor=$!
     for attempt in $(${pkgs.coreutils}/bin/seq 1 100); do
