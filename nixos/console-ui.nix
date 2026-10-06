@@ -36,6 +36,7 @@ let
   '';
 in {
   services.seatd.enable = true;
+  hardware.alsa.enable = true;
   fonts.packages = [ pkgs.noto-fonts-cjk-sans ];
   fonts.fontconfig.enable = true;
   environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
