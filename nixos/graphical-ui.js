@@ -106,7 +106,7 @@ app.connect('activate',()=>{
     .choice-icon { font-size: 28px; min-width: 28px; color: #6776a0; }
 window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:#20232d; }
     .card { background:rgba(255,255,255,0.97); border:1px solid #ffffff; border-radius:28px; padding:38px; box-shadow:0 20px 60px rgba(40,50,100,0.12); }
-    .brand { font-size:22px; font-weight:700; letter-spacing:1px; }
+    .brand-logo { background:#253b62; border-radius:14px; padding:14px 20px; }
     .steps { font-size:13px; color:#777e92; }
     .heading { font-size:30px; font-weight:700; margin-top:12px; margin-bottom:6px; }
     .body { font-size:15px; color:#4f5668; }
@@ -126,7 +126,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   window=new Gtk.ApplicationWindow({application:app,title:'Murakumo Setup',default_width:1024,default_height:768});window.connect('close-request',()=>true);
   const outer=box(Gtk.Orientation.VERTICAL,20);outer.halign=Gtk.Align.CENTER;outer.valign=Gtk.Align.CENTER;outer.set_size_request(760,-1);outer.margin_top=30;outer.margin_bottom=30;
   const card=box(Gtk.Orientation.VERTICAL,20);card.add_css_class('card');
-  const header=box(Gtk.Orientation.HORIZONTAL,14);const mark=label('✦','brand');header.append(mark);header.append(label('Murakumo','brand'));card.append(header);
+  const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');
+  const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_from_filename('/etc/murakumo/logo.png'));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
   card.append(label('ネット接続    ›    インストール    ›    アカウント連携','steps'));
   content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);outer.append(label('Murakumo OS · インストールはオフラインでも完了できます','muted'));
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show('Murakumoへようこそ','セットアップを準備しています…');window.fullscreen();window.present();

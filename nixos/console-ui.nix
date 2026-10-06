@@ -1,5 +1,8 @@
 { pkgs, ... }:
 let
+  logo = pkgs.runCommand "murakumo-logo.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
+    rsvg-convert --width 960 --height 148 --keep-aspect-ratio ${./murakumo-logo.svg} > "$out"
+  '';
   graphical = pkgs.stdenvNoCC.mkDerivation {
     pname = "murakumo-setup-ui";
     version = "1";
@@ -21,6 +24,8 @@ in {
   fonts.packages = [ pkgs.noto-fonts-cjk-sans ];
   fonts.fontconfig.enable = true;
   environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
+  environment.etc."murakumo/murakumo-logo.svg".source = ./murakumo-logo.svg;
+  environment.etc."murakumo/logo.png".source = logo;
   environment.etc."murakumo/graphical-ui.js".source = ./graphical-ui.js;
   environment.etc."murakumo/graphical-dialog.mjs".source = ./graphical-dialog.mjs;
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
