@@ -92,7 +92,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       continue;
     }
     const status=[
-      t('OS：インストール完了','OS: installed'),
+      t('AiueOS：インストール完了','AiueOS: installed'),
       ...(local?[t('セットアップ：この端末で完了（スマホ不要）','Setup: completed locally (no phone needed)'),`Device ID: ${local.deviceDid}`,t('共有ネットワーク・推論・報酬の利用には別途確認が必要です。','Shared network participation, inference and rewards require separate verification.')]:[]),
       t(saved?'アカウント：連携情報を保存済み':'アカウント：あとで登録できます',saved?'Account: linking information saved':'Account: registration pending'),
       ...(saved?[t(verified?'登録状態：今回の起動で確認済み':'登録状態：オンライン確認前',verified?'Registration: verified during this boot':'Registration: online verification pending'),`Account ID: ${saved.accountDid}`,`Device ID: ${saved.deviceDid}`]:[]),

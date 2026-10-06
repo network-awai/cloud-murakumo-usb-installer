@@ -19,7 +19,7 @@ function heading(type,message,args){
     if(ids.some(x=>x.startsWith('/dev/')))return tr('インストール先を選ぶ','Choose an installation disk');
     if(ids.includes('retry'))return tr('アカウントの連携を確認','Check account linking');
     if(ids.includes('local'))return tr('使い方を選ぶ','Choose how to use this device');
-    if(ids.includes('network'))return tr('Murakumoのセットアップ','Set up Murakumo');
+    if(ids.includes('network'))return tr('Murakumo Nodeのセットアップ','Set up Murakumo Node');
   }
   if(type==='--textbox')return tr('アカウントを連携','Link an account');
   if(type==='--passwordbox')return tr('Wi-Fiに接続','Connect to Wi-Fi');
@@ -27,7 +27,7 @@ function heading(type,message,args){
   if(/\/dev\/(nvme|sd|vd|mmcblk)/.test(message))return tr('インストール先を選ぶ','Choose an installation disk');
   if(type==='--msgbox'&&/インストールが完了|Installation completed/.test(message))return tr('準備ができました','Ready to continue');
   if(/停止|stopped|できません|見つかりません|unavailable|failed/i.test(message))return tr('操作を確認してください','Check this operation');
-  if(/インストールしています|Installing/.test(message))return tr('Murakumo OSをインストール','Install Murakumo OS');
+  if(/インストールしています|Installing/.test(message))return tr('AiueOSをインストール','Install AiueOS');
   if(/準備しています|Preparing|確認しています|Checking|Verifying/.test(message))return tr('準備しています','Getting ready');
   return tr('Murakumoへようこそ','Welcome to Murakumo');
 }
@@ -126,14 +126,14 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
     checkbutton { font-size:14px; padding:12px 0; }
   `);
   Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),css,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-  window=new Gtk.ApplicationWindow({application:app,title:'Murakumo Setup',default_width:1024,default_height:768});window.connect('close-request',()=>true);
+  window=new Gtk.ApplicationWindow({application:app,title:'Murakumo Node Setup',default_width:1024,default_height:768});window.connect('close-request',()=>true);
   const outer=box(Gtk.Orientation.VERTICAL,20);outer.halign=Gtk.Align.CENTER;outer.valign=Gtk.Align.CENTER;outer.set_size_request(760,-1);outer.margin_top=30;outer.margin_bottom=30;
   const card=box(Gtk.Orientation.VERTICAL,20);card.add_css_class('card');
   const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');
   const logoPixels=GdkPixbuf.Pixbuf.new_from_file('/etc/murakumo/logo.png').scale_simple(240,37,GdkPixbuf.InterpType.BILINEAR);
   const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
   steps=label('ネット接続    ›    インストール    ›    セットアップ','steps');card.append(steps);
-  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('Murakumo OS · インストールはオフラインでも完了できます','muted');outer.append(footer);
+  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('AiueOS · インストールはオフラインでも完了できます','muted');outer.append(footer);
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show(tr('Murakumoへようこそ','Welcome to Murakumo'),'セットアップを準備しています…');window.fullscreen();window.present();
   const socketPath=GLib.getenv('MURAKUMO_UI_SOCKET');
   if(!socketPath||!socketPath.startsWith('/run/murakumo-ui/'))throw Error('Missing private socket');
@@ -146,7 +146,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
     });return true;
   });service.start();
   const startBackend=selected=>{
-  language=selected;steps.set_label(tr('ネット接続    ›    インストール    ›    セットアップ','Network    ›    Install    ›    Setup'));footer.set_label(tr('Murakumo OS · インストールはオフラインでも完了できます','Murakumo OS · Installation works offline'));
+  language=selected;steps.set_label(tr('ネット接続    ›    インストール    ›    セットアップ','Network    ›    Install    ›    Setup'));footer.set_label(tr('AiueOS · インストールはオフラインでも完了できます','AiueOS · Installation works offline'));
   show(tr('Murakumoへようこそ','Welcome to Murakumo'),tr('セットアップを準備しています…','Preparing setup…'));
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
   launcher.setenv('MURAKUMO_UI_LANG',language,true);launcher.setenv('MURAKUMO_UI_LANGUAGE_SELECTED','1',true);

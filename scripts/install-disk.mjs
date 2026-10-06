@@ -77,7 +77,7 @@ function inventory() {
   return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
 }
 function dialog(args, {allowCancel = false} = {}) {
-  const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'Murakumo installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
+  const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'AiueOS installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
   if (result.error) throw result.error;
   if (result.status !== 0) {
     if (allowCancel) return null;
@@ -152,7 +152,7 @@ async function main() {
     if (existsSync('/var/lib/murakumo/ui-language')) copyFileSync('/var/lib/murakumo/ui-language', `${mount}/var/lib/murakumo/ui-language`);
     // Copy persistent Wi-Fi profiles, never print them or put them in the Nix store.
     if (existsSync('/etc/NetworkManager/system-connections')) run('cp', ['-a', '/etc/NetworkManager/system-connections', `${mount}/etc/NetworkManager/`]);
-    dialog(['--infobox', text('Murakumo OSをインストールしています…\nネット接続は不要です。電源を切らずにお待ちください。', 'Installing Murakumo OS… Keep the power connected.'), '0', '0']);
+    dialog(['--infobox', text('AiueOSをインストールしています…\nネット接続は不要です。電源を切らずにお待ちください。', 'Installing AiueOS… Keep the power connected.'), '0', '0']);
     run('nixos-install', ['--root', mount, '--system', system, '--no-root-passwd', '--no-channel-copy'], {env: {...process.env, NIX_CONFIG: 'substituters =\nfallback = false\nconnect-timeout = 1\n'}});
     if (!uefi) run('grub-install', ['--target=i386-pc', `--boot-directory=${mount}/boot`, selected]);
     configureBoot(mount, {uefi, rootUuid, bootUuid: expectedBootUuid});

@@ -1,8 +1,10 @@
-# Local setup, account linking, language and OS updates
+# Murakumo Node setup, account linking, language and AiueOS updates
 
 ## Current implementation
 
-This installer contains an offline, prebuilt NixOS system. It has no OS update
+The OS is named **AiueOS**; the device is a **Murakumo Node**. Murakumo Server
+can describe its serving role when a serving process is actually configured.
+This installer contains an offline, prebuilt AiueOS system based on NixOS. It has no OS update
 agent or timer: neither `system.autoUpgrade` nor a Murakumo release updater is
 enabled. Changing source or flashing the USB does not update an already-installed
 PC. CPU microcode options include firmware in an OS build; they are not an OS

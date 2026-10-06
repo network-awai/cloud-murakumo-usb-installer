@@ -1,7 +1,8 @@
 # cloud-murakumo-usb-installer
 
-NixOS installation media definition and target-host configuration for Murakumo
-nodes. This repository owns the OS installation boundary: boot media, disk
+AiueOS installation media definition and target-host configuration for Murakumo
+Nodes. AiueOS is the OS, built on NixOS; Murakumo Node names the device and its
+Murakumo role. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
 installer on boot: choose Wi-Fi, Ethernet or offline continuation, then select
 and approve the internal disk. The bundled OS
