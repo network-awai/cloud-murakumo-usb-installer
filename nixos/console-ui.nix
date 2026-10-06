@@ -7,6 +7,12 @@ let
     cp ${./local-setup.mjs} $out/local-setup.mjs
     cp ${./account-link.mjs} $out/account-link.mjs
   '';
+  sound = pkgs.runCommand "murakumo-setup-sound" {} ''
+    mkdir -p $out
+    cp ${./acoustic-code.mjs} $out/acoustic-code.mjs
+    cp ${./setup-sound.mjs} $out/setup-sound.mjs
+    ${pkgs.nodejs_22}/bin/node $out/setup-sound.mjs ambient $out/startup.wav
+  '';
   logo = pkgs.runCommand "murakumo-logo.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
     # Preserve the supplied source; only the displayed fill color changes.
     sed 's/fill="#ffffff"/fill="#253b62"/g' ${./murakumo-logo.svg} > logo.svg
@@ -35,6 +41,10 @@ in {
   environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
   environment.etc."murakumo/murakumo-logo.svg".source = ./murakumo-logo.svg;
   environment.etc."murakumo/logo.png".source = logo;
+  environment.etc."murakumo/acoustic-code.mjs".source = "${sound}/acoustic-code.mjs";
+  environment.etc."murakumo/setup-sound.mjs".source = "${sound}/setup-sound.mjs";
+  environment.etc."murakumo/startup.wav".source = "${sound}/startup.wav";
+  environment.etc."murakumo/sound-link.html".source = ./sound-link.html;
   environment.etc."murakumo/graphical-ui.js".source = ./graphical-ui.js;
   environment.etc."murakumo/graphical-dialog.mjs".source = ./graphical-dialog.mjs;
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
@@ -44,6 +54,7 @@ in {
   environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
   environment.etc."murakumo/launch-ui".source = pkgs.writeShellScript "murakumo-console-ui" ''
     export TERM=linux LC_ALL=C.UTF-8
+    export PATH=${pkgs.alsa-utils}/bin:${pkgs.nodejs_22}/bin:$PATH
     # Start a single application compositor with software rendering. The
     # backend runs only after its private UI transport is listening.
     session=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-ui/session.XXXXXX)

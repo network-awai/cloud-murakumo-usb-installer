@@ -3,14 +3,19 @@ imports.gi.versions.Gtk='4.0';
 const {Gtk,Gdk,Gio,GLib,Pango,GdkPixbuf}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
-let content,window,steps,footer,active=null,backend=null,language='ja';
+let content,window,steps,footer,active=null,backend=null,language='ja',audio=null,musicEnabled=true,musicButton=null;
 const tr=(ja,en)=>language==='ja'?ja:en;
 const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:cls!=='brand',wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
 function button(text,callback,cls='secondary'){
   const w=new Gtk.Button({label:text});w.add_css_class(cls);w.connect('clicked',callback);return w;
 }
-function clear(){while(content.get_first_child())content.remove(content.get_first_child());}
+function stopAudio(){if(audio){try{audio.force_exit();}catch{}audio=null;}}
+function playAudio(path,onDone=()=>{}){
+  stopAudio();
+  try{const child=Gio.Subprocess.new(['aplay','-q',path],Gio.SubprocessFlags.STDOUT_SILENCE|Gio.SubprocessFlags.STDERR_SILENCE);audio=child;child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(audio===p){audio=null;onDone(p.get_successful());}}catch{}});}catch{onDone(false);}
+}
+function clear(){stopAudio();while(content.get_first_child())content.remove(content.get_first_child());}
 function show(title,message){clear();content.append(label(title,'heading'));if(message)content.append(label(message));}
 function heading(type,message,args){
   if(type==='--menu'){
@@ -41,7 +46,7 @@ function serve(request,connection,input){
   const respond=(status,value='')=>{
     if(active!==token)return;
     try{connection.get_output_stream().write_all(ByteArray.fromString(JSON.stringify({status,value})+'\n'),null);}catch{}
-    connection.close(null);active=null;
+    connection.close(null);active=null;stopAudio();
   };
   show(heading(type,message,args),type==='--textbox'?tr('スマホでQRを読むか、別のPCで表示されたURLを開いてください。\nPasskeyでログインし、端末IDとコードを確認して承認してください。','Scan the QR on a phone, or open the link on another computer.\nSign in with a Passkey, check the Device ID and code, then approve.'):message.replace(/(?:次の文字をそのまま入力してください：|Type exactly: )ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
   if(type==='--menu'){
@@ -86,6 +91,17 @@ function serve(request,connection,input){
     const row=box(Gtk.Orientation.HORIZONTAL,24),details=box(Gtk.Orientation.VERTICAL,16);details.hexpand=true;details.valign=Gtk.Align.CENTER;
     row.append(picture);row.append(details);
     for(const line of text.split('\n').filter(x=>/^(Code:|Device ID:)/.test(x)))details.append(label(line,'muted'));
+    const acousticStatus=label('', 'muted');
+    const sendSound=button(tr('音でコードを送る','Send code by sound'),()=>{
+      musicEnabled=false;musicButton?.set_label(tr('BGMを再生','Play BGM'));
+      const code=text.split('\n').find(x=>x.startsWith('Code: '))?.slice(6);
+      if(!/^[A-Z0-9_-]{10}$/.test(code||''))return;
+      const path=message+'.wav';
+      try{const generator=Gio.Subprocess.new(['node','/etc/murakumo/setup-sound.mjs','code',code,path],Gio.SubprocessFlags.STDERR_SILENCE);if(!generator.wait_check(null))throw Error('Audio generation');
+        acousticStatus.set_label(tr('コードを送信中… 読み取り後にPasskeyで承認してください。','Sending code… Approve with a Passkey after reading.'));
+        playAudio(path,ok=>{acousticStatus.set_label(ok?tr('送信完了。必要ならもう一度送信できます。','Sent. You can send again.'):tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));});
+      }catch{acousticStatus.set_label(tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));}
+    });details.append(sendSound);details.append(acousticStatus);
     const address=new Gtk.Label({label:uri,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:28,xalign:0,selectable:true});address.add_css_class('muted');details.append(address);
     details.append(label(tr('承認待ち · 有効期限5分','Waiting for approval · Expires in 5 minutes'),'muted'));const later=button(tr('あとで登録','Link later'),()=>respond(1));details.append(later);content.append(row);later.grab_focus();
   }else if(type==='--infobox'||type==='--pause'){
@@ -99,7 +115,7 @@ function serve(request,connection,input){
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{stream.read_line_finish_utf8(result);}catch{}
-      if(active===token){active=null;show(tr('準備しています','Getting ready'),tr('次の画面へ進んでいます…','Continuing to the next screen…'));}
+      if(active===token){active=null;stopAudio();show(tr('準備しています','Getting ready'),tr('次の画面へ進んでいます…','Continuing to the next screen…'));}
       try{connection.close(null);}catch{}
     });
   }
@@ -134,6 +150,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
   steps=label('ネット接続    ›    インストール    ›    セットアップ','steps');card.append(steps);
   content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('AiueOS · インストールはオフラインでも完了できます','muted');outer.append(footer);
+  musicButton=button('BGM 停止 / Stop music',()=>{musicEnabled=!musicEnabled;if(musicEnabled)playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label(tr('音声出力なし','Audio unavailable'));});else stopAudio();musicButton.set_label(musicEnabled?tr('BGMを停止','Stop BGM'):tr('BGMを再生','Play BGM'));});outer.append(musicButton);
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show(tr('Murakumoへようこそ','Welcome to Murakumo'),'セットアップを準備しています…');window.fullscreen();window.present();
   const socketPath=GLib.getenv('MURAKUMO_UI_SOCKET');
   if(!socketPath||!socketPath.startsWith('/run/murakumo-ui/'))throw Error('Missing private socket');
@@ -157,6 +174,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   show('言語を選択 / Choose your language','日本語 または English を選んでください。 / Select Japanese or English.');
   let preferred='ja';
   try{const [ok,data]=GLib.file_get_contents('/var/lib/murakumo/ui-language');const value=ByteArray.toString(data).trim();if(ok&&['ja','en'].includes(value))preferred=value;}catch{}
+  playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label('音声出力なし / Audio unavailable');});
   for(const value of [preferred,preferred==='ja'?'en':'ja'])content.append(button(value==='ja'?'日本語':'English',()=>startBackend(value),'choice'));
 });
+app.connect('shutdown',stopAudio);
 app.run([]);
