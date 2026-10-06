@@ -101,7 +101,7 @@ function serve(request,connection,input){
         acousticStatus.set_label(tr('コードを送信中… 読み取り後にPasskeyで承認してください。','Sending code… Approve with a Passkey after reading.'));
         playAudio(path,ok=>{acousticStatus.set_label(ok?tr('送信完了。必要ならもう一度送信できます。','Sent. You can send again.'):tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));});
       }catch{acousticStatus.set_label(tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));}
-    });details.append(sendSound);details.append(acousticStatus);
+    });details.append(sendSound);details.append(label(tr('音の読み取りには専用ページが必要です（公開準備中）。','Sound reading needs the companion page (public release pending).'),'muted'));details.append(acousticStatus);
     const address=new Gtk.Label({label:uri,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:28,xalign:0,selectable:true});address.add_css_class('muted');details.append(address);
     details.append(label(tr('承認待ち · 有効期限5分','Waiting for approval · Expires in 5 minutes'),'muted'));const later=button(tr('あとで登録','Link later'),()=>respond(1));details.append(later);content.append(row);later.grab_focus();
   }else if(type==='--infobox'||type==='--pause'){
