@@ -17,6 +17,7 @@ let
     exec ${pkgs.nodejs_22}/bin/node /etc/murakumo/graphical-dialog.mjs "$@"
   '';
 in {
+  services.seatd.enable = true;
   fonts.packages = [ pkgs.noto-fonts-cjk-sans ];
   fonts.fontconfig.enable = true;
   environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
@@ -31,6 +32,7 @@ in {
     # backend runs only after its private UI transport is listening.
     session=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-ui/session.XXXXXX)
     export MURAKUMO_UI_SESSION="$session" MURAKUMO_UI_LANG=ja
+    export LIBSEAT_BACKEND=seatd
     export XDG_RUNTIME_DIR="$session" WAYLAND_DISPLAY=murakumo-wayland
     export MURAKUMO_UI_SOCKET="$session/ui.sock" GDK_BACKEND=wayland GSK_RENDERER=cairo
     ${pkgs.weston}/bin/weston --backend=drm-backend.so --shell=kiosk-shell.so --renderer=pixman --socket="$WAYLAND_DISPLAY" --idle-time=0 --log="$session/weston.log" &

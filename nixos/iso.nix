@@ -37,7 +37,8 @@ in
   systemd.services.murakumo-install = {
     description = "Guided automatic Murakumo disk installation";
     wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-vconsole-setup.service" "register-nix-paths.service" "NetworkManager.service" ];
+    wants = [ "seatd.service" ];
+    after = [ "seatd.service" "systemd-vconsole-setup.service" "register-nix-paths.service" "NetworkManager.service" ];
     conflicts = [ "getty@tty1.service" ];
     path = with pkgs; [ nodejs_22 dialog networkmanager iproute2 parted dosfstools e2fsprogs grub2 util-linux systemd coreutils nixos-install-tools nix ];
     environment.TERM = "linux";

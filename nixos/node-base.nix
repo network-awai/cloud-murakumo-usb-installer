@@ -17,8 +17,8 @@
   systemd.services.murakumo-account-link = lib.mkIf config.services.murakumoAccountLink.enable {
     description = "Register this Murakumo device using a phone Passkey";
     wantedBy = [ "multi-user.target" ];
-    wants = [ "network.target" ];
-    after = [ "network.target" ];
+    wants = [ "network.target" "seatd.service" ];
+    after = [ "network.target" "seatd.service" ];
     conflicts = [ "getty@tty1.service" ];
     path = with pkgs; [ qrencode dialog networkmanager iproute2 systemd ];
     environment.HOME = "/var/lib/murakumo";
