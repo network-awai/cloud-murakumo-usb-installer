@@ -4,7 +4,7 @@ let
     pname = "murakumo-setup-ui";
     version = "1";
     dontUnpack = true;
-    nativeBuildInputs = [ pkgs.wrapGAppsHook4 ];
+    nativeBuildInputs = [ pkgs.wrapGAppsHook4 pkgs.gobject-introspection ];
     buildInputs = [ pkgs.gtk4 pkgs.gjs ];
     installPhase = ''
       mkdir -p $out/bin
@@ -43,9 +43,11 @@ in {
       ${pkgs.coreutils}/bin/sleep 0.1
     done
     if [ -S "$session/$WAYLAND_DISPLAY" ]; then
-      PATH=${graphicalDialog}/bin:$PATH ${graphical}/bin/murakumo-setup-ui "$@"
+      PATH=${graphicalDialog}/bin:$PATH ${graphical}/bin/murakumo-setup-ui "$@" > "$session/frontend.log" 2>&1
     fi
     kill "$compositor" 2>/dev/null || true
+    wait "$compositor" 2>/dev/null || true
+    ${pkgs.kbd}/bin/chvt 1 || true
     if [ -f "$session/started" ]; then
       # No console fallback after the backend started, even if GTK crashed.
       result=1

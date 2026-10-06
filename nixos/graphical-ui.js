@@ -4,7 +4,7 @@ const {Gtk,Gdk,Gio,GLib,Pango}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
 let content,window,active=null,backend=null;
-const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
+const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:cls!=='brand',wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
 function button(text,callback,cls='secondary'){
   const w=new Gtk.Button({label:text});w.add_css_class(cls);w.connect('clicked',callback);return w;
@@ -91,7 +91,7 @@ function serve(request,connection,input){
   }
 }
 app.connect('activate',()=>{
-  const css=new Gtk.CssProvider();css.load_from_data(`
+  const css=new Gtk.CssProvider();css.load_from_string(`
     window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:#20232d; }
     .card { background:rgba(255,255,255,0.97); border:1px solid #ffffff; border-radius:28px; padding:38px; box-shadow:0 20px 60px rgba(40,50,100,0.12); }
     .brand { font-size:22px; font-weight:700; letter-spacing:1px; }
@@ -131,6 +131,6 @@ app.connect('activate',()=>{
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
   // Marker precedes spawn: compositor failure must never trigger a second erase.
   GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/started','1');backend=launcher.spawnv(ARGV);
-  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_if_exited()?child.get_exit_status():1));if(!active)show(child.get_successful()?'セットアップを完了しました':'セットアップを停止しました','再起動・再インストールを繰り返さず、状態を確認してください。');});
+  backend.wait_async(null,(child,result)=>{child.wait_finish(result);GLib.file_set_contents(GLib.getenv('MURAKUMO_UI_SESSION')+'/result',String(child.get_if_exited()?child.get_exit_status():1));if(!active){const ok=child.get_successful();show(ok?'セットアップを完了しました':'セットアップを停止しました',ok?'まもなく再起動または電源の終了を行います。':'再インストールを繰り返さず、状態を確認してください。');if(!ok)content.append(button('電源を切る',()=>Gio.Subprocess.new(['systemctl','poweroff'],Gio.SubprocessFlags.NONE)));}});
 });
 app.run([]);
