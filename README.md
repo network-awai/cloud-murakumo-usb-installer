@@ -93,3 +93,12 @@ publish its Worker/Portal dependencies.
 Run `node --test test/*.test.mjs` for registration and offline/disk safety tests.
 On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`
 to parse and evaluate both generated boot configurations with Nix.
+
+## Local setup and startup language
+
+Startup offers Japanese and English. The installed guide can complete local setup
+without a phone, an account or Internet, preserving its device identity across boots.
+Account linking remains an explicit later choice. See
+[local setup and the proposed OS update contract](docs/local-setup-and-updates.md).
+OS automatic updates are not currently enabled; updating a USB does not update an
+already installed PC.
