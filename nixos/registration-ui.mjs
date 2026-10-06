@@ -32,7 +32,7 @@ export async function approvalScreen(flow, controller, t, root='/run/murakumo-ui
   return async()=>{closing=true;child.kill();await ended;await rm(dir,{recursive:true,force:true});};
 }
 
-export async function registerWithUI({link,screen,ui,t,options={}}){
+export async function registerWithUI({link,screen,ui,t,options={},onFailure}){
   const controller=new AbortController();
   let close;
   try{
@@ -41,7 +41,65 @@ export async function registerWithUI({link,screen,ui,t,options={}}){
     if(controller.signal.aborted)return null;
     // Close the waiting dialog before opening the error dialog on the same TTY.
     await close?.();close=null;
-    ui.message(registrationFailure(e,t));
+    if(onFailure)onFailure(e);
+    else ui.message(registrationFailure(e,t));
     return null;
   }finally{await close?.();}
+}
+
+
+// The guide owns retries. Network or registration failures remain on an
+// actionable screen instead of exiting into a systemd restart loop.
+export async function runSetup({ui,t,readSaved,network,register,poweroff}) {
+  let saved=null,verified=false,failure=null,state='network',storageError=false;
+  try {saved=await readSaved();if(saved)state='complete';}
+  catch {storageError=true;state='complete';}
+  for (;;) {
+    if(state==='network') {
+      try {
+        const result=await network({registered:!!saved});
+        state=result==='connected'?'register':'complete';
+        failure=null;
+      } catch {
+        failure=t('接続設定を確認できませんでした。接続設定から再試行できます。','Could not check the network. Retry from connection settings.');
+        state='complete';
+      }
+      continue;
+    }
+    if(state==='register') {
+      ui.busy(t(saved?'Murakumoの登録状態を確認しています…':'スマホで登録するためのQRを準備しています…',saved?'Verifying registration…':'Preparing your phone registration QR…'));
+      let error;
+      let receipt;
+      try {receipt=await register(e=>{error=e;});}catch(e){error=e;}
+      if(receipt){saved=receipt;verified=true;failure=null;state='complete';}
+      else if(error){failure=registrationFailure(error,t);verified=false;state='retry';}
+      else {failure=null;state='complete';}
+      continue;
+    }
+    const status=[
+      t('1 OS：インストール完了','1 OS: installed'),
+      t(saved?'3 アカウント：連携情報を保存済み':'3 アカウント：あとで登録できます',saved?'3 Account: linking information saved':'3 Account: registration pending'),
+      ...(saved?[t(verified?'登録状態：今回の起動で確認済み':'登録状態：オンライン確認前',verified?'Registration: verified during this boot':'Registration: online verification pending'),`Account ID: ${saved.accountDid}`,`Device ID: ${saved.deviceDid}`]:[]),
+      t('Wi-Fi / 有線の設定は保存されます。再インストールは不要です。','Network settings are saved. Reinstallation is not needed.'),
+      ...(failure?['',failure]:[]),
+      ...(storageError?[t('保存済みの登録情報を読み取れません。登録情報を保持したまま、保守担当者に確認してください。','Saved registration cannot be read. Contact maintenance; registration information is preserved.')]:[]),
+      ...(verified?[t('モデルと推論の稼働確認は別の手順です。','Model and inference readiness are verified separately.')]:[]),
+    ].join('\n');
+    const action=ui.menu(status,[
+      ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'ネットに接続してスマホで登録する',state==='retry'?'Retry registration':saved?'Verify registration online':'Connect and register using your phone')]]:[]),
+      ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
+      ...(state==='retry'?[['later',t('あとで登録する','Register later')]]:[]),
+      ['shutdown',t('電源を切る','Shut down')],
+    ]);
+    if(action==='shutdown') {
+      if(await poweroff())return;
+      failure=t('電源を切れませんでした。もう一度お試しください。','Could not shut down. Please retry.');
+    } else if(action==='retry'&&!storageError)state='register';
+    else if(action==='connect'&&!storageError)state='network';
+    else if(action==='network') {
+      // An unreadable receipt must never start an automatic replacement claim.
+      if(storageError){try{await network({registered:true});}catch{}state='complete';}
+      else state='network';
+    } else if(action==='later'||!action)state='complete';
+  }
 }
