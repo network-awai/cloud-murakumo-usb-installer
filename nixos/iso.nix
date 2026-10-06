@@ -23,7 +23,7 @@ in
   # Include complete installed systems, not just installation tools.
   isoImage.storeContents = [ uefi bios ];
   environment.etc."murakumo/offline-systems.json".text = builtins.toJSON {
-    version = 1;
+    version = 2;
     uefi = toString uefi;
     bios = toString bios;
     rootLabel = "MURAKUMO_ROOT";

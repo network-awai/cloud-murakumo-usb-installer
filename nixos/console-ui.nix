@@ -1,12 +1,56 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+let
+  graphical = pkgs.stdenvNoCC.mkDerivation {
+    pname = "murakumo-setup-ui";
+    version = "1";
+    dontUnpack = true;
+    nativeBuildInputs = [ pkgs.wrapGAppsHook4 ];
+    buildInputs = [ pkgs.gtk4 pkgs.gjs ];
+    installPhase = ''
+      mkdir -p $out/bin
+      cp ${./graphical-ui.js} $out/bin/murakumo-setup-ui
+      chmod +x $out/bin/murakumo-setup-ui
+      substituteInPlace $out/bin/murakumo-setup-ui --replace-fail /usr/bin/env\ gjs ${pkgs.gjs}/bin/gjs
+    '';
+  };
+  graphicalDialog = pkgs.writeShellScriptBin "dialog" ''
+    exec ${pkgs.nodejs_22}/bin/node /etc/murakumo/graphical-dialog.mjs "$@"
+  '';
+in {
   fonts.packages = [ pkgs.noto-fonts-cjk-sans ];
   fonts.fontconfig.enable = true;
-  environment.systemPackages = with pkgs; [ dialog fbterm networkmanager ];
+  environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
+  environment.etc."murakumo/graphical-ui.js".source = ./graphical-ui.js;
+  environment.etc."murakumo/graphical-dialog.mjs".source = ./graphical-dialog.mjs;
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
   environment.etc."murakumo/setup-ui.mjs".source = ./setup-ui.mjs;
   environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
   environment.etc."murakumo/launch-ui".source = pkgs.writeShellScript "murakumo-console-ui" ''
     export TERM=linux LC_ALL=C.UTF-8
+    # Start a single application compositor with software rendering. The
+    # backend runs only after its private UI transport is listening.
+    session=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-ui/session.XXXXXX)
+    export MURAKUMO_UI_SESSION="$session" MURAKUMO_UI_LANG=ja
+    export XDG_RUNTIME_DIR="$session" WAYLAND_DISPLAY=murakumo-wayland
+    export MURAKUMO_UI_SOCKET="$session/ui.sock" GDK_BACKEND=wayland GSK_RENDERER=cairo
+    ${pkgs.weston}/bin/weston --backend=drm-backend.so --shell=kiosk-shell.so --renderer=pixman --socket="$WAYLAND_DISPLAY" --idle-time=0 --log="$session/weston.log" &
+    compositor=$!
+    for attempt in $(${pkgs.coreutils}/bin/seq 1 100); do
+      [ ! -S "$session/$WAYLAND_DISPLAY" ] || break
+      kill -0 "$compositor" 2>/dev/null || break
+      ${pkgs.coreutils}/bin/sleep 0.1
+    done
+    if [ -S "$session/$WAYLAND_DISPLAY" ]; then
+      PATH=${graphicalDialog}/bin:$PATH ${graphical}/bin/murakumo-setup-ui "$@"
+    fi
+    kill "$compositor" 2>/dev/null || true
+    if [ -f "$session/started" ]; then
+      # No console fallback after the backend started, even if GTK crashed.
+      result=1
+      [ ! -f "$session/result" ] || result=$(cat "$session/result")
+      exit "$result"
+    fi
+    unset MURAKUMO_UI_SOCKET GDK_BACKEND GSK_RENDERER WAYLAND_DISPLAY XDG_RUNTIME_DIR
     if [ -c /dev/fb0 ]; then
       session=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-ui/session.XXXXXX)
       export MURAKUMO_UI_SESSION="$session" MURAKUMO_UI_LANG=ja

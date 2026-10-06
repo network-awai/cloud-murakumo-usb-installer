@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {diskReason, fingerprint, verifyDisk, partitionPath, targetConfiguration, verifyLabels, offlineSystem, ROOT_LABEL, BOOT_LABEL} from '../scripts/install-disk.mjs';
+import {diskReason, fingerprint, verifyDisk, partitionPath, targetConfiguration, bootParameters, patchBootEntry, offlineSystem, ROOT_LABEL, BOOT_LABEL} from '../scripts/install-disk.mjs';
 const nvme = {path:'/dev/nvme0n1', 'maj:min':'259:0', type:'disk', size:512*1024**3, model:'Internal SSD', serial:'NVME-A', wwn:'id-a', tran:'nvme', rm:false, hotplug:false, ro:false, mountpoints:[null], children:[{path:'/dev/nvme0n1p1',type:'part',mountpoints:[null],fstype:'ntfs'}]};
 test('unmounted Windows disk is eligible, boot USB is never eligible', () => {
   assert.equal(diskReason(nvme), null);
@@ -26,23 +26,26 @@ test('NVMe is refused in BIOS mode before any destructive preparation', () => {
   assert.equal(diskReason({...nvme,path:'/dev/sda',tran:'sata'},{uefi:false}),null);
 });
 test('installed configuration imports the shipped mode without host compilation', () => {
-  assert.match(targetConfiguration({uefi:true}), /offline-uefi.nix/);
-  assert.match(targetConfiguration({uefi:false}), /offline-bios.nix/);
+  assert.match(targetConfiguration({uefi:true,rootUuid:'01010101-0202-0303-0404-050505050505',bootUuid:'1234-ABCD'}), /offline-uefi.nix/);
+  assert.match(targetConfiguration({uefi:false,rootUuid:'01010101-0202-0303-0404-050505050505'}), /offline-bios.nix/);
 });
-test('reserved filesystem labels on another disk are refused before erasure', () => {
-  const selected={...nvme,children:[{label:ROOT_LABEL}]};
-  assert.doesNotThrow(()=>verifyLabels([selected],selected.path));
-  for (const label of [ROOT_LABEL,BOOT_LABEL]) {
-    assert.throws(()=>verifyLabels([selected,{path:'/dev/sda',children:[{label}]}],selected.path));
-  }
+test('boot entries use installation UUIDs and replace only previous UUID parameters', () => {
+  const options={uefi:true,rootUuid:'01010101-0202-0303-0404-050505050505',bootUuid:'1234-ABCD'};
+  const result=patchBootEntry('title NixOS\noptions init=/nix/store/example/init quiet murakumo.root_uuid=old\n',options);
+  assert.match(result,/quiet murakumo.root_uuid=01010101/);
+  assert.match(result,/murakumo.boot_uuid=1234-ABCD/);
+  assert.doesNotMatch(result,/=old/);
+  assert.match(patchBootEntry(' linux /kernel init=/init\n',{...options,uefi:false}),/murakumo.root_uuid=/);
+  assert.throws(()=>patchBootEntry('title only',options));
+  for(const change of [{rootUuid:'../../sda'},{rootUuid:'bad value'},{bootUuid:'ABCD;EFGH'}]) assert.throws(()=>bootParameters({...options,...change}));
 });
 test('offline manifest must identify the supported shipped system and labels', () => {
-  const manifest={version:1,rootLabel:ROOT_LABEL,bootLabel:BOOT_LABEL,
+  const manifest={version:2,rootLabel:ROOT_LABEL,bootLabel:BOOT_LABEL,
     uefi:'/nix/store/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-nixos-system-murakumo-node-26.05',
     bios:'/nix/store/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-nixos-system-murakumo-node-26.05'};
   assert.equal(offlineSystem(manifest,true),manifest.uefi);
   assert.equal(offlineSystem(manifest,false),manifest.bios);
-  for (const change of [{version:2},{rootLabel:'other'},{bootLabel:'other'},{uefi:undefined},{uefi:'/tmp/system'},{uefi:manifest.uefi+';reboot'}]) {
+  for (const change of [{version:1},{rootLabel:'other'},{bootLabel:'other'},{uefi:undefined},{uefi:'/tmp/system'},{uefi:manifest.uefi+';reboot'}]) {
     assert.throws(()=>offlineSystem({...manifest,...change},true));
   }
 });

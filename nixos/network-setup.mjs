@@ -80,7 +80,7 @@ export function networkBackend(run = command, fetcher = fetch) {
 }
 export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), backend = networkBackend(), registered = false} = {}) {
   const later = text(stage === 'installer' ? '接続せずにインストールする' : '登録はあとで行う', stage === 'installer' ? 'Install without a connection' : 'Register later');
-  const help = text('↑↓で選択、Enterで決定。Wi-Fiだけでも利用できます。', 'Select with arrows and Enter. Ethernet is optional.');
+  const help = text(process.env.MURAKUMO_UI_SOCKET ? '接続方法を選んでください。Wi-Fiだけでも利用できます。' : '↑↓で選択、Enterで決定。Wi-Fiだけでも利用できます。', 'Choose a connection. Ethernet is optional.');
   const check = async () => {
     ui.busy(text('接続を確認しています…', 'Checking the connection…'));
     const state = await backend.probe();

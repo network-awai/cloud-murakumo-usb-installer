@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {spawnSync} from 'node:child_process';
-import {existsSync, mkdtempSync, copyFileSync, writeFileSync, realpathSync, readFileSync} from 'node:fs';
+import {existsSync, mkdtempSync, copyFileSync, writeFileSync, realpathSync, readFileSync, readdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
@@ -29,21 +29,40 @@ export function verifyDisk(disks, selected, identity, options) {
 export function partitionPath(disk, number) { return `${disk}${/\d$/.test(disk) ? 'p' : ''}${number}`; }
 export const ROOT_LABEL = 'MURAKUMO_ROOT';
 export const BOOT_LABEL = 'MURA_BOOT';
-export function verifyLabels(disks, selected) {
-  if (disks.some(d => d.path !== selected && tree(d).some(p => [ROOT_LABEL, BOOT_LABEL].includes(p.label)))) {
-    throw Error('Another disk uses Murakumo installation labels. Disconnect it before installing. Nothing erased.');
-  }
+const ROOT_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const BOOT_UUID = /^[0-9A-F]{4}-[0-9A-F]{4}$/;
+export function bootParameters({uefi, rootUuid, bootUuid}) {
+  if (!ROOT_UUID.test(rootUuid || '') || (uefi && !BOOT_UUID.test(bootUuid || ''))) throw Error('Invalid installation UUID.');
+  return [`murakumo.root_uuid=${rootUuid}`, ...(uefi ? [`murakumo.boot_uuid=${bootUuid}`] : [])];
+}
+export function patchBootEntry(content, options) {
+  const params = bootParameters(options);
+  let count = 0;
+  const patched = content.replace(options.uefi ? /^(options\s+)(.*)$/gm : /^(\s*linux(?:efi)?\s+)(.*)$/gm, (_, prefix, value) => {
+    count++;
+    return prefix + value.split(/\s+/).filter(x => !/^murakumo\.(root|boot)_uuid=/.test(x)).concat(params).join(' ');
+  });
+  if (!count) throw Error('No kernel boot entry was generated.');
+  return patched;
+}
+function configureBoot(mount, options) {
+  const files = options.uefi
+    ? readdirSync(`${mount}/boot/loader/entries`).filter(n => /^nixos.*\.conf$/.test(n)).map(n => `${mount}/boot/loader/entries/${n}`)
+    : [`${mount}/boot/grub/grub.cfg`];
+  if (!files.length) throw Error('No installed boot entries.');
+  for (const file of files) writeFileSync(file, patchBootEntry(readFileSync(file, 'utf8'), options));
 }
 export function offlineSystem(manifest, uefi) {
   const system = manifest[uefi ? 'uefi' : 'bios'];
-  if (manifest.version !== 1 || manifest.rootLabel !== ROOT_LABEL || manifest.bootLabel !== BOOT_LABEL ||
+  if (manifest.version !== 2 || manifest.rootLabel !== ROOT_LABEL || manifest.bootLabel !== BOOT_LABEL ||
       !/^\/nix\/store\/[a-z0-9]{32}-nixos-system-[A-Za-z0-9._+-]+$/.test(system || '')) {
     throw Error('Invalid offline OS manifest. Nothing erased.');
   }
   return system;
 }
-export function targetConfiguration({uefi}) {
-  return `{ ... }: { imports = [ ./offline-${uefi ? 'uefi' : 'bios'}.nix ]; }\n`;
+export function targetConfiguration(options) {
+  const params = bootParameters(options);
+  return `{ ... }: { imports = [ ./offline-${options.uefi ? 'uefi' : 'bios'}.nix ]; boot.kernelParams = ${JSON.stringify(params).replaceAll(',', ' ')}; }\n`;
 }
 
 function run(program, args, options = {}) {
@@ -75,27 +94,26 @@ async function main() {
   const target = eligible.find(d => d.path === selected);
   if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
   const identity = fingerprint(target);
-  verifyLabels(disks, selected);
   const system = offlineSystem(JSON.parse(readFileSync('/etc/murakumo/offline-systems.json', 'utf8')), uefi);
-  console.log('Checking the complete offline OS on the USB before erasing...');
+  dialog(['--infobox', text('USB内のOSを確認しています…', 'Checking the offline OS…'), '0', '0']);
   const closure = capture('nix-store', ['--query', '--requisites', system]).split('\n').filter(Boolean);
   if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
   run('nix-store', ['--check-validity', ...closure]);
   const directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs'];
+  const configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs'];
   for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
   const rootUuid = randomUUID(), bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
   run('nixos-generate-config', ['--no-filesystems', '--dir', directory]);
   // Retain hardware detection for later review; the shipped system is generic.
   run('mv', [join(directory, 'hardware-configuration.nix'), join(directory, 'detected-hardware.nix')]);
-  writeFileSync(join(directory, 'configuration.nix'), targetConfiguration({uefi}));
+  writeFileSync(join(directory, 'configuration.nix'), targetConfiguration({uefi, rootUuid, bootUuid: `${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`}));
   const phrase = `ERASE ${selected}`;
   const approval = dialog(['--inputbox', text(`消去するディスク：${selected}\n機種：${String(target.model || '').trim()}\n容量：${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\n製造番号：${target.serial || target.wwn || '不明'}\nWindowsを含む全データが失われます。\n次の文字をそのまま入力してください：${phrase}`, `Ready to replace ${selected}\nModel: ${String(target.model || '').trim()}\nSize: ${(Number(target.size) / 1024 ** 3).toFixed(1)} GiB\nSerial: ${target.serial || target.wwn || 'not available'}\nALL DATA INCLUDING WINDOWS WILL BE LOST.\nType exactly: ${phrase}`), '0', '0']);
   if (approval !== phrase) throw Error('Erase confirmation did not match. Nothing erased.');
   run('udevadm', ['settle']);
   const current = inventory();
   verifyDisk(current, selected, identity, {uefi});
-  verifyLabels(current, selected);
+  dialog(['--infobox', text('選択したディスクを準備しています…\n電源を切らずにお待ちください。', 'Preparing the selected disk…'), '0', '0']);
   // No shell interpolation and no device auto-selection beyond this boundary.
   run('parted', ['--script', selected, 'mklabel', 'gpt', ...(uefi
     ? ['mkpart', 'ESP', 'fat32', '1MiB', '513MiB', 'set', '1', 'esp', 'on', 'mkpart', 'root', 'ext4', '513MiB', '100%']
@@ -107,6 +125,8 @@ async function main() {
   if (uefi) run('mkfs.fat', ['-F', '32', '-i', bootUuid, '-n', BOOT_LABEL, boot]);
   run('udevadm', ['trigger', '--subsystem-match=block']);
   run('udevadm', ['settle']);
+  const expectedBootUuid = `${bootUuid.slice(0,4)}-${bootUuid.slice(4)}`;
+  if (capture('blkid', ['-s', 'UUID', '-o', 'value', root]) !== rootUuid || (uefi && capture('blkid', ['-s', 'UUID', '-o', 'value', boot]) !== expectedBootUuid)) throw Error('Formatted filesystem UUID did not match.');
   const mount = mkdtempSync('/mnt/murakumo-install-');
   let mounted = false;
   try {
@@ -116,8 +136,10 @@ async function main() {
     for (const name of ['configuration.nix', 'detected-hardware.nix', ...configFiles]) copyFileSync(join(directory, name), `${mount}/etc/nixos/${name}`);
     // Copy persistent Wi-Fi profiles, never print them or put them in the Nix store.
     if (existsSync('/etc/NetworkManager/system-connections')) run('cp', ['-a', '/etc/NetworkManager/system-connections', `${mount}/etc/NetworkManager/`]);
+    dialog(['--infobox', text('Murakumo OSをインストールしています…\nネット接続は不要です。電源を切らずにお待ちください。', 'Installing Murakumo OS… Keep the power connected.'), '0', '0']);
     run('nixos-install', ['--root', mount, '--system', system, '--no-root-passwd', '--no-channel-copy'], {env: {...process.env, NIX_CONFIG: 'substituters =\nfallback = false\nconnect-timeout = 1\n'}});
     if (!uefi) run('grub-install', ['--target=i386-pc', `--boot-directory=${mount}/boot`, selected]);
+    configureBoot(mount, {uefi, rootUuid, bootUuid: expectedBootUuid});
     run('sync', []);
   } finally {
     if (mounted) run('umount', ['--recursive', mount]);
