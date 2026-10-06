@@ -77,8 +77,8 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff}) {
       continue;
     }
     const status=[
-      t('1 OS：インストール完了','1 OS: installed'),
-      t(saved?'3 アカウント：連携情報を保存済み':'3 アカウント：あとで登録できます',saved?'3 Account: linking information saved':'3 Account: registration pending'),
+      t('OS：インストール完了','OS: installed'),
+      t(saved?'アカウント：連携情報を保存済み':'アカウント：あとで登録できます',saved?'Account: linking information saved':'Account: registration pending'),
       ...(saved?[t(verified?'登録状態：今回の起動で確認済み':'登録状態：オンライン確認前',verified?'Registration: verified during this boot':'Registration: online verification pending'),`Account ID: ${saved.accountDid}`,`Device ID: ${saved.deviceDid}`]:[]),
       t('Wi-Fi / 有線の設定は保存されます。再インストールは不要です。','Network settings are saved. Reinstallation is not needed.'),
       ...(failure?['',failure]:[]),
