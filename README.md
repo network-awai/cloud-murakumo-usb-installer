@@ -51,8 +51,12 @@ The steps below are the manual recovery/custom configuration path.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `node-base.nix`, `console-ui.nix`, `network-setup.mjs`, `setup-ui.mjs`,
-   `registration-ui.mjs`, `graphical-ui.js`, `graphical-dialog.mjs` and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
+4. Copy `node-base.nix`, `console-ui.nix`, `offline-base.nix`, `offline-uefi.nix`,
+   `offline-bios.nix`, `network-setup.mjs`, `setup-ui.mjs`, `registration-ui.mjs`,
+   `account-link.mjs`, `local-setup.mjs`, `language.mjs`, `graphical-ui.js`,
+   `graphical-dialog.mjs`, `murakumo-logo.svg`, `acoustic-code.mjs`,
+   `setup-sound.mjs` and `sound-link.html` from `/etc/murakumo/` to
+   `/mnt/etc/nixos/`, along with
    an edited `configuration.example.nix` renamed to `configuration.nix`. For
    the guided network screen, set `networking.networkmanager.enable = true`
    and `networking.useDHCP = false` in that edited configuration. Set a real
@@ -103,3 +107,10 @@ Account linking remains an explicit later choice. See
 [local setup and the proposed OS update contract](docs/local-setup-and-updates.md).
 OS automatic updates are not currently enabled; updating a USB does not update an
 already installed PC.
+
+## Setup audio
+
+The startup language page plays a quiet, original ambient piece with a visible
+stop/replay control. The QR page can send the same expiring approval code by sound.
+See [sound linking](docs/sound-linking.md) for the included companion reader,
+Passkey approval boundary and public-release/physical-phone qualification gaps.
