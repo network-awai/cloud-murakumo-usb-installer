@@ -17,7 +17,9 @@
    its Nix store references are on the USB. No `nix-build` or network downloads
    run on the PC. UEFI and BIOS installed systems are built when creating the
    ISO, with generic x86_64 storage drivers and Intel/AMD microcode/firmware.
-5. Review the target again and type `ERASE /dev/<chosen-disk>` exactly.
+5. Review the target again, acknowledge that its data will be erased, and press
+   the red installation button. Back returns to disk selection without erasing.
+   The recovery console fallback instead requires `ERASE /dev/<chosen-disk>`.
    Disk identity and usage are rechecked. GPT partitioning, formatting,
    copying of the shipped OS and installation of its bootloader run
    automatically. Network substituters are disabled. UEFI uses systemd-boot's
@@ -35,10 +37,11 @@ Maintenance on Alt+F2 logs in locally as `root` automatically. Anyone with
 physical console access can administer this node. Root's password is locked and
 SSH is disabled; no empty-password remote login is enabled.
 
-The generic prebuilt systems mount labels `MURAKUMO_ROOT` and `MURA_BOOT`.
-If another attached disk already carries either label, installation stops
-before erasure. Disconnect the conflicting disk. This avoids booting or mounting
-another installed node's disk by mistake. UUIDs are still randomized at format.
+The installer assigns fresh filesystem UUIDs and records them in the selected
+disk's boot entries. The prebuilt initrd maps only those UUIDs to its root and
+boot devices; matching labels on another attached disk do not prevent
+installation or select that other disk during boot. UUID collisions with
+another disk are rejected before erasure.
 Detected host settings are saved as `/etc/nixos/detected-hardware.nix` for later
 review, and are not imported into the prebuilt generic system. To customize the
 host later, review its generated configuration and rebuild with network access
