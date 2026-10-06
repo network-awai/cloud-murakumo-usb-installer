@@ -106,7 +106,7 @@ app.connect('activate',()=>{
     .choice-icon { font-size: 28px; min-width: 28px; color: #6776a0; }
 window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:#20232d; }
     .card { background:rgba(255,255,255,0.97); border:1px solid #ffffff; border-radius:28px; padding:38px; box-shadow:0 20px 60px rgba(40,50,100,0.12); }
-    .brand-logo { background:#253b62; border-radius:14px; padding:14px 20px; }
+
     .steps { font-size:13px; color:#777e92; }
     .heading { font-size:30px; font-weight:700; margin-top:12px; margin-bottom:6px; }
     .body { font-size:15px; color:#4f5668; }

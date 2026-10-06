@@ -1,7 +1,9 @@
 { pkgs, ... }:
 let
   logo = pkgs.runCommand "murakumo-logo.png" { nativeBuildInputs = [ pkgs.librsvg ]; } ''
-    rsvg-convert --width 960 --height 148 --keep-aspect-ratio ${./murakumo-logo.svg} > "$out"
+    # Preserve the supplied source; only the displayed fill color changes.
+    sed 's/fill="#ffffff"/fill="#253b62"/g' ${./murakumo-logo.svg} > logo.svg
+    rsvg-convert --width 960 --height 148 --keep-aspect-ratio logo.svg > "$out"
   '';
   graphical = pkgs.stdenvNoCC.mkDerivation {
     pname = "murakumo-setup-ui";
