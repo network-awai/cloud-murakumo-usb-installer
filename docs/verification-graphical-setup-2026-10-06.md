@@ -56,5 +56,11 @@ installed and rebooted end to end in UEFI mode.
 
 This record does not qualify physical PC firmware, a real Wi-Fi radio, a real
 phone account link, production registration deployment or fleet inference.
-The final ISO has not been written to KIOXIA in this verification run; no
-external physical disk is currently connected to the Mac.
+The user returned KIOXIA to the Mac after local qualification. The installed
+passwordless helper reidentified serial `0022CFF6B899CA205987CBC4`, capacity
+61,949,214,720 bytes, dynamically at `disk6`. ISO preflight passed. The helper
+wrote and read back exactly 2,303,950,848 bytes. Both SHA256 values equal the
+final ISO hash above. It exited successfully with `verified-and-ejected`;
+subsequent external physical disk inventory was empty. No password prompt
+was needed. The request was reset to check mode after completion. See
+[USB result](evidence/graphical-setup-2026-10-06/usb-result.json).

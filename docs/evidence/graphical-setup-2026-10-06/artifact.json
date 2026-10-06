@@ -7,7 +7,7 @@
   "nixpkgs_revision": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
   "nix_iso_store": "/nix/store/730hbzp4kcgbwjfvnygxqpn3p8pw09fn-nixos-minimal-26.05pre-git-x86_64-linux.iso",
   "source_tests_pass": 35,
-  "usb_written": false,
+  "usb_written": true,
   "physical_pc_verified": false,
   "real_phone_linked": false,
   "uefi_offline_install_pass": true,
@@ -15,5 +15,9 @@
   "uuid_mount_routing_pass": true,
   "other_disk_sha256_before": "4a7526b2e1f15770c4eeaa6abcad3fc86e4d761fb2eaa6e64b9d086b3936a251",
   "other_disk_sha256_after": "4a7526b2e1f15770c4eeaa6abcad3fc86e4d761fb2eaa6e64b9d086b3936a251",
-  "qa_vms_shutdown": true
+  "qa_vms_shutdown": true,
+  "usb_readback_verified": true,
+  "usb_ejected": true,
+  "usb_serial": "0022CFF6B899CA205987CBC4",
+  "usb_sha256": "9e68645d5d75071c3e65d6995181d4dff8051ccca8053f14fa5ef8cf67d1d6ef"
 }
