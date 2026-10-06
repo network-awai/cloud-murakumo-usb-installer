@@ -10,6 +10,8 @@ opens the same network guide after the installed PC boots. See
 [network onboarding](docs/network-onboarding.md).
 The [account-linking guide](docs/account-onboarding.md) continues through a phone
 QR, Passkey approval, cancellation/retry and saved versus online-verified status.
+The [native graphical guide](docs/graphical-setup.md) describes the new disk cards,
+selected-disk confirmation and UUID-based boot routing.
 See [the guided installation procedure](docs/automatic-install.md). Initial
 password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
@@ -49,7 +51,7 @@ The steps below are the manual recovery/custom configuration path.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
 4. Copy `node-base.nix`, `console-ui.nix`, `network-setup.mjs`, `setup-ui.mjs`,
-   `registration-ui.mjs` and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
+   `registration-ui.mjs`, `graphical-ui.js`, `graphical-dialog.mjs` and `account-link.mjs` from `/etc/murakumo/` to `/mnt/etc/nixos/`, along with
    an edited `configuration.example.nix` renamed to `configuration.nix`. For
    the guided network screen, set `networking.networkmanager.enable = true`
    and `networking.useDHCP = false` in that edited configuration. Set a real
