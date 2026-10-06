@@ -127,7 +127,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const outer=box(Gtk.Orientation.VERTICAL,20);outer.halign=Gtk.Align.CENTER;outer.valign=Gtk.Align.CENTER;outer.set_size_request(760,-1);outer.margin_top=30;outer.margin_bottom=30;
   const card=box(Gtk.Orientation.VERTICAL,20);card.add_css_class('card');
   const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');
-  const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_from_filename('/etc/murakumo/logo.png'));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
+  const logoPixels=GdkPixbuf.Pixbuf.new_from_file('/etc/murakumo/logo.png').scale_simple(240,37,GdkPixbuf.InterpType.BILINEAR);
+  const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
   card.append(label('ネット接続    ›    インストール    ›    アカウント連携','steps'));
   content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);outer.append(label('Murakumo OS · インストールはオフラインでも完了できます','muted'));
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show('Murakumoへようこそ','セットアップを準備しています…');window.fullscreen();window.present();
