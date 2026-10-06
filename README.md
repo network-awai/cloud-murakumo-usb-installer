@@ -22,15 +22,23 @@ The target flow and qualification gates are recorded in
 
 ## Build the bootable ISO
 
-On a NixOS or Linux machine with Nix, use a reviewed nixpkgs checkout at an
-explicit commit, or the immutable store path behind a pinned NixOS channel:
+On a NixOS or Linux machine with Nix, use a clean installer checkout and a
+clean nixpkgs checkout at the exact commit in
+[`nixos/nixpkgs-revision.txt`](nixos/nixpkgs-revision.txt). Run the local
+release gate; GitHub Actions is not required:
 
 ```sh
-./scripts/build-iso.sh /absolute/path/to/nixpkgs
+./scripts/release-iso.sh /absolute/path/to/nixpkgs /absolute/new/evidence-directory
 ```
 
-The script prints the nixpkgs commit and produces `result/iso/*.iso`. Review
-that commit and record the ISO SHA-256 before writing a USB stick. Use the
+The gate runs the factory-claim and model-readiness tests, builds
+`result/iso/*.iso`, then records the ISO SHA-256, size, installer commit and
+nixpkgs commit in the new evidence directory. `scripts/build-iso.sh` remains
+available for development builds, but accepts any reviewed full nixpkgs commit
+and does not create a release identity record. The local identity files are
+not signed fleet receipts or replicated ISO storage; publication still needs
+those independent checks. Review the recorded ISO identity before writing a
+USB stick. Use the
 [official NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation)
 for USB writing, partitioning, mounting and `nixos-install`. An ISO built from
 this source includes the read-only preflight and local-inference checks,
