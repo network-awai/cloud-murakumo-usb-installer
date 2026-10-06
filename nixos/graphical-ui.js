@@ -50,10 +50,10 @@ function serve(request,connection,input){
       const b=new Gtk.Button();b.add_css_class('choice');
       const row=box(Gtk.Orientation.HORIZONTAL,16);
       const disk=key.startsWith('/dev/');
-      const icon=new Gtk.Image({icon_name:disk?'drive-harddisk-symbolic':key==='wifi'?'network-wireless-signal-excellent-symbolic':key==='wired'?'network-wired-symbolic':'go-next-symbolic',pixel_size:28});row.append(icon);
+      const icon=new Gtk.Label({label:disk?'▤':key==='wifi'?'◎':key==='wired'?'↔':'›'});icon.add_css_class('choice-icon');row.append(icon);
       const words=box(Gtk.Orientation.VERTICAL,4);words.hexpand=true;words.append(label(disk?text.split('|')[0].trim():text,'choice-title'));
       if(disk)words.append(label(text.split('|').slice(1).join(' · ')+' · '+key,'muted'));
-      row.append(words);row.append(new Gtk.Image({icon_name:'go-next-symbolic',pixel_size:18}));b.set_child(row);b.connect('clicked',()=>respond(0,key));list.append(b);
+      row.append(words);row.append(new Gtk.Label({label:'›'}));b.set_child(row);b.connect('clicked',()=>respond(0,key));list.append(b);
     }
     const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);list.get_first_child()?.grab_focus();
   }else if(type==='--inputbox'||type==='--passwordbox'){
@@ -103,7 +103,8 @@ function serve(request,connection,input){
 }
 app.connect('activate',()=>{
   const css=new Gtk.CssProvider();css.load_from_string(`
-    window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:#20232d; }
+    .choice-icon { font-size: 28px; min-width: 28px; color: #6776a0; }
+window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:#20232d; }
     .card { background:rgba(255,255,255,0.97); border:1px solid #ffffff; border-radius:28px; padding:38px; box-shadow:0 20px 60px rgba(40,50,100,0.12); }
     .brand { font-size:22px; font-weight:700; letter-spacing:1px; }
     .steps { font-size:13px; color:#777e92; }
