@@ -1,0 +1,7 @@
+{
+  "actualProtectedServer": true,
+  "healthStatus": 200,
+  "unauthenticatedStatus": 401,
+  "authorizedAction": "wifi",
+  "physicalMicrophone": false
+}

@@ -48,3 +48,5 @@ The real GTK approval view now sends playback state to the voice agent. Recognit
 The native GTK voice action produced real QR PNG and16000Hz FSK WAV. Independent macOS Vision QR decoding and the acoustic decoder both returned `https://murakumo.cloud/portal/#device-link?code=ABCD123456`. This is a fixture public code, not a live approval.
 
 Final playback binding tests also confirm requested BGM is allowed to finish. Only the initial startup BGM is stopped when dialogue becomes ready; manual BGM and FSK use the shared playback pause/resume protocol. Initial automatic language detection recognized Japanese and English correctly and selected both languages through the real controller. Evidence: `voice-ui-audio-final.log`, committed `voice-auto-language-result.json`.
+
+The real llama.cpp server was also tested with the actual per-session key configuration: public health200, missing-key inference401, authorized bounded Wi-Fi choice passed. The test uses only an ephemeral local key, never an account credential. Evidence: committed `voice-model-key-result.json`.
