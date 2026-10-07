@@ -73,6 +73,8 @@ in {
     export XDG_RUNTIME_DIR="$session" WAYLAND_DISPLAY=murakumo-wayland
     export MURAKUMO_UI_SOCKET="$session/ui.sock" GDK_BACKEND=wayland GSK_RENDERER=cairo
     mkdir -p /run/murakumo-voice
+    # Allow the unprivileged runtime to traverse into its own 0700 session.
+    ${pkgs.coreutils}/bin/chmod 0711 /run/murakumo-voice
     export MURAKUMO_VOICE_DIR=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-voice/session.XXXXXX)
     export MURAKUMO_VOICE_SOCKET="$session/voice.sock"
     ${voice}/bin/aiueos-voice > "$session/voice-runtime.log" 2>&1 &

@@ -4,9 +4,10 @@ export const policy=JSON.parse(readFileSync(new URL('./voice-policy.json',import
 const clean=s=>String(s||'').normalize('NFKC').trim().toLowerCase().replace(/[。！？.!?]/g,'');
 const chars={エー:'a',ビー:'b',シー:'c',ディー:'d',イー:'e',エフ:'f',ジー:'g',エイチ:'h',アイ:'i',ジェー:'j',ケー:'k',エル:'l',エム:'m',エヌ:'n',オー:'o',ピー:'p',キュー:'q',アール:'r',エス:'s',ティー:'t',ユー:'u',ブイ:'v',ダブリュー:'w',エックス:'x',ワイ:'y',ゼット:'z',ゼロ:'0',イチ:'1',ニ:'2',サン:'3',ヨン:'4',ゴ:'5',ロク:'6',ナナ:'7',ハチ:'8',キュウ:'9',ハイフン:'-',アンダースコア:'_',アットマーク:'@',ドット:'.',スペース:' ',シャープ:'#',ビックリマーク:'!'};
 export function secretCharacters(raw){
-  let text=String(raw).trim(),upper=false,lower=false;
-  if(/^大文字|^uppercase /i.test(text)){upper=true;text=text.replace(/^(?:大文字\s*|uppercase\s+)/i,'');}
-  if(/^小文字|^lowercase /i.test(text)){lower=true;text=text.replace(/^(?:小文字\s*|lowercase\s+)/i,'');}
+  let text=String(raw).normalize('NFKC').trim().replace(/[。！？]+$/, '').replace(/(?:を入力|です)$/, '').trim(),upper=false,lower=false;
+  if(/^数字(?:の)?/.test(text)){text=text.replace(/^数字(?:の)?\s*/, '');const digits={零:'0',一:'1',二:'2',三:'3',四:'4',五:'5',六:'6',七:'7',八:'8',九:'9'};return digits[text]??(/^[0-9]$/.test(text)?text:null);}
+  if(/^大文字|^uppercase /i.test(text)){upper=true;text=text.replace(/^(?:大文字(?:の)?\s*|uppercase\s+)/i,'');}
+  if(/^小文字|^lowercase /i.test(text)){lower=true;text=text.replace(/^(?:小文字(?:の)?\s*|lowercase\s+)/i,'');}
   const value=chars[text]??(/^[A-Za-z0-9@#_!.+\-]{1,64}$/.test(text)?text:null);
   return value===null?null:upper?value.toUpperCase():lower?value.toLowerCase():value;
 }
@@ -28,7 +29,7 @@ export class VoiceControl {
     if(/^(戻る|やめる|キャンセル|back|cancel)$/.test(text)&&s.canBack)return send('back');
     if(s.kind==='secret'){
       // No model, history, spoken value, or transcript event in this branch.
-      if(policy['secret-complete'].includes(text)){const value=this.secret;this.secret='';return send('input',value);}
+      if(policy['secret-complete'].includes(text)){if(!this.secret){await say('まだ文字を入力していません。小文字のBを入力、のように話してください','No characters entered yet. Say lowercase B');return {status:'secret'};}const value=this.secret;this.secret='';return send('input',value);}
       if(policy['secret-delete'].includes(text)){this.secret=this.secret.slice(0,-1);await say('一文字消しました','Deleted one character');return {status:'secret'};}
       const value=secretCharacters(raw);
       if(value===null||this.secret.length+value.length>128){await say('一文字ずつ、大文字や記号も指定してください','Spell characters, including case and symbols');return {status:'secret'};}
@@ -39,7 +40,7 @@ export class VoiceControl {
     if(setting){this.confirmation=null;return send('control',setting[1]);}
     if(s.kind==='erase'){
       if(!s.serial||!s.target){await say('製造番号を確認できません。画面で確認してください','Serial unavailable. Please check the screen');return {status:'refused'};}
-      const suffix=s.serial.slice(-4),request=s.language==='en'?`erase ${suffix} and install`:`末尾${suffix}を消去してインストール`;
+      const suffix=s.serial.slice(-4),request=s.language==='en'?`erase ${suffix} and install`:`番号${suffix}のディスクを消してインストール`;
       if(text!==clean(request)){this.confirmation={revision,expires:this.now()+policy['confirmation-seconds']*1000};await say(`この操作で${s.target}の全データが失われます。実行する場合は「${request}」と話してください`,`All data on ${s.target} will be erased. To proceed say: ${request}`);return {status:'confirmation'};}
       if(!this.confirmation||this.now()>this.confirmation.expires){this.confirmation={revision,expires:this.now()+policy['confirmation-seconds']*1000};await say('対象を確認しました。実行する場合はもう一度話してください','Target checked. Repeat the confirmation to proceed');return {status:'confirmation'};}
       this.confirmation=null;return send('erase',s.target);

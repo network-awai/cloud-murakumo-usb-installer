@@ -5,8 +5,8 @@ let
     sha256 = "061b54daade076b5d3362dac252678d17da8c68f07560be70818cace6590cb1a";
   };
   whisper = pkgs.fetchurl {
-    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin";
-    sha256 = "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe";
+    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-small.bin";
+    sha256 = "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b";
   };
   tts = pkgs.python3.withPackages (p: [ p.pyopenjtalk ]);
 in pkgs.runCommand "aiueos-local-voice" { nativeBuildInputs = [ pkgs.makeWrapper ]; } ''

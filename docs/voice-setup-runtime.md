@@ -13,7 +13,7 @@ The dialogue policy is generated from `src/murakumo/voice_policy.cljk` using
 `kbb --backend sci src/murakumo/voice_policy.cljk`.
 
 Wi-Fi password spelling bypasses the dialogue model and transcript display.
-The user specifies each character, case and symbol, then says `入力完了` or
+The user speaks explicit phrases such as `小文字のBを入力` and `数字の7を入力`, specifies case and symbols, then says `入力完了` or
 `done`. Only the character count is spoken. Temporary audio lives in a private
 runtime directory and is removed after recognition. The assembled password is
 passed to the original controller, cleared from the voice state, and never
