@@ -4,7 +4,7 @@ Implementation source: `3d186d1`. Product naming: AiueOS operating system; Murak
 
 ## Verified locally
 
-- 58 Node tests pass, including stale screen/model response refusal, deduplication, model action bounds, local password spelling, fresh serial-bound erasure consent, VAD and audio-control consent invalidation.
+- 59 Node tests pass, including stale screen/model response refusal, deduplication, model action bounds, local password spelling, fresh serial-bound erasure consent, VAD and audio-control consent invalidation.
 - Actual GTK4/GJS frontend with VoiceControl and a dedicated installer-backend fixture completes Japanese language selection, Wi-Fi choice, secret input, serial-bound confirmation and Continue. `actualDiskErased=false`; this is a binding/flow test, not a physical disk installation.
 - Official whisper.cpp 1.8.4 with immutable `ggml-base.bin` recognizes the Japanese PCM fixture as `Wi-Fiに、接続したいです。`. Actual Qwen3 1.7B Q8_0 selects Wi-Fi, smartphone-free local completion and English wired networking. It distinguishes unlinked status from an explicit linked-status fixture. Five cases took 11229ms on Mac native CPU, two threads; this is a combined test duration, not a per-turn speed guarantee.
 - Japanese OpenJTalk synthesizes the actual model reply as an unprivileged user in the network-disconnected x86_64 VM. The final voice runtime package builds from the cached immutable model and Nix dependencies without network access.
@@ -36,3 +36,7 @@ Actual Whisper base misrecognized short Japanese secret characters and both test
 The service now creates both UI and voice runtime directories through systemd. The root-owned voice parent permits traversal (0711); each private session remains0700 and owned by the unprivileged runtime. This avoids the installed service's strict filesystem protection preventing startup or the runtime from reading its own0600 model key/audio.
 
 The first full ISO build without network failed because system dependencies were not all cached. Package creation is permitted to fetch trusted immutable build dependencies; offline installation is qualified separately. No image from that failed build was distributed.
+
+Final small-model dialogue run passed all five cases in9507ms. Actual English small-model recognition also passed `lowercase B`, `digit seven`, `done` and the exact serial-bound erase phrase. Named symbols and NATO letters are parsed locally; sentence punctuation cannot silently add password characters. Physical microphone=false and actualDiskErased=false.
+
+The protected runtime-directory test passed under actual systemd with `ProtectSystem=strict`, `NoNewPrivileges=yes`, a0700 session and a0600 file read as the dedicated unprivileged voice user. The updated GTK flow passed again. Selected results are committed under `docs/evidence/voice-setup-2026-10-07/`.

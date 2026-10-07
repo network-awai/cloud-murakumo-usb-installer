@@ -18,3 +18,5 @@ test('audio control cancels prior disk confirmation instead of carrying consent 
 test('explicit lower case survives ASR returning an uppercase Latin character',()=>{assert.equal(secretCharacters('小文字B'),'b');assert.equal(secretCharacters('lowercase Q'),'q');});
 
 test('explicit spoken secret phrases parse without exposing or silently completing empty secrets',async()=>{assert.equal(secretCharacters('小文字のBを入力'),'b');assert.equal(secretCharacters('大文字のエーを入力。'),'A');assert.equal(secretCharacters('数字の7を入力'),'7');assert.equal(secretCharacters('数字の七を入力'),'7');assert.equal(secretCharacters('数字のfooを入力'),null);const h=harness();h.control.update({revision:1,language:'ja',kind:'secret'});await h.control.utterance('入力完了');assert.equal(h.actions.length,0);});
+
+test('English punctuation and named symbols do not become accidental password characters',()=>{assert.equal(secretCharacters('lowercase B.'),'b');assert.equal(secretCharacters('digit seven.'),'7');assert.equal(secretCharacters('uppercase bravo.'),'B');assert.equal(secretCharacters('dot.'),'.');assert.equal(secretCharacters('underscore'),'_');});

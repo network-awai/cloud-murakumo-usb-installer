@@ -1,0 +1,9 @@
+{
+  "nativeGTK": true,
+  "language": "ja",
+  "networkChoice": "wifi",
+  "secretPassed": true,
+  "serialBoundConfirmation": true,
+  "continue": true,
+  "actualDiskErased": false
+}
