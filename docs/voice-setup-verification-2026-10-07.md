@@ -1,13 +1,13 @@
 # Voice setup qualification — 2026-10-07
 
-Implementation source: `3d186d1`. Product naming: AiueOS operating system; Murakumo Node service.
+Frozen runtime source: `481cd28` (initial implementation `3d186d1`). Product naming: AiueOS operating system; Murakumo Node service.
 
 ## Verified locally
 
 - 59 Node tests pass, including stale screen/model response refusal, deduplication, model action bounds, local password spelling, fresh serial-bound erasure consent, VAD and audio-control consent invalidation.
 - Actual GTK4/GJS frontend with VoiceControl and a dedicated installer-backend fixture completes Japanese language selection, Wi-Fi choice, secret input, serial-bound confirmation and Continue. `actualDiskErased=false`; this is a binding/flow test, not a physical disk installation.
-- Official whisper.cpp 1.8.4 with immutable `ggml-base.bin` recognizes the Japanese PCM fixture as `Wi-Fiに、接続したいです。`. Actual Qwen3 1.7B Q8_0 selects Wi-Fi, smartphone-free local completion and English wired networking. It distinguishes unlinked status from an explicit linked-status fixture. Five cases took 11229ms on Mac native CPU, two threads; this is a combined test duration, not a per-turn speed guarantee.
-- Japanese OpenJTalk synthesizes the actual model reply as an unprivileged user in the network-disconnected x86_64 VM. The final voice runtime package builds from the cached immutable model and Nix dependencies without network access.
+- Official whisper.cpp 1.8.4 with immutable `ggml-small.bin` recognizes the Japanese PCM fixture. Actual Qwen3 1.7B Q8_0 selects Wi-Fi, smartphone-free local completion and English wired networking. It distinguishes unlinked status from an explicit linked-status fixture. Five final cases took 9507ms on Mac native CPU, two threads; this is a combined test duration, not a per-turn speed guarantee.
+- Japanese OpenJTalk synthesizes the actual model reply as an unprivileged user in the network-disconnected x86_64 VM. The earlier 1.7B/base-model runtime package built offline from cached dependencies; this does not establish an offline build of the final small-model ISO. Final image creation can fetch immutable build dependencies. Target-PC installation is a separate offline check.
 - BIOS and UEFI retained install configurations parse and evaluate. Source retention includes all voice modules and license notices.
 
 ## Negative findings and limits
@@ -20,12 +20,12 @@ This version is half duplex. It suppresses its own speech/BGM while listening; f
 
 Evidence directory: `/Users/junkawasaki/github/murakumo-usb-auto-install-qa/`.
 
-- `voice-native-final-result.json`, `voice-native-final.log`: actual recognition and dialogue.
-- `voice-ui-result.json`, `voice-ui-integration.log`: real GTK/controller fixture flow.
+- `voice-native-small-result.json`: actual final recognition and dialogue.
+- `voice-ui-result.json`, `voice-ui-audio-final.log`: real GTK/controller fixture flow with fresh per-run transport and results.
 - `voice-final-package.log`: offline runtime build.
 - `voice-final-eval.log`: BIOS/UEFI evaluation.
 - `voice-reply-tts.log`, `voice-ai-reply.wav`: actual model reply synthesized offline.
-- `voice-iso-build.log`: frozen-source ISO build; completion must be checked before using the image.
+- `voice-iso-481cd28-build.log`: final frozen-source ISO build; completion must be checked before using the image.
 
 No USB overwrite or physical disk operation has been performed for this voice candidate. Old prototype ISOs were preserved. App/Worker production release remains a separate reviewed change.
 
