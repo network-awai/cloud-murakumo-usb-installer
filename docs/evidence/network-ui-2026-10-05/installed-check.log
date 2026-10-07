@@ -1,0 +1,21 @@
+NETWORK_UI_INSTALLED_QA
+/dev/nvme0n1p2 ext4 rw,relatime
+NAME        TYPE  SIZE LABEL         MOUNTPOINTS
+sr0         rom  1024M               
+nvme0n1     disk   24G               
+├─nvme0n1p1 part  512M MURA_BOOT     /boot
+└─nvme0n1p2 part 23.5G MURAKUMO_ROOT /nix/store
+                                     /
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+active
+not-found
+root L 1970-01-02 -1 -1 -1 -1
+ActiveState=active
+SubState=running
+NRestarts=0
+ExecStart={ path=/nix/store/bp3vb652rrh4jnxpnzy33pgwhv6ihr7i-bash-interactive-5.3p9/bin/bash ; argv[]=/nix/store/bp3vb652rrh4jnxpnzy33pgwhv6ihr7i-bash-interactive-5.3p9/bin/bash /etc/murakumo/launch-ui /nix/store/j8fnxyagi3vngxdjs433vmljl5sb4h2q-nodejs-22.23.3/bin/node /etc/murakumo/setup-ui.mjs ; ignore_errors=no ; start_time=[Mon 2026-10-05 12:57:23 UTC] ; stop_time=[n/a] ; pid=769 ; code=(null) ; status=0/0 }
+ProtectSystem=strict
+RuntimeDirectory=murakumo-ui
+Installed code matches retained and frozen QA sources

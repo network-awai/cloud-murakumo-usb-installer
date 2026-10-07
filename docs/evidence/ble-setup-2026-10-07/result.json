@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-07",
+  "node": "aiueos-6600hs-2",
+  "tailscaleIp": "100.84.134.120",
+  "hostOs": "Ubuntu 24.04.4 LTS",
+  "bluetooth": {"usbId": "0bda:b850", "controller": "hci0", "bluez": "5.72", "gattRegistered": true, "advertisementStartedAndStopped": true, "legacyManagementCompatibility": true},
+  "tests": {"localPassed": 66, "webCryptoEncryptedLiveController": true, "fragmentedIpcAccepted": true, "replayRefused": true, "liveWifiBackendConnected": true, "consumedSecretRemoved": true, "wifiBoundHttpsStatus": 200, "wifiCredentialFileMode": "0600", "mishimaUserServicesActive": true},
+  "unverified": ["Bluetooth radio transfer: Mac chooser did not discover node; physical distance not established", "physical smartphone setup", "iPhone native companion", "public HTTPS companion", "Nix runtime and GTK Bluetooth view", "USB image build and write"],
+  "finalState": {"servicesEnabled": true, "pairingWindow": "closed", "localTestServer": "stopped", "testBrowserTabs": "closed", "credentialsInEvidence": false}
+}

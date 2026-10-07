@@ -1,0 +1,16 @@
+{
+  "fixtureOnly": true,
+  "firstBootId": "2270919d-41e0-41d2-a347-6c88a93d2c9b",
+  "secondBootId": "5e26dbd7-b6fa-4770-a244-7d9522a7291d",
+  "receiptUnchanged": true,
+  "onlineStatusVerified": true,
+  "receipt": {
+    "version": 1,
+    "deviceDid": "did:key:z6Mks7tGJNNYxmj4v1W9QCbAD4bbvzJ5UPMQENW8Ytda7yNe",
+    "accountDid": "did:key:owner",
+    "authority": "https://murakumo.cloud",
+    "linkedAt": 1791291931007,
+    "registrationState": "registered"
+  },
+  "proofUpdatedAt": "2026-10-06T13:16:30.770Z"
+}

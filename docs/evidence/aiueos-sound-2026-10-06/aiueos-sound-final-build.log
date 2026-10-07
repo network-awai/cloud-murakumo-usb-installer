@@ -1,0 +1,165 @@
+evaluation warning: `boot.zfs.forceImportRoot` is using the default value of `true`. It is highly recommended to set it to `false`, the new default from 26.11 on, to reduce the risk of data loss. Alternatively, you can silence this warning by explicitly setting it to `true`.
+evaluation warning: Scripted initrd is deprecated and scheduled for removal in 26.11. See the NixOS 26.05 release notes.
+evaluation warning: Scripted initrd is deprecated and scheduled for removal in 26.11. See the NixOS 26.05 release notes.
+these 16 derivations will be built:
+  /nix/store/dwxy0lyr73d8bwa1asj7gmcgp77h4gg3-murakumo-setup-sound.drv
+  /nix/store/02xy3h7q0c38ng7bfarc97ic5a1kxa1y-etc.drv
+  /nix/store/x656q1y45p6fwyssb4fj28ig615jbjw8-activate.drv
+  /nix/store/n14wkcdy0xlr3vscyr048nv6agcdpqki-nixos-system-murakumo-node-26.05pre-git.drv
+  /nix/store/pag2lc6phqpdr4h9yair6rwanalx1h92-etc.drv
+  /nix/store/n1jm2c822qmc5bif8xw2h2pd2aabcc2c-activate.drv
+  /nix/store/pkqjsa51pkp23941x4shp4q4hl0c6ffc-nixos-system-murakumo-node-26.05pre-git.drv
+  /nix/store/skihzsgx4ahgb7fz20s83waq4pj9qngm-etc-murakumo-offline-systems.json.drv
+  /nix/store/glswggbswq6qjdzg9z5vv2d0w88qgfws-etc.drv
+  /nix/store/zl7jdg00wrb2s5d885gwjjqpmp2227qp-activate.drv
+  /nix/store/7varhi87244v6mpxd1gmm5mjj95xnsa7-nixos-system-nixos-26.05pre-git.drv
+  /nix/store/1grdwl6znj1fj68wbnan8cc5470jxxyc-closure-info.drv
+  /nix/store/b9l96hwi9slri56w3rmqd4d68f8g4ic3-efi-directory.drv
+  /nix/store/cdnakl9pvrpri9zf1qybj440i76bghbh-isolinux.cfg.drv
+  /nix/store/q1k80da2xbyqw84q98ha9z3q4if1k8bb-efi-image_eltorito.drv
+  /nix/store/m2r4bx8mi5ads0p60jf2q6ky8b3nz9qh-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv
+building '/nix/store/dwxy0lyr73d8bwa1asj7gmcgp77h4gg3-murakumo-setup-sound.drv'...
+building '/nix/store/02xy3h7q0c38ng7bfarc97ic5a1kxa1y-etc.drv'...
+building '/nix/store/pag2lc6phqpdr4h9yair6rwanalx1h92-etc.drv'...
+building '/nix/store/x656q1y45p6fwyssb4fj28ig615jbjw8-activate.drv'...
+building '/nix/store/n1jm2c822qmc5bif8xw2h2pd2aabcc2c-activate.drv'...
+building '/nix/store/n14wkcdy0xlr3vscyr048nv6agcdpqki-nixos-system-murakumo-node-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/pkqjsa51pkp23941x4shp4q4hl0c6ffc-nixos-system-murakumo-node-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/skihzsgx4ahgb7fz20s83waq4pj9qngm-etc-murakumo-offline-systems.json.drv'...
+building '/nix/store/glswggbswq6qjdzg9z5vv2d0w88qgfws-etc.drv'...
+building '/nix/store/zl7jdg00wrb2s5d885gwjjqpmp2227qp-activate.drv'...
+building '/nix/store/7varhi87244v6mpxd1gmm5mjj95xnsa7-nixos-system-nixos-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/1grdwl6znj1fj68wbnan8cc5470jxxyc-closure-info.drv'...
+structuredAttrs is enabled
+building '/nix/store/b9l96hwi9slri56w3rmqd4d68f8g4ic3-efi-directory.drv'...
+Building GRUB with modules:
+ - fat
+ - iso9660
+ - part_gpt
+ - part_msdos
+ - normal
+ - boot
+ - linux
+ - configfile
+ - loopback
+ - chain
+ - halt
+ - efifwsetup
+ - efi_gop
+ - ls
+ - search
+ - search_label
+ - search_fs_uuid
+ - search_fs_file
+ - echo
+ - serial
+ - gfxmenu
+ - gfxterm
+ - gfxterm_background
+ - gfxterm_menu
+ - test
+ - loadenv
+ - all_video
+ - videoinfo
+ - png
+Adding additional modules:
+ - efi_uga
+'/nix/store/y5b7003yidg3aavnmaxj15xpb7ksx92x-refind-0.14.2/share/refind/refind_x64.efi' -> '/nix/store/wrjs8fd25qfmjzy3rsdzcsivrqc583bl-efi-directory/EFI/BOOT/refind_x64.efi'
+building '/nix/store/cdnakl9pvrpri9zf1qybj440i76bghbh-isolinux.cfg.drv'...
+building '/nix/store/q1k80da2xbyqw84q98ha9z3q4if1k8bb-efi-image_eltorito.drv'...
+Usage size: 2097152
+Image size: 3145728
+mkfs.fat 4.2 (2021-01-31)
+Copying BOOTX64.EFI
+Copying grub.cfg
+Copying refind_x64.efi
+fsck.fat 4.2 (2021-01-31)
+Checking we can access the last sector of the filesystem
+Boot sector contents:
+System ID "mkfs.fat"
+Media byte 0xf8 (hard disk)
+       512 bytes per logical sector
+      2048 bytes per cluster
+         1 reserved sector
+First FAT starts at byte 512 (sector 1)
+         2 FATs, 12 bit entries
+      2560 bytes per FAT (= 5 sectors)
+Root directory starts at byte 5632 (sector 11)
+       512 root directory entries
+Data area starts at byte 22016 (sector 43)
+      1525 data clusters (3123200 bytes)
+32 sectors/track, 2 heads
+         0 hidden sectors
+      6144 sectors total
+Checking for unused clusters.
+/nix/store/rs2mfm8xqhd52gs88yp9cnpbw2kfgk0w-efi-image_eltorito: 6 files, 719/1525 clusters
+building '/nix/store/m2r4bx8mi5ads0p60jf2q6ky8b3nz9qh-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv'...
+structuredAttrs is enabled
+Parallel mksquashfs: Using 2 processors
+Creating 4.0 filesystem on nix-store.squashfs, block size 1048576.
+
+
+Exportable Squashfs 4.0 filesystem, zstd compressed, data block size 1048576
+        compressed data, compressed metadata, compressed fragments,
+        compressed xattrs, compressed ids
+        duplicates are removed
+Filesystem size 2198477.79 Kbytes (2146.95 Mbytes)
+        47.00% of uncompressed filesystem size (4677427.77 Kbytes)
+Inode table size 2546413 bytes (2486.73 Kbytes)
+        19.96% of uncompressed inode table size (12759872 bytes)
+Directory table size 3055303 bytes (2983.69 Kbytes)
+        38.77% of uncompressed directory table size (7881571 bytes)
+Number of duplicate files found 60088
+Number of inodes 308067
+Number of files 173019
+Number of fragments 1871
+Number of symbolic links 42412
+Number of device nodes 0
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 92636
+Number of hard-links 0
+Number of ids (unique uids + gids) 1
+Number of uids 1
+        root (0)
+Number of gids 1
+        root (0)
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+xorriso : NOTE : Environment variable SOURCE_DATE_EPOCH encountered with value 315532800
+Drive current: -outdev 'stdio:/nix/store/4rmsk8p83ymljkl5wi4w7q1calz87r6b-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 4983m free
+xorriso : WARNING : -volid text does not comply to ISO 9660 / ECMA 119 rules
+xorriso : UPDATE :     194 files added in 1 seconds
+Added 12 items from file 'pathlist'
+xorriso : UPDATE :     194 files added in 1 seconds
+xorriso : NOTE : Copying to System Area: 432 bytes from file '/nix/store/q786wfxhzaz94mp8644n6hg43lnp2lp8-syslinux-unstable-2019-02-07/share/syslinux/isohdpfx.bin'
+libisofs: NOTE : Automatically adjusted MBR geometry to 1020/138/32
+libisofs: NOTE : Aligned image size to cylinder size by 160 blocks
+xorriso : UPDATE :  0.62% done
+xorriso : UPDATE :  7.51% done
+xorriso : UPDATE :  15.30% done
+xorriso : UPDATE :  22.72% done, estimate finish Tue Oct 06 13:30:48 2026
+xorriso : UPDATE :  30.30% done, estimate finish Tue Oct 06 13:30:48 2026
+xorriso : UPDATE :  36.91% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  42.48% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  49.45% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  56.62% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  64.56% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  72.95% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  78.22% done, estimate finish Tue Oct 06 13:30:50 2026
+xorriso : UPDATE :  85.55% done, estimate finish Tue Oct 06 13:30:49 2026
+xorriso : UPDATE :  94.93% done
+ISO image produced: 1126080 sectors
+Written to medium : 1126080 sectors at LBA 0
+Writing to 'stdio:/nix/store/4rmsk8p83ymljkl5wi4w7q1calz87r6b-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso' completed successfully.
+
+/nix/store/4rmsk8p83ymljkl5wi4w7q1calz87r6b-nixos-minimal-26.05pre-git-x86_64-linux.iso
+c1d28f40e6834613c2ca50da550fddb734378db3bd05456c9aa3d36d64932cad  /mnt/output/aiueos-sound-setup-20261006.iso
+
+AUTO_BUILD_EXIT=0
