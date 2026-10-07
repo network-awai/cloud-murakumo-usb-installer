@@ -53,3 +53,4 @@ test('network and unexpected registration errors stay in the guide; shutdown fai
   assert.match(screens[1],/Reinstallation is not needed/);
   assert.match(screens[3],/Could not shut down/);
 });
+test('Node details returns to setup without claiming an account or touching network',async()=>{let details=0;const actions=['status','network','status','shutdown'];await runSetup({t,readSaved:async()=>null,ui:{menu:(_,items)=>{const action=actions.shift();assert.ok(items.some(([id])=>id===action));return action;}},showStatus:async()=>{details++;},network:async()=> 'offline',register:async()=>assert.fail('status must not register'),poweroff:async()=>true});assert.equal(details,2);assert.equal(actions.length,0);});
