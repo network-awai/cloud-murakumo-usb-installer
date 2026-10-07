@@ -1,0 +1,29 @@
+{
+  "networkInterfaces": [
+    "lo"
+  ],
+  "offline": true,
+  "retainedSourcesMatch": [
+    "node-base.nix",
+    "console-ui.nix",
+    "account-link.mjs",
+    "local-setup.mjs",
+    "language.mjs",
+    "network-setup.mjs",
+    "setup-ui.mjs",
+    "registration-ui.mjs",
+    "graphical-ui.js",
+    "graphical-dialog.mjs",
+    "murakumo-logo.svg",
+    "offline-base.nix",
+    "offline-uefi.nix",
+    "offline-bios.nix",
+    "acoustic-code.mjs",
+    "setup-sound.mjs",
+    "sound-link.html"
+  ],
+  "language": "en",
+  "rootUuid": "af53832f-ab0e-455e-baa7-9c6332603cd1",
+  "bootUuid": "E4E0-049E",
+  "system": "system-1-link"
+}

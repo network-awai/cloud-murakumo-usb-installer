@@ -1,0 +1,99 @@
+      2560 bytes per FAT (= 5 sectors)
+Root directory starts at byte 5632 (sector 11)
+       512 root directory entries
+Data area starts at byte 22016 (sector 43)
+      1525 data clusters (3123200 bytes)
+32 sectors/track, 2 heads
+         0 hidden sectors
+      6144 sectors total
+Checking for unused clusters.
+/nix/store/n4s8gn8vxx7fzn5c6nlv0pf5mj8jm55q-efi-image_eltorito: 6 files, 719/1525 clusters
+building '/nix/store/qzx7g7gbwh94j82wvhicysrm4dlrj93h-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv'...
+structuredAttrs is enabled
+Parallel mksquashfs: Using 2 processors
+Creating 4.0 filesystem on nix-store.squashfs, block size 1048576.
+
+
+Exportable Squashfs 4.0 filesystem, zstd compressed, data block size 1048576
+        compressed data, compressed metadata, compressed fragments,
+        compressed xattrs, compressed ids
+        duplicates are removed
+Filesystem size 5070899.14 Kbytes (4952.05 Mbytes)
+        61.02% of uncompressed filesystem size (8310606.75 Kbytes)
+Inode table size 2604011 bytes (2542.98 Kbytes)
+        20.08% of uncompressed inode table size (12970103 bytes)
+Directory table size 3107703 bytes (3034.87 Kbytes)
+        38.81% of uncompressed directory table size (8006944 bytes)
+Number of duplicate files found 61428
+Number of inodes 313439
+Number of files 177358
+Number of fragments 1956
+Number of symbolic links 42748
+Number of device nodes 0
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 93333
+Number of hard-links 0
+Number of ids (unique uids + gids) 1
+Number of uids 1
+        root (0)
+Number of gids 1
+        root (0)
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+xorriso : NOTE : Environment variable SOURCE_DATE_EPOCH encountered with value 315532800
+Drive current: -outdev 'stdio:/nix/store/igb7sbq6akrz5v65bvyp6rjv8i1nmq68-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 18.2g free
+xorriso : WARNING : -volid text does not comply to ISO 9660 / ECMA 119 rules
+xorriso : UPDATE :     194 files added in 1 seconds
+Added 12 items from file 'pathlist'
+xorriso : UPDATE :     194 files added in 1 seconds
+xorriso : NOTE : Copying to System Area: 432 bytes from file '/nix/store/q786wfxhzaz94mp8644n6hg43lnp2lp8-syslinux-unstable-2019-02-07/share/syslinux/isohdpfx.bin'
+libisofs: NOTE : Automatically adjusted MBR geometry to 1017/160/63
+libisofs: NOTE : Aligned image size to cylinder size by 710 blocks
+xorriso : UPDATE :  0.19% done
+xorriso : UPDATE :  2.02% done
+xorriso : UPDATE :  4.15% done
+xorriso : UPDATE :  6.11% done, estimate finish Wed Oct 07 03:10:52 2026
+xorriso : UPDATE :  8.50% done, estimate finish Wed Oct 07 03:10:52 2026
+xorriso : UPDATE :  12.28% done, estimate finish Wed Oct 07 03:10:48 2026
+xorriso : UPDATE :  14.62% done, estimate finish Wed Oct 07 03:10:48 2026
+xorriso : UPDATE :  17.10% done, estimate finish Wed Oct 07 03:10:48 2026
+xorriso : UPDATE :  20.37% done, estimate finish Wed Oct 07 03:10:47 2026
+xorriso : UPDATE :  22.29% done, estimate finish Wed Oct 07 03:10:49 2026
+xorriso : UPDATE :  26.12% done, estimate finish Wed Oct 07 03:10:47 2026
+xorriso : UPDATE :  29.70% done, estimate finish Wed Oct 07 03:10:46 2026
+xorriso : UPDATE :  33.06% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  34.44% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  38.84% done, estimate finish Wed Oct 07 03:10:43 2026
+xorriso : UPDATE :  42.74% done, estimate finish Wed Oct 07 03:10:42 2026
+xorriso : UPDATE :  45.47% done, estimate finish Wed Oct 07 03:10:43 2026
+xorriso : UPDATE :  49.60% done, estimate finish Wed Oct 07 03:10:42 2026
+xorriso : UPDATE :  50.35% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  51.54% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  53.75% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  57.93% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  61.77% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  62.69% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  66.08% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  70.10% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  73.62% done, estimate finish Wed Oct 07 03:10:43 2026
+xorriso : UPDATE :  74.46% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  77.47% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  81.06% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  83.34% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  87.02% done, estimate finish Wed Oct 07 03:10:44 2026
+xorriso : UPDATE :  91.21% done, estimate finish Wed Oct 07 03:10:43 2026
+xorriso : UPDATE :  91.21% done, estimate finish Wed Oct 07 03:10:45 2026
+xorriso : UPDATE :  91.21% done, estimate finish Wed Oct 07 03:10:46 2026
+xorriso : UPDATE :  92.28% done, estimate finish Wed Oct 07 03:10:47 2026
+xorriso : UPDATE :  96.27% done
+xorriso : UPDATE :  99.97% done
+ISO image produced: 2562840 sectors
+Written to medium : 2562840 sectors at LBA 0
+Writing to 'stdio:/nix/store/igb7sbq6akrz5v65bvyp6rjv8i1nmq68-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso' completed successfully.
+
+/nix/store/igb7sbq6akrz5v65bvyp6rjv8i1nmq68-nixos-minimal-26.05pre-git-x86_64-linux.iso
+VOICE_ISO_BUILD_EXIT=0

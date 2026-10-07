@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-06 Asia/Tokyo",
+  "method": "POST",
+  "body": {},
+  "authority": "https://murakumo.cloud",
+  "start": {
+    "status": 404,
+    "body": {
+      "error": "unknown devices route"
+    }
+  },
+  "status": {
+    "status": 404,
+    "body": {
+      "error": "unknown devices route"
+    }
+  },
+  "createdRegistration": false,
+  "final_start_check": {
+    "status": 404,
+    "body": {
+      "error": "unknown devices route"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+CURRENT_SYSTEM=system-1-link
+7da8df6a05b27bba115a632f86b29d244d641ed427a548f56c745ee3828b9156  /etc/murakumo/account-link.mjs
+ba8988656acc13cbdf4fe67e5ab9b4a86275cc866ac6c4ec9a2e41f9d56a13e2  /etc/murakumo/registration-ui.mjs
+7f9dcc13741319f75f902d860b661d00d5e6cd4b40cdf53560885e35b061d897  /etc/murakumo/setup-ui.mjs
+db812f2fb87563bae3ac42788319278fde8da638048b030e3d5cd3225105e9ea  /etc/murakumo/network-setup.mjs
+ActiveState=active
+SubState=running
+NRestarts=0
+ProtectSystem=strict
+NoNewPrivileges=yes
+RuntimeDirectoryMode=0700
+StateDirectoryMode=0700
+root L 1970-01-02 -1 -1 -1 -1
+LoadState=not-found
+TARGET SOURCE         FSTYPE OPTIONS
+/      /dev/nvme0n1p2 ext4   rw,relatime
+TARGET SOURCE         FSTYPE OPTIONS
+/boot  /dev/nvme0n1p1 vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro
+OFFLINE_ACCOUNT_UNREGISTERED
+INSTALLED_ACCOUNT_UI_CHECK_DONE

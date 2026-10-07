@@ -1,0 +1,69 @@
+this derivation will be built:
+  /nix/store/byk1jglzmzdx7w8m4v8zppdzi5ha9lgq-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv
+building '/nix/store/byk1jglzmzdx7w8m4v8zppdzi5ha9lgq-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv'...
+structuredAttrs is enabled
+Parallel mksquashfs: Using 2 processors
+Creating 4.0 filesystem on nix-store.squashfs, block size 1048576.
+
+
+Exportable Squashfs 4.0 filesystem, zstd compressed, data block size 1048576
+        compressed data, compressed metadata, compressed fragments,
+        compressed xattrs, compressed ids
+        duplicates are removed
+Filesystem size 2196263.07 Kbytes (2144.79 Mbytes)
+        47.00% of uncompressed filesystem size (4673269.88 Kbytes)
+Inode table size 2538335 bytes (2478.84 Kbytes)
+        19.97% of uncompressed inode table size (12713635 bytes)
+Directory table size 3051489 bytes (2979.97 Kbytes)
+        38.79% of uncompressed directory table size (7867322 bytes)
+Number of duplicate files found 60088
+Number of inodes 307487
+Number of files 172870
+Number of fragments 1868
+Number of symbolic links 42027
+Number of device nodes 0
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 92590
+Number of hard-links 0
+Number of ids (unique uids + gids) 1
+Number of uids 1
+        root (0)
+Number of gids 1
+        root (0)
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+xorriso : NOTE : Environment variable SOURCE_DATE_EPOCH encountered with value 315532800
+Drive current: -outdev 'stdio:/nix/store/x8bmq161vzjmwyrmvllq35rxm4iwlafa-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 5661m free
+xorriso : WARNING : -volid text does not comply to ISO 9660 / ECMA 119 rules
+xorriso : UPDATE :     194 files added in 1 seconds
+Added 12 items from file 'pathlist'
+xorriso : UPDATE :     194 files added in 1 seconds
+xorriso : NOTE : Copying to System Area: 432 bytes from file '/nix/store/q786wfxhzaz94mp8644n6hg43lnp2lp8-syslinux-unstable-2019-02-07/share/syslinux/isohdpfx.bin'
+libisofs: NOTE : Automatically adjusted MBR geometry to 1019/138/32
+libisofs: NOTE : Aligned image size to cylinder size by 167 blocks
+xorriso : UPDATE :  0.43% done
+xorriso : UPDATE :  8.26% done
+xorriso : UPDATE :  19.31% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  28.12% done, estimate finish Tue Oct 06 10:26:55 2026
+xorriso : UPDATE :  36.22% done, estimate finish Tue Oct 06 10:26:55 2026
+xorriso : UPDATE :  41.11% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  48.27% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  55.88% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  64.95% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  73.72% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  81.41% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  88.06% done, estimate finish Tue Oct 06 10:26:56 2026
+xorriso : UPDATE :  97.13% done
+ISO image produced: 1124976 sectors
+Written to medium : 1124976 sectors at LBA 0
+Writing to 'stdio:/nix/store/x8bmq161vzjmwyrmvllq35rxm4iwlafa-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso' completed successfully.
+
+warning: you did not specify '--add-root'; the result might be removed by the garbage collector
+/nix/store/x8bmq161vzjmwyrmvllq35rxm4iwlafa-nixos-minimal-26.05pre-git-x86_64-linux.iso
+cbbe316011bdb0996ddda01f5056f6d3894c9283039e69977c1b410133ff97f2  /mnt/output/murakumo-local-language-setup-fixed-20261006.iso
+
+AUTO_BUILD_EXIT=0

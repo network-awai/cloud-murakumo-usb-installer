@@ -1,0 +1,13 @@
+NETWORK_UI_PRIVATE_PROFILE_QA
+wlan0:wifi:connected
+lo:loopback:connected (externally)
+p2p-dev-wlan0:wifi-p2p:disconnected
+p2p-dev-wlan1:wifi-p2p:unavailable
+tailscale0:tun:unmanaged
+hwsim0:unknown:unmanaged
+wlan1:wifi:unmanaged
+3: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    altname wlx020000000000
+    inet 192.0.2.14/24 brd 192.0.2.255 scope global dynamic noprefixroute wlan0
+       valid_lft 3498sec preferred_lft 3498sec
+600 root root Murakumo-QA:WiFi.nmconnection

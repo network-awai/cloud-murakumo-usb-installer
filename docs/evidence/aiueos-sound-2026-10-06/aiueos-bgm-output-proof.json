@@ -1,0 +1,9 @@
+{
+  "nativeVmOutput": true,
+  "rate": 44100,
+  "channels": 2,
+  "peak": 0.022613525390625,
+  "rms": 0.00426084499143763,
+  "capturedSeconds": 24.845102040816325,
+  "physicalSpeakerQualified": false
+}

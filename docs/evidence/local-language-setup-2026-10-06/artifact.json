@@ -1,0 +1,20 @@
+{
+  "source_commit": "1952e8b324045d636750e6afa38f6d2d1a7e8cd7",
+  "iso_path": "/Users/junkawasaki/github/murakumo-usb-auto-install-qa/murakumo-local-language-setup-fixed-20261006.iso",
+  "iso_bytes": 2303950848,
+  "iso_sha256": "cbbe316011bdb0996ddda01f5056f6d3894c9283039e69977c1b410133ff97f2",
+  "source_tests_passed": 41,
+  "normal_boot_language_selection": "passed",
+  "packaged_installed_controller_on_live_media": "passed",
+  "local_completion_without_nic_phone_account": "passed",
+  "retained_language_preference": "passed",
+  "live_and_uefi_bios_module_bundle_validation": "passed",
+  "physical_pc_updated": false,
+  "same_disk_install_reboot_this_run": false,
+  "account_linked": false,
+  "fleet_inference_verified": false,
+  "os_auto_update_enabled": false,
+  "os_update_engine_implemented": false,
+  "usb_written": false,
+  "usb_status": "awaiting KIOXIA reconnection"
+}
