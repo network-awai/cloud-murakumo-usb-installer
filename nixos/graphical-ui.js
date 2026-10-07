@@ -120,6 +120,28 @@ function serve(request,connection,input){
       const submit=()=>{const value=entry.get_text();entry.set_text('');respond(0,value);};entry.connect('activate',submit);
       const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button(tr('戻る','Back'),()=>{entry.set_text('');respond(1);}));controls.append(button(type==='--passwordbox'?tr('接続する','Connect'):tr('次へ','Continue'),submit,'primary'));content.append(controls);entry.grab_focus();
     }
+  }else if(type==='--textbox'&&message==='/run/murakumo-ble/pair.json'){
+    const [ok,bytes]=GLib.file_get_contents(message);if(!ok)throw Error('BLE session missing');
+    const pair=JSON.parse(ByteArray.toString(bytes));if(pair.v!==1||Date.now()>=pair.expires)throw Error('BLE session expired');
+    const pairToken=GLib.base64_encode(ByteArray.fromString(JSON.stringify(pair))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    show(tr('BluetoothでWi-Fiを設定','Set up Wi-Fi by Bluetooth'),tr('対応する設定アプリでQRを読み取ってください。\nMacの設定画面では、一時キーを入力できます。受付は10分間です。','Scan the QR with a compatible companion app.\nThe Mac companion also accepts the temporary key. Setup expires in 10 minutes.'));
+    const png=(GLib.getenv('MURAKUMO_UI_SESSION')||'/run/murakumo-ui')+'/ble-pair.png';const qr=Gio.Subprocess.new(['qrencode','-o',png,'-s','5','-m','2',pairToken],Gio.SubprocessFlags.NONE);if(!qr.wait_check(null))throw Error('BLE QR failed');
+    const pixels=GdkPixbuf.Pixbuf.new_from_file(png).scale_simple(280,280,GdkPixbuf.InterpType.NEAREST);const picture=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(pixels));picture.set_size_request(280,280);picture.can_shrink=true;content.append(picture);
+    const key=new Gtk.Entry({text:pairToken,visibility:false,editable:false});content.append(key);
+    const reveal=new Gtk.CheckButton({label:tr('一時キーを表示する','Show temporary key')});reveal.connect('toggled',()=>{key.visibility=reveal.active;});content.append(reveal);
+    const state=label(tr('近くの端末からの設定を待っています…','Waiting for a nearby companion…'));content.append(state);
+    const back=button(tr('戻る','Back'),()=>respond(1));content.append(back);
+    voice={kind:'message',message:tr('BluetoothでWi-Fi設定を待っています。対応する設定画面を使うか、戻って音声でWi-Fiを設定できます。','Waiting for Wi-Fi settings by Bluetooth. Use a compatible companion, or go back to set up Wi-Fi by voice.'),canBack:true};actions={back:()=>respond(1)};
+    GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,1,()=>{
+      if(active!==token){GLib.unlink(png);return GLib.SOURCE_REMOVE;}
+      try{const client=new Gio.SocketClient({timeout:2});const c=client.connect(new Gio.UnixSocketAddress({path:'/run/murakumo-ble/control.sock'}),null);c.get_output_stream().write_all(ByteArray.fromString('{"op":"status"}\n'),null);const [line]=new Gio.DataInputStream({base_stream:c.get_input_stream()}).read_line_utf8(null);c.close(null);const s=JSON.parse(line).state;
+        if(s==='connected'){key.set_text('');GLib.unlink(png);respond(0);return GLib.SOURCE_REMOVE;}
+        if(['expired','closed','failed'].includes(s)){key.set_text('');GLib.unlink(png);respond(1);return GLib.SOURCE_REMOVE;}
+        state.set_label(s==='connecting'?tr('Wi-Fiに接続しています…','Connecting to Wi-Fi…'):tr('近くの端末からの設定を待っています…','Waiting for a nearby companion…'));
+      }catch{}
+      if(Date.now()>=pair.expires){key.set_text('');GLib.unlink(png);respond(1);return GLib.SOURCE_REMOVE;}
+      return GLib.SOURCE_CONTINUE;
+    });
   }else if(type==='--textbox'){
     // Only the existing registration controller's private file is accepted.
     if(!/^\/run\/murakumo-ui\/approval\.[A-Za-z0-9]+\/qr\.txt$/.test(message))throw Error('Invalid approval path');

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   # Node resolves /etc symlinks to their store paths before relative imports.
   # Keep the local setup module and its identity dependency in one directory.
@@ -36,6 +36,8 @@ let
   '';
   voice = import ./voice-runtime.nix { inherit pkgs; };
 in {
+  imports = [ ./ble-setup.nix ];
+  services.murakumoBle.enable = lib.mkDefault true;
   environment.etc."murakumo/voice-NOTICES.txt".source = ./voice-NOTICES.txt;
   users.groups.murakumo-voice = {};
   users.users.murakumo-voice = { isSystemUser = true; group = "murakumo-voice"; extraGroups = [ "audio" ]; };
@@ -60,6 +62,7 @@ in {
   environment.etc."murakumo/network-setup.mjs".source = ./network-setup.mjs;
   environment.etc."murakumo/local-setup.mjs".source = "${localSetup}/local-setup.mjs";
   environment.etc."murakumo/language.mjs".source = ./language.mjs;
+  environment.etc."murakumo/node-status.mjs".source = ./node-status.mjs;
   environment.etc."murakumo/setup-ui.mjs".source = ./setup-ui.mjs;
   environment.etc."murakumo/registration-ui.mjs".source = ./registration-ui.mjs;
   environment.etc."murakumo/launch-ui".source = pkgs.writeShellScript "murakumo-console-ui" ''

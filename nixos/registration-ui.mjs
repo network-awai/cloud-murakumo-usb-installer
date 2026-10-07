@@ -51,7 +51,7 @@ export async function registerWithUI({link,screen,ui,t,options={},onFailure}){
 
 // The guide owns retries. Network or registration failures remain on an
 // actionable screen instead of exiting into a systemd restart loop.
-export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal}) {
+export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal,showStatus}) {
   let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false;
   try {saved=await readSaved();local=await readLocal();if(saved||local)state='complete';}
   catch {storageError=true;state='complete';}
@@ -60,13 +60,15 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       const choice=ui.menu(t('使い方を選んでください。ローカルのセットアップはスマホ・アカウント・インターネットなしで完了します。','Choose how to use this device. Local setup needs no phone, account or Internet.'),[
         ...(completeLocal?[['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
         ['connect',t('Murakumoアカウントに連携する','Link a Murakumo account')],
-        ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
+        ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
+      ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
         ['shutdown',t('電源を切る','Shut down')],
       ]);
       if(choice==='local'){
         try {local=await completeLocal();state='complete';failure=null;}
         catch {failure=t('ローカル設定を保存できませんでした。再試行できます。','Could not save local setup. Please retry.');state='complete';}
-      } else if(choice==='connect'||choice==='network'){wantsLink=choice==='connect';state='network';}
+      } else if(choice==='status'&&showStatus){await showStatus();}
+      else if(choice==='connect'||choice==='network'){wantsLink=choice==='connect';state='network';}
       else if(choice==='shutdown'&&await poweroff())return;
       continue;
     }
@@ -102,12 +104,14 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       ...(verified?[t('モデルと推論の稼働確認は別の手順です。','Model and inference readiness are verified separately.')]:[]),
     ].join('\n');
     const action=ui.menu(status,[
+      ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
       ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'ネットに接続してスマホで登録する',state==='retry'?'Retry registration':saved?'Verify registration online':'Connect and register using your phone')]]:[]),
       ...(!storageError&&!local&&completeLocal? [['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
       ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
       ...(state==='retry'?[['later',t('あとで登録する','Register later')]]:[]),
       ['shutdown',t('電源を切る','Shut down')],
     ]);
+    if(action==='status'&&showStatus){await showStatus();continue;}
     if(action==='shutdown') {
       if(await poweroff())return;
       failure=t('電源を切れませんでした。もう一度お試しください。','Could not shut down. Please retry.');
