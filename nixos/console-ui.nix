@@ -34,12 +34,21 @@ let
   graphicalDialog = pkgs.writeShellScriptBin "dialog" ''
     exec ${pkgs.nodejs_22}/bin/node /etc/murakumo/graphical-dialog.mjs "$@"
   '';
+  voice = import ./voice-runtime.nix { inherit pkgs; };
 in {
+  environment.etc."murakumo/voice-NOTICES.txt".source = ./voice-NOTICES.txt;
+  users.groups.murakumo-voice = {};
+  users.users.murakumo-voice = { isSystemUser = true; group = "murakumo-voice"; extraGroups = [ "audio" ]; };
   services.seatd.enable = true;
   hardware.alsa.enable = true;
   fonts.packages = [ pkgs.noto-fonts-cjk-sans ];
   fonts.fontconfig.enable = true;
-  environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical ];
+  environment.systemPackages = with pkgs; [ dialog fbterm networkmanager weston qrencode graphical voice ];
+  environment.etc."murakumo/voice-runtime.nix".source = ./voice-runtime.nix;
+  environment.etc."murakumo/voice-agent.mjs".source = ./voice-agent.mjs;
+  environment.etc."murakumo/voice-control.mjs".source = ./voice-control.mjs;
+  environment.etc."murakumo/voice-policy.json".source = ./voice-policy.json;
+  environment.etc."murakumo/voice-tts.py".source = ./voice-tts.py;
   environment.etc."murakumo/murakumo-logo.svg".source = ./murakumo-logo.svg;
   environment.etc."murakumo/logo.png".source = logo;
   environment.etc."murakumo/acoustic-code.mjs".source = "${sound}/acoustic-code.mjs";
@@ -63,6 +72,17 @@ in {
     export LIBSEAT_BACKEND=seatd
     export XDG_RUNTIME_DIR="$session" WAYLAND_DISPLAY=murakumo-wayland
     export MURAKUMO_UI_SOCKET="$session/ui.sock" GDK_BACKEND=wayland GSK_RENDERER=cairo
+    mkdir -p /run/murakumo-voice
+    export MURAKUMO_VOICE_DIR=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-voice/session.XXXXXX)
+    export MURAKUMO_VOICE_SOCKET="$session/voice.sock"
+    ${voice}/bin/aiueos-voice > "$session/voice-runtime.log" 2>&1 &
+    voice_pid=$!
+    trap 'kill "$voice_pid" 2>/dev/null || true' EXIT
+    for attempt in $(${pkgs.coreutils}/bin/seq 1 100); do
+      [ ! -S "$MURAKUMO_VOICE_SOCKET" ] || break
+      kill -0 "$voice_pid" 2>/dev/null || break
+      ${pkgs.coreutils}/bin/sleep 0.1
+    done
     # Wait for input-device classification before Weston enumerates its seat.
     ${pkgs.systemd}/bin/udevadm settle --timeout=30 || true
     ${pkgs.weston}/bin/weston --backend=drm-backend.so --shell=kiosk-shell.so --renderer=pixman --socket="$WAYLAND_DISPLAY" --idle-time=0 --log="$session/weston.log" &
@@ -84,6 +104,8 @@ in {
       [ ! -f "$session/result" ] || result=$(cat "$session/result")
       exit "$result"
     fi
+    kill "$voice_pid" 2>/dev/null || true
+    wait "$voice_pid" 2>/dev/null || true
     unset MURAKUMO_UI_SOCKET GDK_BACKEND GSK_RENDERER WAYLAND_DISPLAY XDG_RUNTIME_DIR
     if [ -c /dev/fb0 ]; then
       session=$(${pkgs.coreutils}/bin/mktemp -d /run/murakumo-ui/session.XXXXXX)

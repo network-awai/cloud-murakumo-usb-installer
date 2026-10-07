@@ -4,6 +4,32 @@ const {Gtk,Gdk,Gio,GLib,Pango,GdkPixbuf}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
 let content,window,steps,footer,active=null,backend=null,language='ja',audio=null,musicEnabled=true,musicButton=null;
+let voiceConnection=null,voiceInput=null,voiceRevision=0,voiceState=null,voiceActions={},voiceCaption=null,voiceStatus=null;
+function voiceWrite(value){try{voiceConnection?.get_output_stream().write_all(ByteArray.fromString(JSON.stringify(value)+'\n'),null);}catch{}}
+function voiceInvalidate(){voiceRevision++;voiceState=null;voiceActions={};voiceWrite({kind:'invalidate'});}
+function voicePublish(screen,actions){voiceState={revision:++voiceRevision,language,...screen};voiceActions=actions;voiceWrite({kind:'screen',screen:voiceState});}
+function voiceListen(){
+  voiceInput.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
+    try{const [line]=stream.read_line_finish_utf8(result);if(!line||line.length>65536)throw Error('Voice disconnected');const value=JSON.parse(line);
+      if(value.kind==='action'&&voiceState&&value.revision===voiceState.revision){
+        if(value.action==='control')voiceSetting(value.value);
+        else if(value.action==='choose')voiceActions.choose?.(value.value);
+        else if(value.action==='input')voiceActions.input?.(value.value);
+        else if(value.action==='erase'&&value.value===voiceState.target)voiceActions.erase?.();
+        else if(['back','continue','send_code'].includes(value.action))voiceActions[value.action]?.();
+      }else if(value.kind==='speech'||value.kind==='transcript'){voiceCaption.set_label((value.kind==='speech'?'AI: ':'')+String(value.text).slice(0,1200));}
+      else if(value.kind==='status'){
+        const states={warming:['AIを準備しています','Preparing local AI'],listening:['お話しください','Your turn to speak'],thinking:['考えています…','Thinking…'],speaking:['AIが話しています','AI is speaking'],unavailable:['AI会話を起動できません。画面で続けられます','AI unavailable. Continue using the screen'],microphone_unavailable:['マイクを利用できません。画面で続けられます','Microphone unavailable. Continue using the screen'],audio_unavailable:['音声出力を利用できません','Audio output unavailable'],retry:['聞き取れませんでした。もう一度お話しください','Could not understand. Please try again']};
+        if(states[value.status])voiceStatus.set_label(tr(...states[value.status]));if(['listening','thinking','speaking'].includes(value.status))stopAudio();
+      }
+      voiceListen();
+    }catch{voiceCaption?.set_label(tr('音声会話は停止しています。画面で続けられます','Voice stopped. Continue using the screen'));voiceInvalidate();}
+  });
+}
+function connectVoice(){
+  const path=GLib.getenv('MURAKUMO_VOICE_SOCKET');if(!path)return;
+  try{voiceConnection=new Gio.SocketClient().connect(new Gio.UnixSocketAddress({path}),null);voiceInput=new Gio.DataInputStream({base_stream:voiceConnection.get_input_stream()});voiceListen();}catch{voiceCaption.set_label(tr('音声会話を起動できません。画面で続けられます','Voice unavailable. Continue using the screen'));}
+}
 const tr=(ja,en)=>language==='ja'?ja:en;
 const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:cls!=='brand',wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
@@ -11,6 +37,14 @@ function button(text,callback,cls='secondary'){
   const w=new Gtk.Button({label:text});w.add_css_class(cls);w.connect('clicked',callback);return w;
 }
 function stopAudio(){if(audio){try{audio.force_exit();}catch{}audio=null;}}
+function voiceSetting(value){
+  if(value==='music_off'){musicEnabled=false;stopAudio();musicButton?.set_label(tr('BGMを再生','Play BGM'));}
+  else if(value==='music_on'){musicEnabled=true;musicButton?.set_label(tr('BGMを停止','Stop BGM'));playAudio('/etc/murakumo/startup.wav');}
+  else if(['volume_up','volume_down'].includes(value)){
+    const child=Gio.Subprocess.new(['amixer','-q','sset','Master',value==='volume_up'?'5%+':'5%-'],Gio.SubprocessFlags.STDOUT_SILENCE|Gio.SubprocessFlags.STDERR_SILENCE);
+    child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(!p.get_successful())voiceStatus.set_label(tr('この音声出力は音量変更に対応していません','This audio output does not support volume control'));}catch{}});
+  }
+}
 function playAudio(path,onDone=()=>{}){
   stopAudio();
   try{const child=Gio.Subprocess.new(['aplay','-q',path],Gio.SubprocessFlags.STDOUT_SILENCE|Gio.SubprocessFlags.STDERR_SILENCE);audio=child;child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(audio===p){audio=null;onDone(p.get_successful());}}catch{}});}catch{onDone(false);}
@@ -43,17 +77,22 @@ function serve(request,connection,input){
   const type=types.find(x=>args.includes(x));if(!type)throw Error('Unsupported UI request');
   const i=args.indexOf(type);let message=args[i+1]||'';
   const token={connection,type};active=token;
+  let voice={kind:'message',message,canBack:false,canContinue:false},actions={};
   const respond=(status,value='')=>{
     if(active!==token)return;
+    if(type!=='--infobox')voiceInvalidate();
     try{connection.get_output_stream().write_all(ByteArray.fromString(JSON.stringify({status,value})+'\n'),null);}catch{}
     connection.close(null);active=null;stopAudio();
   };
   show(heading(type,message,args),type==='--textbox'?tr('スマホでQRを読むか、別のPCで表示されたURLを開いてください。\nPasskeyでログインし、端末IDとコードを確認して承認してください。','Scan the QR on a phone, or open the link on another computer.\nSign in with a Passkey, check the Device ID and code, then approve.'):message.replace(/(?:次の文字をそのまま入力してください：|Type exactly: )ERASE \/dev\/[^\n]+/,'').replace(/↑↓で選択、Enterで決定。/,'接続方法を選んでください。'));
   if(type==='--menu'){
     const choices=args.slice(i+5);
+    voice={kind:'menu',message,choices:[],canBack:true};const keys=new Set();
+    actions={choose:key=>{if(keys.has(key))respond(0,key);},back:()=>respond(1)};
     const list=box(Gtk.Orientation.VERTICAL,10);
     for(let n=0;n<choices.length;n+=2){
       const key=choices[n],text=choices[n+1]||key;
+      keys.add(key);voice.choices.push({id:key,label:text});
       const b=new Gtk.Button();b.add_css_class('choice');
       const row=box(Gtk.Orientation.HORIZONTAL,16);
       const disk=key.startsWith('/dev/');
@@ -66,6 +105,9 @@ function serve(request,connection,input){
   }else if(type==='--inputbox'||type==='--passwordbox'){
     const phrase=message.match(/ERASE \/dev\/(?:nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+)/)?.[0];
     if(phrase){
+      const target=phrase.slice(6),serial=message.match(/(?:製造番号：|Serial: )([^\n]+)/)?.[1]?.trim();
+      voice={kind:'erase',message,target,serial:serial&&!['不明','not available'].includes(serial)?serial:null,canBack:true};
+      actions={erase:()=>respond(0,phrase),back:()=>respond(1)};
       const agree=new Gtk.CheckButton({label:tr('このディスクの全データを消去することを確認しました','I confirm that all data on this disk will be erased')});content.append(agree);
       const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;
       controls.append(button(tr('戻る','Back'),()=>respond(1)));
@@ -73,6 +115,8 @@ function serve(request,connection,input){
       agree.connect('toggled',()=>erase.sensitive=agree.active);controls.append(erase);content.append(controls);agree.grab_focus();
     }else{
       const entry=type==='--passwordbox'?new Gtk.PasswordEntry({show_peek_icon:true}):new Gtk.Entry();entry.add_css_class('input');content.append(entry);
+      voice={kind:type==='--passwordbox'?'secret':'input',message,canBack:true};
+      actions={input:value=>{if(typeof value==='string'&&value.length<=128){entry.set_text('');respond(0,value);}},back:()=>{entry.set_text('');respond(1);}};
       const submit=()=>{const value=entry.get_text();entry.set_text('');respond(0,value);};entry.connect('activate',submit);
       const controls=box(Gtk.Orientation.HORIZONTAL,12);controls.halign=Gtk.Align.END;controls.append(button(tr('戻る','Back'),()=>{entry.set_text('');respond(1);}));controls.append(button(type==='--passwordbox'?tr('接続する','Connect'):tr('次へ','Continue'),submit,'primary'));content.append(controls);entry.grab_focus();
     }
@@ -101,21 +145,24 @@ function serve(request,connection,input){
         acousticStatus.set_label(tr('コードを送信中… 読み取り後にPasskeyで承認してください。','Sending code… Approve with a Passkey after reading.'));
         playAudio(path,ok=>{acousticStatus.set_label(ok?tr('送信完了。必要ならもう一度送信できます。','Sent. You can send again.'):tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));});
       }catch{acousticStatus.set_label(tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));}
-    });details.append(sendSound);details.append(label(tr('音の読み取りには専用ページが必要です（公開準備中）。','Sound reading needs the companion page (public release pending).'),'muted'));details.append(acousticStatus);
+    });details.append(sendSound);voice={kind:'approval',message:tr('Passkeyでログインし、端末IDとコードを確認して承認してください。音でコードを送れます。','Sign in with a Passkey, compare the device identity and code, then approve. You can send the code by sound.'),canBack:true};actions={send_code:()=>sendSound.emit('clicked'),back:()=>respond(1)};details.append(label(tr('音の読み取りには専用ページが必要です（公開準備中）。','Sound reading needs the companion page (public release pending).'),'muted'));details.append(acousticStatus);
     const address=new Gtk.Label({label:uri,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:28,xalign:0,selectable:true});address.add_css_class('muted');details.append(address);
     details.append(label(tr('承認待ち · 有効期限5分','Waiting for approval · Expires in 5 minutes'),'muted'));const later=button(tr('あとで登録','Link later'),()=>respond(1));details.append(later);content.append(row);later.grab_focus();
   }else if(type==='--infobox'||type==='--pause'){
+    voice={kind:'busy',message};
     const spinner=new Gtk.Spinner({spinning:true,width_request:40,height_request:40,halign:Gtk.Align.START});content.append(spinner);
     // Busy updates are acknowledged immediately; installation runs separately
     // from the UI event loop. Pauses retain the caller's retry pacing.
-    if(type==='--pause')GLib.timeout_add(GLib.PRIORITY_DEFAULT,2000,()=>{respond(0);return GLib.SOURCE_REMOVE;});else respond(0);
+    if(type==='--pause')GLib.timeout_add(GLib.PRIORITY_DEFAULT,2000,()=>{respond(0);return GLib.SOURCE_REMOVE;});else {voicePublish(voice,{});respond(0);}
   }else{
+    voice={kind:'message',message,canContinue:true};actions={continue:()=>respond(0)};
     const next=button(/再起動|restart/i.test(message)?tr('再起動する','Restart'):tr('続ける','Continue'),()=>respond(0),'primary');content.append(next);next.grab_focus();
   }
+  if(active===token)voicePublish(voice,actions);
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{stream.read_line_finish_utf8(result);}catch{}
-      if(active===token){active=null;stopAudio();show(tr('準備しています','Getting ready'),tr('次の画面へ進んでいます…','Continuing to the next screen…'));}
+      if(active===token){active=null;voiceInvalidate();stopAudio();show(tr('準備しています','Getting ready'),tr('次の画面へ進んでいます…','Continuing to the next screen…'));}
       try{connection.close(null);}catch{}
     });
   }
@@ -150,6 +197,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
   steps=label('ネット接続    ›    インストール    ›    セットアップ','steps');card.append(steps);
   content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('AiueOS · インストールはオフラインでも完了できます','muted');outer.append(footer);
+  voiceStatus=label(tr('AIとの音声会話を準備しています','Preparing AI voice conversation'),'muted');outer.append(voiceStatus);
+  voiceCaption=label('','muted');outer.append(voiceCaption);connectVoice();
   musicButton=button('BGM 停止 / Stop music',()=>{musicEnabled=!musicEnabled;if(musicEnabled)playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label(tr('音声出力なし','Audio unavailable'));});else stopAudio();musicButton.set_label(musicEnabled?tr('BGMを停止','Stop BGM'):tr('BGMを再生','Play BGM'));});outer.append(musicButton);
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show(tr('Murakumoへようこそ','Welcome to Murakumo'),'セットアップを準備しています…');window.fullscreen();window.present();
   const socketPath=GLib.getenv('MURAKUMO_UI_SOCKET');
@@ -163,6 +212,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
     });return true;
   });service.start();
   const startBackend=selected=>{
+  if(backend)return;
+  voiceInvalidate();
   language=selected;steps.set_label(tr('ネット接続    ›    インストール    ›    セットアップ','Network    ›    Install    ›    Setup'));footer.set_label(tr('AiueOS · インストールはオフラインでも完了できます','AiueOS · Installation works offline'));
   show(tr('Murakumoへようこそ','Welcome to Murakumo'),tr('セットアップを準備しています…','Preparing setup…'));
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
@@ -176,6 +227,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   try{const [ok,data]=GLib.file_get_contents('/var/lib/murakumo/ui-language');const value=ByteArray.toString(data).trim();if(ok&&['ja','en'].includes(value))preferred=value;}catch{}
   playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label('音声出力なし / Audio unavailable');});
   for(const value of [preferred,preferred==='ja'?'en':'ja'])content.append(button(value==='ja'?'日本語':'English',()=>startBackend(value),'choice'));
+  voicePublish({kind:'language',message:'Choose Japanese or English. 日本語か英語でお話しください。',choices:[{id:'ja',label:'日本語'},{id:'en',label:'English'}]}, {choose:value=>{if(['ja','en'].includes(value)){voiceInvalidate();startBackend(value);}}});
 });
 app.connect('shutdown',stopAudio);
 app.run([]);

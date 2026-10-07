@@ -108,7 +108,7 @@ async function main() {
     if (!closure.length || closure.some(p => !existsSync(p))) throw Error('Offline OS is incomplete. Nothing erased.');
     run('nix-store', ['--check-validity', ...closure]);
     directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
-    configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs', 'acoustic-code.mjs', 'setup-sound.mjs', 'sound-link.html'];
+    configFiles = ['node-base.nix', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs', 'acoustic-code.mjs', 'setup-sound.mjs', 'sound-link.html', 'voice-runtime.nix', 'voice-agent.mjs', 'voice-control.mjs', 'voice-policy.json', 'voice-tts.py', 'voice-NOTICES.txt'];
     for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
     rootUuid = randomUUID(); bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();
     const otherUuids = disks.filter(d => d.path !== selected).flatMap(tree).map(d => String(d.uuid || '').toUpperCase());
