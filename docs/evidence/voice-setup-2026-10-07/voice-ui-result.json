@@ -5,5 +5,7 @@
   "secretPassed": true,
   "serialBoundConfirmation": true,
   "continue": true,
+  "codePlaybackCompleted": true,
+  "playerFixture": true,
   "actualDiskErased": false
 }

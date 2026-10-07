@@ -40,3 +40,7 @@ The first full ISO build without network failed because system dependencies were
 Final small-model dialogue run passed all five cases in9507ms. Actual English small-model recognition also passed `lowercase B`, `digit seven`, `done` and the exact serial-bound erase phrase. Named symbols and NATO letters are parsed locally; sentence punctuation cannot silently add password characters. Physical microphone=false and actualDiskErased=false.
 
 The protected runtime-directory test passed under actual systemd with `ProtectSystem=strict`, `NoNewPrivileges=yes`, a0700 session and a0600 file read as the dedicated unprivileged voice user. The updated GTK flow passed again. Selected results are committed under `docs/evidence/voice-setup-2026-10-07/`.
+
+## Acoustic playback coordination
+
+The real GTK approval view now sends playback state to the voice agent. Recognition pauses while BGM/FSK plays, pending erase consent is cleared, and listening-state notifications cannot terminate the code player. A new native GTK test sends the existing public FSK code by voice, injects the listening notification immediately after player startup, and verifies the player completes before returning. The code generator/QR renderer are real; the one-second player is an explicit fixture, not a physical speaker. Results: `voice-ui-playback-final.log` and the committed `voice-ui-result.json`. Each run now uses unique result/transport paths so old files cannot establish success.

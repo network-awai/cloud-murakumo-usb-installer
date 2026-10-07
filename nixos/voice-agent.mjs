@@ -58,11 +58,12 @@ export async function startAgent({socket,dir}){
   const key=randomUUID(),keyPath=dir+'/llm-key';await writeFile(keyPath,key,{mode:0o600});
   if(process.getuid?.()===0)await run('chown',['murakumo-voice:murakumo-voice',keyPath],{unprivileged:false}).promise;
   const llm=run(process.env.MURAKUMO_LLM_SERVER,['-m',process.env.MURAKUMO_VOICE_MODEL,'--host','127.0.0.1','--port','18086','--api-key-file',keyPath,'--ctx-size','2048','--threads','2','--parallel','1','--cache-ram','0'],{timeout:86400000});llm.promise.catch(()=>notify('unavailable'));
-  let peer=null,output=null,synthesis=null,speechEpoch=0,capture=null,working=false,server,closed=false,ready=false,speaking=false,resumeAt=0,microphoneReady=true;
+  let peer=null,output=null,synthesis=null,speechEpoch=0,capture=null,working=false,server,closed=false,ready=false,speaking=false,resumeAt=0,microphoneReady=true,externalPlayback=false,pendingAnnouncement=false;
   const cancelSpeech=()=>{speechEpoch++;terminate(output);terminate(synthesis);output=synthesis=null;speaking=false;resumeAt=Date.now()+300;};
   const notify=status=>{if(peer&&!peer.destroyed)peer.write(JSON.stringify({kind:'status',status})+'\n');};
   const speak=async text=>{
     if(closed||!peer)return;
+    if(externalPlayback){pendingAnnouncement=true;return;}
     cancelSpeech();const epoch=speechEpoch;speaking=true;vad.reset();notify('speaking');peer.write(JSON.stringify({kind:'speech',text})+'\n');
     const path=dir+'/'+randomUUID()+'.wav';
     try{
@@ -72,23 +73,23 @@ export async function startAgent({socket,dir}){
     }catch{if(epoch===speechEpoch)notify('audio_unavailable');}finally{if(epoch===speechEpoch){output=synthesis=null;speaking=false;resumeAt=Date.now()+300;vad.reset();notify(microphoneReady?'listening':'microphone_unavailable');}await rm(path,{force:true});}
   };
   const control=new VoiceControl({model:modelClient({key}),speak,dispatch:action=>{if(peer&&!peer.destroyed)peer.write(JSON.stringify({kind:'action',...action})+'\n');}});
-  const announce=async()=>{const s=control.screen;if(!s)return;const text=s.kind==='secret'?(s.language==='en'?'Spell your Wi-Fi password locally. Say lowercase B or uppercase A, then done.':'Wi-Fiのパスワードを端末内で入力します。小文字のBを入力、数字の7を入力、のように話してください。最後に入力完了と言ってください。'):s.kind==='erase'?(s.language==='en'?'Check the target disk. Ask to install to hear the confirmation.':'消去するディスクを確認してください。インストールを依頼すると、確認する内容を読み返します。'):s.message+' '+(s.choices||[]).slice(0,6).map((c,i)=>`${i+1}: ${c.label}`).join('。');await speak(text.slice(0,400));};
+  const announce=async()=>{const s=control.screen;if(!s)return;if(externalPlayback){pendingAnnouncement=true;return;}pendingAnnouncement=false;const text=s.kind==='secret'?(s.language==='en'?'Spell your Wi-Fi password locally. Say lowercase B or uppercase A, then done.':'Wi-Fiのパスワードを端末内で入力します。小文字のBを入力、数字の7を入力、のように話してください。最後に入力完了と言ってください。'):s.kind==='erase'?(s.language==='en'?'Check the target disk. Ask to install to hear the confirmation.':'消去するディスクを確認してください。インストールを依頼すると、確認する内容を読み返します。'):s.message+' '+(s.choices||[]).slice(0,6).map((c,i)=>`${i+1}: ${c.label}`).join('。');await speak(text.slice(0,400));};
   const vad=new VoiceActivity({onInterrupt:()=>{terminate(output);},onSpeech:async pcm=>{
     if(working||closed||!ready||!control.screen)return;working=true;
     const revision=control.screen.revision,generation=control.generation,secret=control.screen.kind==='secret';notify('thinking');
     try{const words=await transcribe(pcm,{dir,language:control.screen.kind==='language'?'auto':control.screen.language,secret});if(!control.valid(revision,generation))return;
       if(!secret&&peer)peer.write(JSON.stringify({kind:'transcript',text:words})+'\n');
       if(words)await control.utterance(words);
-    }catch{notify('retry');}finally{working=false;notify('listening');}
+    }catch{notify('retry');}finally{working=false;notify(externalPlayback?'playback':microphoneReady?'listening':'microphone_unavailable');}
   }});
   server=net.createServer(c=>{
     if(peer){c.destroy();return;}peer=c;let pending='';
-    c.on('data',chunk=>{pending+=chunk;if(pending.length>65536){c.destroy();return;}for(let end;(end=pending.indexOf('\n'))>=0;){const line=pending.slice(0,end);pending=pending.slice(end+1);try{const state=JSON.parse(line);if(state.kind==='screen'){if(control.update(state.screen)){vad.reset();cancelSpeech();notify(ready?'listening':'warming');if(ready)announce().catch(()=>notify('audio_unavailable'));}}else if(state.kind==='invalidate'){control.invalidate();vad.reset();cancelSpeech();}}catch{c.destroy();}}});
+    c.on('data',chunk=>{pending+=chunk;if(pending.length>65536){c.destroy();return;}for(let end;(end=pending.indexOf('\n'))>=0;){const line=pending.slice(0,end);pending=pending.slice(end+1);try{const state=JSON.parse(line);if(state.kind==='screen'){if(control.update(state.screen)){vad.reset();cancelSpeech();notify(ready?'listening':'warming');if(ready)announce().catch(()=>notify('audio_unavailable'));}}else if(state.kind==='invalidate'){control.invalidate();vad.reset();cancelSpeech();}else if(state.kind==='playback'&&typeof state.playing==='boolean'){externalPlayback=state.playing;vad.reset();if(externalPlayback){control.confirmation=null;cancelSpeech();notify('playback');}else{resumeAt=Date.now()+300;notify(microphoneReady?'listening':'microphone_unavailable');if(ready&&pendingAnnouncement)announce().catch(()=>notify('audio_unavailable'));}}}catch{c.destroy();}}});
     c.on('close',()=>{if(peer===c){peer=null;control.invalidate();cancelSpeech();vad.reset();}});
   });await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(socket,resolve);});await chmod(socket,0o600);
   const record=run('arecord',['-q','-t','raw','-f','S16_LE','-r','16000','-c','1'],{unprivileged:true,timeout:86400000});capture=record.child;
   // run() drains stdout for commands; capture needs the raw stream exclusively.
-  capture.stdout.removeAllListeners('data');capture.stdout.on('data',d=>{if(!speaking&&Date.now()>resumeAt&&!working)vad.push(d);});record.promise.catch(()=>{microphoneReady=false;notify('microphone_unavailable');});
+  capture.stdout.removeAllListeners('data');capture.stdout.on('data',d=>{if(!externalPlayback&&!speaking&&Date.now()>resumeAt&&!working)vad.push(d);});record.promise.catch(()=>{microphoneReady=false;notify('microphone_unavailable');});
   (async()=>{for(let i=0;i<180&&!closed;i++){try{const r=await fetch('http://127.0.0.1:18086/health',{signal:AbortSignal.timeout(1000)});if(r.ok){ready=true;notify('listening');await announce();break;}}catch{}await new Promise(resolve=>setTimeout(resolve,1000));}if(!ready&&!closed)notify('unavailable');})().catch(()=>notify('unavailable'));
   const close=async()=>{closed=true;control.invalidate();cancelSpeech();terminate(capture);terminate(llm.child);peer?.destroy();server.close();await new Promise(resolve=>setTimeout(resolve,1100));await rm(dir,{recursive:true,force:true});await rm(socket,{force:true});};
   return {control,close};

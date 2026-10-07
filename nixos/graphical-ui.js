@@ -3,7 +3,7 @@ imports.gi.versions.Gtk='4.0';
 const {Gtk,Gdk,Gio,GLib,Pango,GdkPixbuf}=imports.gi;
 const ByteArray=imports.byteArray;
 const app=new Gtk.Application({application_id:'cloud.murakumo.Setup'});
-let content,window,steps,footer,active=null,backend=null,language='ja',audio=null,musicEnabled=true,musicButton=null;
+let content,window,steps,footer,active=null,backend=null,language='ja',audio=null,musicEnabled=true,musicButton=null,audioKind=null;
 let voiceConnection=null,voiceInput=null,voiceRevision=0,voiceState=null,voiceActions={},voiceCaption=null,voiceStatus=null;
 function voiceWrite(value){try{voiceConnection?.get_output_stream().write_all(ByteArray.fromString(JSON.stringify(value)+'\n'),null);}catch{}}
 function voiceInvalidate(){voiceRevision++;voiceState=null;voiceActions={};voiceWrite({kind:'invalidate'});}
@@ -19,8 +19,8 @@ function voiceListen(){
         else if(['back','continue','send_code'].includes(value.action))voiceActions[value.action]?.();
       }else if(value.kind==='speech'||value.kind==='transcript'){voiceCaption.set_label((value.kind==='speech'?'AI: ':'')+String(value.text).slice(0,1200));}
       else if(value.kind==='status'){
-        const states={warming:['AIを準備しています','Preparing local AI'],listening:['お話しください','Your turn to speak'],thinking:['考えています…','Thinking…'],speaking:['AIが話しています','AI is speaking'],unavailable:['AI会話を起動できません。画面で続けられます','AI unavailable. Continue using the screen'],microphone_unavailable:['マイクを利用できません。画面で続けられます','Microphone unavailable. Continue using the screen'],audio_unavailable:['音声出力を利用できません','Audio output unavailable'],retry:['聞き取れませんでした。もう一度お話しください','Could not understand. Please try again']};
-        if(states[value.status])voiceStatus.set_label(tr(...states[value.status]));if(['listening','thinking','speaking'].includes(value.status))stopAudio();
+        const states={warming:['AIを準備しています','Preparing local AI'],listening:['お話しください','Your turn to speak'],thinking:['考えています…','Thinking…'],speaking:['AIが話しています','AI is speaking'],unavailable:['AI会話を起動できません。画面で続けられます','AI unavailable. Continue using the screen'],microphone_unavailable:['マイクを利用できません。画面で続けられます','Microphone unavailable. Continue using the screen'],audio_unavailable:['音声出力を利用できません','Audio output unavailable'],playback:['音を再生しています。終了後にお話しください','Playing audio. Speak when it finishes'],retry:['聞き取れませんでした。もう一度お話しください','Could not understand. Please try again']};
+        if(states[value.status])voiceStatus.set_label(tr(...states[value.status]));if(['listening','thinking','speaking'].includes(value.status)&&audioKind==='music')stopAudio();
       }
       voiceListen();
     }catch{voiceCaption?.set_label(tr('音声会話は停止しています。画面で続けられます','Voice stopped. Continue using the screen'));voiceInvalidate();}
@@ -36,7 +36,7 @@ const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orient
 function button(text,callback,cls='secondary'){
   const w=new Gtk.Button({label:text});w.add_css_class(cls);w.connect('clicked',callback);return w;
 }
-function stopAudio(){if(audio){try{audio.force_exit();}catch{}audio=null;}}
+function stopAudio(){if(audio){try{audio.force_exit();}catch{}audio=null;audioKind=null;voiceWrite({kind:'playback',playing:false});}}
 function voiceSetting(value){
   if(value==='music_off'){musicEnabled=false;stopAudio();musicButton?.set_label(tr('BGMを再生','Play BGM'));}
   else if(value==='music_on'){musicEnabled=true;musicButton?.set_label(tr('BGMを停止','Stop BGM'));playAudio('/etc/murakumo/startup.wav');}
@@ -45,9 +45,9 @@ function voiceSetting(value){
     child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(!p.get_successful())voiceStatus.set_label(tr('この音声出力は音量変更に対応していません','This audio output does not support volume control'));}catch{}});
   }
 }
-function playAudio(path,onDone=()=>{}){
+function playAudio(path,onDone=()=>{},kind='music'){
   stopAudio();
-  try{const child=Gio.Subprocess.new(['aplay','-q',path],Gio.SubprocessFlags.STDOUT_SILENCE|Gio.SubprocessFlags.STDERR_SILENCE);audio=child;child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(audio===p){audio=null;onDone(p.get_successful());}}catch{}});}catch{onDone(false);}
+  try{const child=Gio.Subprocess.new(['aplay','-q',path],Gio.SubprocessFlags.STDOUT_SILENCE|Gio.SubprocessFlags.STDERR_SILENCE);audio=child;audioKind=kind;voiceWrite({kind:'playback',playing:true});child.wait_async(null,(p,r)=>{try{p.wait_finish(r);if(audio===p){audio=null;audioKind=null;voiceWrite({kind:'playback',playing:false});onDone(p.get_successful());}}catch{}});}catch{onDone(false);}
 }
 function clear(){stopAudio();while(content.get_first_child())content.remove(content.get_first_child());}
 function show(title,message){clear();content.append(label(title,'heading'));if(message)content.append(label(message));}
@@ -143,7 +143,7 @@ function serve(request,connection,input){
       const path=message+'.wav';
       try{const generator=Gio.Subprocess.new(['node','/etc/murakumo/setup-sound.mjs','code',code,path],Gio.SubprocessFlags.STDERR_SILENCE);if(!generator.wait_check(null))throw Error('Audio generation');
         acousticStatus.set_label(tr('コードを送信中… 読み取り後にPasskeyで承認してください。','Sending code… Approve with a Passkey after reading.'));
-        playAudio(path,ok=>{acousticStatus.set_label(ok?tr('送信完了。必要ならもう一度送信できます。','Sent. You can send again.'):tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));});
+        playAudio(path,ok=>{acousticStatus.set_label(ok?tr('送信完了。必要ならもう一度送信できます。','Sent. You can send again.'):tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));},'code');
       }catch{acousticStatus.set_label(tr('音声出力を利用できません。QRまたはURLを使えます。','Audio unavailable. Use the QR or URL.'));}
     });details.append(sendSound);voice={kind:'approval',message:tr('Passkeyでログインし、端末IDとコードを確認して承認してください。音でコードを送れます。','Sign in with a Passkey, compare the device identity and code, then approve. You can send the code by sound.'),canBack:true};actions={send_code:()=>sendSound.emit('clicked'),back:()=>respond(1)};details.append(label(tr('音の読み取りには専用ページが必要です（公開準備中）。','Sound reading needs the companion page (public release pending).'),'muted'));details.append(acousticStatus);
     const address=new Gtk.Label({label:uri,wrap:true,wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:28,xalign:0,selectable:true});address.add_css_class('muted');details.append(address);
