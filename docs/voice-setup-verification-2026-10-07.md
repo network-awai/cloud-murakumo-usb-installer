@@ -44,3 +44,5 @@ The protected runtime-directory test passed under actual systemd with `ProtectSy
 ## Acoustic playback coordination
 
 The real GTK approval view now sends playback state to the voice agent. Recognition pauses while BGM/FSK plays, pending erase consent is cleared, and listening-state notifications cannot terminate the code player. A new native GTK test sends the existing public FSK code by voice, injects the listening notification immediately after player startup, and verifies the player completes before returning. The code generator/QR renderer are real; the one-second player is an explicit fixture, not a physical speaker. Results: `voice-ui-playback-final.log` and the committed `voice-ui-result.json`. Each run now uses unique result/transport paths so old files cannot establish success.
+
+The native GTK voice action produced real QR PNG and16000Hz FSK WAV. Independent macOS Vision QR decoding and the acoustic decoder both returned `https://murakumo.cloud/portal/#device-link?code=ABCD123456`. This is a fixture public code, not a live approval.
