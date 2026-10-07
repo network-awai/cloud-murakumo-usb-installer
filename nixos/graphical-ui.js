@@ -20,7 +20,7 @@ function voiceListen(){
       }else if(value.kind==='speech'||value.kind==='transcript'){voiceCaption.set_label((value.kind==='speech'?'AI: ':'')+String(value.text).slice(0,1200));}
       else if(value.kind==='status'){
         const states={warming:['AIを準備しています','Preparing local AI'],listening:['お話しください','Your turn to speak'],thinking:['考えています…','Thinking…'],speaking:['AIが話しています','AI is speaking'],unavailable:['AI会話を起動できません。画面で続けられます','AI unavailable. Continue using the screen'],microphone_unavailable:['マイクを利用できません。画面で続けられます','Microphone unavailable. Continue using the screen'],audio_unavailable:['音声出力を利用できません','Audio output unavailable'],playback:['音を再生しています。終了後にお話しください','Playing audio. Speak when it finishes'],retry:['聞き取れませんでした。もう一度お話しください','Could not understand. Please try again']};
-        if(states[value.status])voiceStatus.set_label(tr(...states[value.status]));if(['listening','thinking','speaking'].includes(value.status)&&audioKind==='music')stopAudio();
+        if(states[value.status])voiceStatus.set_label(tr(...states[value.status]));if(['listening','thinking','speaking'].includes(value.status)&&audioKind==='startup')stopAudio();
       }
       voiceListen();
     }catch{voiceCaption?.set_label(tr('音声会話は停止しています。画面で続けられます','Voice stopped. Continue using the screen'));voiceInvalidate();}
@@ -225,7 +225,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   show('言語を選択 / Choose your language','日本語 または English を選んでください。 / Select Japanese or English.');
   let preferred='ja';
   try{const [ok,data]=GLib.file_get_contents('/var/lib/murakumo/ui-language');const value=ByteArray.toString(data).trim();if(ok&&['ja','en'].includes(value))preferred=value;}catch{}
-  playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label('音声出力なし / Audio unavailable');});
+  playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label('音声出力なし / Audio unavailable');},'startup');
   for(const value of [preferred,preferred==='ja'?'en':'ja'])content.append(button(value==='ja'?'日本語':'English',()=>startBackend(value),'choice'));
   voicePublish({kind:'language',message:'Choose Japanese or English. 日本語か英語でお話しください。',choices:[{id:'ja',label:'日本語'},{id:'en',label:'English'}]}, {choose:value=>{if(['ja','en'].includes(value)){voiceInvalidate();startBackend(value);}}});
 });

@@ -11,4 +11,4 @@ await writeFile(approval+'/qr.txt','Code: ABCD123456\nDevice ID: did:key:voice-f
 assert.equal((await dialog(['--textbox',approval+'/qr.txt','20','80'])).status,1);
 await writeFile('/mnt/output/voice-ui-acoustic-fixture.wav',await readFile(approval+'/qr.txt.wav'));
 await writeFile('/mnt/output/voice-ui-acoustic-fixture.png',await readFile(approval+'/qr.txt.png'));
-await writeFile(process.env.MURAKUMO_QA_RESULT,JSON.stringify({nativeGTK:true,language:'ja',networkChoice:'wifi',secretPassed:true,serialBoundConfirmation:true,continue:true,codePlaybackCompleted:true,playerFixture:true,actualDiskErased:false},null,2));
+await writeFile(process.env.MURAKUMO_QA_RESULT,JSON.stringify({nativeGTK:true,language:'ja',networkChoice:'wifi',secretPassed:true,serialBoundConfirmation:true,continue:true,requestedMusicCompleted:true,codePlaybackCompleted:true,playerFixture:true,actualDiskErased:false},null,2));

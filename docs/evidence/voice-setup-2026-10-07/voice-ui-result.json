@@ -5,6 +5,7 @@
   "secretPassed": true,
   "serialBoundConfirmation": true,
   "continue": true,
+  "requestedMusicCompleted": true,
   "codePlaybackCompleted": true,
   "playerFixture": true,
   "actualDiskErased": false
