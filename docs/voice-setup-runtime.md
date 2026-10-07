@@ -45,6 +45,6 @@ and companion sound page need their separate reviewed production release;
 this package does not deploy them. Real microphone, speaker, phone permission
 and Passkey checks must be reported separately from synthetic audio fixtures.
 
-The upstream runtime licenses and redistributed model/voice assets must be
-included in release notices before distributing the new voice medium. This
+The package includes pinned upstream runtime/model/voice license notices in
+`share/doc/aiueos-local-voice/NOTICE.txt` and retains that notice on the installed system. This
 runtime is currently a local candidate, not a published or USB-written release.
