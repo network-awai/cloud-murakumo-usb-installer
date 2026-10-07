@@ -97,6 +97,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       t('AiueOS：インストール完了','AiueOS: installed'),
       ...(local?[t('セットアップ：この端末で完了（スマホ不要）','Setup: completed locally (no phone needed)'),`Device ID: ${local.deviceDid}`,t('共有ネットワーク・推論・報酬の利用には別途確認が必要です。','Shared network participation, inference and rewards require separate verification.')]:[]),
       t(saved?'アカウント：連携情報を保存済み':'アカウント：あとで登録できます',saved?'Account: linking information saved':'Account: registration pending'),
+      t('スマホ・別のPCで連携できます。秘密情報の保管庫は操作する機器で開きます。','Link using a phone or another computer. Unlock the secret vault on the device you use to manage this Node.'),
       ...(saved?[t(verified?'登録状態：今回の起動で確認済み':'登録状態：オンライン確認前',verified?'Registration: verified during this boot':'Registration: online verification pending'),`Account ID: ${saved.accountDid}`,`Device ID: ${saved.deviceDid}`]:[]),
       t('Wi-Fi / 有線の設定は保存されます。再インストールは不要です。','Network settings are saved. Reinstallation is not needed.'),
       ...(failure?['',failure]:[]),
@@ -105,7 +106,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     ].join('\n');
     const action=ui.menu(status,[
       ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
-      ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'ネットに接続してスマホで登録する',state==='retry'?'Retry registration':saved?'Verify registration online':'Connect and register using your phone')]]:[]),
+      ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'スマホ・別のPCでアカウントを連携する',state==='retry'?'Retry registration':saved?'Verify registration online':'Link account using a phone or another computer')]]:[]),
       ...(!storageError&&!local&&completeLocal? [['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
       ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
       ...(state==='retry'?[['later',t('あとで登録する','Register later')]]:[]),
