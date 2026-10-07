@@ -1,4 +1,5 @@
 import {spawnSync} from 'node:child_process';
+import {existsSync} from 'node:fs';
 
 export const text = (ja, en) => process.env.MURAKUMO_UI_LANG === 'ja' ? ja : en;
 // SSIDs are untrusted display text. Keep the original separately for nmcli.
@@ -41,6 +42,7 @@ export function dialogUI(stage) {
     message: message => screen(['--msgbox',message,'0','0']),
     busy: message => screen(['--infobox',message,'0','0']),
     pause: message => screen(['--pause',message,'0','0','2']),
+    bluetooth: () => screen(['--textbox','/run/murakumo-ble/pair.json','0','0']) === '',
   };
 }
 function command(program, args, options = {}) {
@@ -49,6 +51,9 @@ function command(program, args, options = {}) {
 export function networkBackend(run = command, fetcher = fetch) {
   const nm = args => run('nmcli', args);
   return {
+    bluetoothAvailable: () => existsSync('/sys/class/bluetooth/hci0') && existsSync('/etc/murakumo/ble-controller.mjs'),
+    bluetoothStart: () => run('node',['/etc/murakumo/ble-controller.mjs','start']).status===0,
+    bluetoothStop: () => run('node',['/etc/murakumo/ble-controller.mjs','stop']).status===0,
     devices: () => rows(nm(['-t','-f','DEVICE,TYPE,STATE','device','status']).stdout || '')
       .map(([name,type,state]) => ({name,type,connected: state.startsWith('connected')})).filter(d => ['wifi','ethernet'].includes(d.type)),
     scan: device => {
@@ -97,8 +102,15 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
   if (backend.devices().some(d => d.connected)) { const r = await check(); if (r) return r; }
   for (;;) {
     const choice = ui.menu(`${help}\n\n${text('インストールはネットなしでも完了します。登録にはネット接続が必要です。','OS installation works offline. Account registration needs Internet.')}`,
-      [['wifi',text('Wi-Fiに接続する','Connect to Wi-Fi')],['wired',text('LANケーブルで接続する','Connect with an Ethernet cable')],['later',later]]);
+      [['wifi',text('Wi-Fiに接続する','Connect to Wi-Fi')],...(backend.bluetoothAvailable?.()?[['bluetooth',text('BluetoothでWi-Fi設定を受け取る','Receive Wi-Fi settings by Bluetooth')]]:[]),['wired',text('LANケーブルで接続する','Connect with an Ethernet cable')],['later',later]]);
     if (!choice || choice === 'later') return 'offline';
+    if(choice==='bluetooth'){
+      let connected=false;
+      try{if(backend.bluetoothStart?.())connected=ui.bluetooth?.()===true;}finally{backend.bluetoothStop?.();}
+      if(connected){const result=await check();if(result)return result;}
+      else ui.message(text('Bluetooth設定を終了しました。対応する設定画面、Wi-Fi設定、または有線LANで続けられます。','Bluetooth setup ended. Continue with a compatible companion, Wi-Fi settings, or Ethernet.'));
+      continue;
+    }
     const devices = backend.devices().filter(d => d.type === (choice === 'wifi' ? 'wifi' : 'ethernet'));
     if (!devices.length) {
       ui.message(text(choice === 'wifi' ? 'Wi-Fi機器が見つかりません。無線が有効か確認してください。有線接続、またはあとで接続も選べます。' : '有線LAN機器が見つかりません。Wi-Fi、またはあとで接続を選べます.', choice === 'wifi' ? 'No Wi-Fi adapter found. Check the wireless switch, use Ethernet, or connect later.' : 'No Ethernet adapter found. Use Wi-Fi or connect later.'));

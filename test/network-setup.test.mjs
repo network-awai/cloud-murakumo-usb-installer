@@ -57,3 +57,13 @@ test('saved connection that becomes ready at the chooser skips scanning and secr
   const f=fixture(['wifi','next'],[],{devices:()=>[{name:'wlan0',type:'wifi',connected:++checks > 1}],scan:()=>{throw Error('must not scan');}});
   assert.equal(await setupNetwork(f),'connected');assert.equal(f.calls.length,0);
 });
+
+test('Bluetooth success closes its pairing window and checks Internet before proceeding',async()=>{
+  const events=[];const f=fixture(['bluetooth','next'],[],{bluetoothAvailable:()=>true,bluetoothStart:()=>{events.push('start');return true;},bluetoothStop:()=>events.push('stop'),probe:async()=>{events.push('probe');return {internet:true,murakumo:true};}});
+  f.ui.bluetooth=()=>{events.push('companion');return true;};
+  assert.equal(await setupNetwork(f),'connected');assert.deepEqual(events,['start','companion','stop','probe']);
+});
+test('Bluetooth cancellation closes its pairing window and offers offline completion',async()=>{
+  let stopped=false;const f=fixture(['bluetooth','later'],[],{bluetoothAvailable:()=>true,bluetoothStart:()=>true,bluetoothStop:()=>{stopped=true;},probe:()=>{throw Error('no connection');}});
+  f.ui.bluetooth=()=>false;assert.equal(await setupNetwork(f),'offline');assert.equal(stopped,true);
+});

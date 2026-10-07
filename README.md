@@ -114,3 +114,28 @@ The startup language page plays a quiet, original ambient piece with a visible
 stop/replay control. The QR page can send the same expiring approval code by sound.
 See [sound linking](docs/sound-linking.md) for the included companion reader,
 Passkey approval boundary and public-release/physical-phone qualification gaps.
+
+## Bluetooth Wi-Fi provisioning
+
+The network chooser offers Bluetooth when a controller is present. Opening it
+creates a ten-minute, one-use secret shown locally as a QR code or a masked key.
+The companion encrypts Wi-Fi credentials with HKDF/AES-GCM before sending
+fragmented GATT writes; expired, modified and replayed messages are refused.
+Closing the page stops advertising. This transfers Wi-Fi settings only; account
+ownership still requires the separate Passkey flow.
+
+`nixos/ble-setup.nix` integrates the services into the next installer build.
+`scripts/install-ble-host.sh` installs the Ubuntu adapter on the explicitly
+selected existing node. Its services start at boot but do not advertise until
+a setup window is opened. `scripts/serve-ble-client.mjs` provides a localhost
+companion for Mac Chrome testing; it is not a published phone application.
+
+On 2026-10-07, 6600hs-2 registered the GATT service and started/stopped its
+advertisement. The live controller accepted WebCrypto-encrypted, fragmented
+settings, reconnected its existing Wi-Fi, refused replay and removed its consumed
+secret. That test uses private local IPC, not a Bluetooth radio transfer.
+The Mac Bluetooth chooser did not discover the node, so radio transfer and
+physical-phone setup remain unverified. An iPhone native companion, public
+HTTPS companion deployment, Nix runtime evaluation and USB rewrite are not
+included in this host verification. See the machine-readable evidence under
+`docs/evidence/ble-setup-2026-10-07/`.
