@@ -1,0 +1,64 @@
+{
+  "runtimeSource": "481cd28",
+  "bootId": "00f450e8-285e-40e7-98af-f4bdcb6b368c",
+  "system": "/nix/store/41f51wagm4f4pzv5850n0baq2ydgaa6b-nixos-system-murakumo-node-26.05pre-git",
+  "rootSource": "/dev/nvme0n1p2",
+  "interfaces": [
+    "lo",
+    "tailscale0"
+  ],
+  "language": "ja",
+  "sourceHashes": {
+    "voice-agent.mjs": "d1521e183e9f5e333bfb385e41bb36ade9e7b6f92c9855f468ee6cc5356cf13e",
+    "voice-control.mjs": "a35f8c9202e06c68c829a19184629de8f73888beb9681764447764c279206aac",
+    "voice-policy.json": "b3964cc8c9cb3655fe9be6c1a61ded6b1e7d73adf0d380b29c869b4e869c418a",
+    "voice-runtime.nix": "4264952888ba6b6eac29d26b291fe6b4095875291df6448d9797657ed32f1376",
+    "voice-tts.py": "66326fa37ea699e4a57d4196c54fd108ba34bceaad6f7efb3ede41faa5f4a938",
+    "voice-NOTICES.txt": "7e24887cd7f19489de2aebd14dfff0f1bbd58cc07ef024689a45226c842408c9",
+    "graphical-ui.js": "68d83f97c26fd6ef9e5aa8c66c0175b1b7cdf27486da8ed960244b57adc61a12",
+    "console-ui.nix": "20bb793df99af3f9c63436738cb7e1c6120e2287eadac8867e534889353af6c8",
+    "language.mjs": "386a04c506c32203f3de17ff6a8d0b2bda797f64e6d6e3e23021368025a0df21",
+    "local-setup.mjs": "16f13a7ce71f47197e6641ba5f43441da2111d3290a69f46a7cfc902c984be1c",
+    "account-link.mjs": "f69cc3a9be4ac83653b368ec68e602e389220ffb85384ef1e2c2ff6aabeb93cc"
+  },
+  "retainedSourcesMatch": true,
+  "permissions": [
+    {
+      "name": "murakumo-voice",
+      "mode": "711",
+      "uid": 0,
+      "gid": 0,
+      "directory": true
+    },
+    {
+      "name": "session.7QFoTs",
+      "mode": "700",
+      "uid": 999,
+      "gid": 999,
+      "directory": true
+    },
+    {
+      "name": "9eb71552-4317-4213-9cba-b328a0fb2920.wav",
+      "mode": "644",
+      "uid": 999,
+      "gid": 999,
+      "directory": false
+    },
+    {
+      "name": "llm-key",
+      "mode": "600",
+      "uid": 999,
+      "gid": 999,
+      "directory": false
+    }
+  ],
+  "service": "ActiveState=active\nSubState=running\nProtectSystem=strict\nNoNewPrivileges=yes",
+  "physicalMicrophone": false,
+  "realPasskey": false,
+  "publicAccountReceiptExists": false,
+  "voiceRuntimePermissionsMatch": true,
+  "localModelHealth": 200,
+  "localSetupExists": true,
+  "physicalNetworkInterfaces": [],
+  "defaultRoutes": []
+}

@@ -50,3 +50,17 @@ The native GTK voice action produced real QR PNG and16000Hz FSK WAV. Independent
 Final playback binding tests also confirm requested BGM is allowed to finish. Only the initial startup BGM is stopped when dialogue becomes ready; manual BGM and FSK use the shared playback pause/resume protocol. Initial automatic language detection recognized Japanese and English correctly and selected both languages through the real controller. Evidence: `voice-ui-audio-final.log`, committed `voice-auto-language-result.json`.
 
 The real llama.cpp server was also tested with the actual per-session key configuration: public health200, missing-key inference401, authorized bounded Wi-Fi choice passed. The test uses only an ephemeral local key, never an account credential. Evidence: committed `voice-model-key-result.json`.
+
+## Final media and offline installation
+
+Frozen runtime `481cd28` built successfully (`VOICE_ISO_BUILD_EXIT=0`). The image is `aiueos-voice-setup-481cd28.iso`, 5248696320 bytes, SHA256 `647d77202af5f05fab9b4dad6e712a492a7d1f4ca99e0c296274e67a9aee3fb1`; Mac and build-VM hashing agree. Image creation fetched immutable build dependencies.
+
+The actual image cold-booted with UEFI into the GTK language screen. A new, task-owned 32GiB NVMe image (`AIUEOS-VOICE-QA`) was installed with `-nic none`, without an initial password prompt. The installer displayed completion and logged `installation finished!`. This test uses keyboard/pointer fallback; it is not a physical voice-only installation. The VM has no microphone. A subsequent boot from the same virtual NVMe, without the ISO and still with `-nic none`, is checked separately below.
+
+The task-owned builder was stopped after completion. To retain enough space for this test, only already-free blocks in its labelled virtual filesystem were trimmed; no files or old prototype ISOs were deleted. No real disk was changed.
+
+The same NVMe cold-booted without the ISO and without a NIC. Local setup completed, with no phone, account or Internet. Retained voice/UI/language/account sources match `481cd28`. The actual voice service is active under `ProtectSystem=strict` and `NoNewPrivileges=yes`; its parent is root-owned0711, session0700 and model key0600 owned by the unprivileged runtime. Actual local model health returned200. There is no physical network interface or default IPv4/IPv6 route. The expected Tailscale virtual interface remains present; the first proof script incorrectly required loopback alone, and its failed result is preserved. The corrected proof checks actual device attachment and routes rather than calling a virtual interface Internet connectivity.
+
+Evidence: committed `voice-installed-proof.json`, `voice-installed-proof.log`, the initial proof failure, proof script/expected hashes and `aiueos-voice-local-complete.png`. `localSetupExists=true`, `publicAccountReceiptExists=false`, `physicalMicrophone=false`, `realPasskey=false`. This does not establish account linking, fleet admission, inference or rewards on a physical PC.
+
+Final KIOXIA check returned no external physical media, so this candidate was not written to USB. Production voice/registration release is pending explicit authorization; the read-only public sound-page check still returned404. The draft review artifacts are installer#4, app#38 and Worker#274.
