@@ -3,8 +3,8 @@
 ## Runtime and scope
 
 Installed UEFI AiueOS includes an update timer (15 minutes plus jitter) and an
-on-boot recovery service. They run only after a private owner configuration and
-anti-replay journal are provisioned. No release verification root is invented or
+on-boot recovery service. Updates run only after a private owner configuration and anti-replay journal are
+provisioned. Recovery uses the retained journal even if configuration is missing. No release verification root is invented or
 shipped as a trusted production key. BIOS machines and non-AiueOS systems are
 not automatically activated. An unqualified/missing watchdog holds activation.
 
@@ -36,14 +36,15 @@ Prepare private JSON (`0600`, root-owned on the Node):
  "trust":{"threshold":2,"channel":"stable","keys":{"release-1":"ED25519 PUBLIC PEM","release-2":"ED25519 PUBLIC PEM"}},
  "policy":{"mode":"automatic-stable","channel":"stable","semi-mandatory?":true,"high-grace-ms":259200000,"critical-grace-ms":86400000,"max-apply-risk":"medium"},
  "watchdogQualified":true,
- "healthServices":["NetworkManager.service","murakumo-account-link.service"]
+ "healthServices":["NetworkManager.service"]
 }
 ```
 
 `watchdogQualified` is an operator record of real watchdog/fallback qualification,
 not a way to manufacture a device: activation also checks `/dev/watchdog0`, UEFI,
 installed bootloader and the current host's two filesystem UUID parameters.
-Only set it after a real reboot/fallback test. Missing config is shown as updates
+Only set it after a real reboot/fallback test. Add required long-running Node
+services to `healthServices`; do not include a completed oneshot setup wizard. Missing config is shown as updates
 not configured. A downloaded manifest cannot grant owner policy authorization.
 
 Run `scripts/provision-updates.mjs CONFIG` as root on the installed AiueOS. It
@@ -51,7 +52,7 @@ refuses an existing journal/config; journal is written before enabled config.
 Deleting a journal does not start from sequence zero: the updater stops. Journal
 and config are outside the Nix store. Owner changes are root-authorized local
 operations; this version has no account-authenticated remote policy editor.
-`applyNow` authorizes immediate application, `deferUntil` postpones within the
+`applyNow` is a standing immediate-application policy until cleared, `deferUntil` postpones within the
 security grace. `offlineTimeAuthorized` is an explicit offline trust choice;
 otherwise NTP synchronization is required. None is accepted from release data.
 
@@ -63,7 +64,8 @@ On the qualified Linux build host, prepare a release spec with `arch`, `channel`
 `scripts/publish-update.mjs SPEC PRIVATE_ED25519_KEY OUTPUT_DIRECTORY`.
 It queries/exports the complete Nix closure, computes streaming SHA256 and length,
 then signs exact manifest bytes. Keep the private key off Nodes and mirrors.
-Quorum policies require independent publishers to add distinct signatures over
+Use `scripts/sign-update.mjs MANIFEST PRIVATE_ED25519_KEY KEY_ID` to append a
+second signature atomically. Quorum policies require independent publishers to add distinct signatures over
 the exact same payload; duplicate signers never count twice. A single-signature
 publication cannot satisfy a two-key trust policy.
 

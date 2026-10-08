@@ -22,7 +22,7 @@ export function admitRelease(envelope, trust, current, now=Date.now()) {
     !['low','medium','high','critical'].includes(r.securityRisk) || !['low','medium','high','critical'].includes(r.applyRisk) ||
     !/^[a-f0-9]{64}$/.test(r.closureSha256) || !Number.isSafeInteger(r.closureBytes) || r.closureBytes<1 ||
     !/^\/nix\/store\/[a-z0-9]{32}-nixos-system-[a-zA-Z0-9.+_-]+$/.test(r.systemPath) ||
-    r.hostContract!==current.hostContract || (r.requiredBy!==undefined && !Number.isSafeInteger(r.requiredBy))) throw Error('release incompatible, expired or downgraded');
+    r.systemPath.endsWith('.drv') || r.hostContract!==current.hostContract || (r.requiredBy!==undefined && !Number.isSafeInteger(r.requiredBy))) throw Error('release incompatible, expired or downgraded');
  // Transport locations deliberately not used as commands or trust roots.
  return Object.freeze({manifestHash:digest(bytes),release:Object.freeze(r),signers:[...signers]});
 }

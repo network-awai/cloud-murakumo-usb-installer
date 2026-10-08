@@ -4,11 +4,12 @@
 
 The OS is named **AiueOS**; the device is a **Murakumo Node**. Murakumo Server
 can describe its serving role when a serving process is actually configured.
-This installer contains an offline, prebuilt AiueOS system based on NixOS. It has no OS update
-agent or timer: neither `system.autoUpgrade` nor a Murakumo release updater is
-enabled. Changing source or flashing the USB does not update an already-installed
-PC. CPU microcode options include firmware in an OS build; they are not an OS
-updater. No automatic reboot or new release deployment is added here.
+This installer contains an offline, prebuilt AiueOS system based on NixOS. The
+installed system now includes a signed-release timer and boot recovery service.
+They run only after a local owner provisions private update configuration and
+trusted verification keys. No production keys or update source are shipped.
+Changing source or flashing a USB does not update an already-installed PC.
+See [update operations](update-operations.md) for provisioning and current limits.
 
 At startup the graphical installer and installed setup guide offer Japanese and
 English. The preferred language is saved privately in `/var/lib/murakumo/ui-language`,
@@ -65,12 +66,12 @@ trust, admission and execution readiness as separate observable states. Offline
 setup remains complete when all peers are unavailable. None of peer discovery,
 invitation admission, model execution or rewards is newly implemented here.
 
-## Integrated OS update design (not enabled)
+## Integrated OS updates (owner provisioning required)
 
 See [the update lifecycle](os-update-lifecycle.md) for distribution, signed
 verification, durable staging, automatic scheduling, deadline-bound
 semi-mandatory updates and boot recovery. The shared Kotoba decision library and
-reference host controller now have executable tests. The Nix configuration ships
-reference modules and disabled defaults; it creates no update timer or reboot
-service. Production signing, fleet enforcement and Linux boot providers remain
-qualification gates.
+Linux controller have executable tests. The Nix configuration includes conditional
+update/recovery services and the offline policy runtime. Standalone UEFI VM boot
+qualification is recorded in [verification](verification-updates-20261008.md).
+Production signing, fleet enforcement and physical hardware qualification remain gates.

@@ -105,7 +105,8 @@ Startup offers Japanese and English. The installed guide can complete local setu
 without a phone, an account or Internet, preserving its device identity across boots.
 Account linking remains an explicit later choice. See
 [local setup](docs/local-setup-and-updates.md) and [the integrated update lifecycle](docs/os-update-lifecycle.md).
-OS automatic updates are not currently enabled; updating a USB does not update an
+Signed OS update services require owner provisioning; see [operations](docs/update-operations.md).
+Updating a USB does not update an
 already installed PC.
 
 ## Setup audio

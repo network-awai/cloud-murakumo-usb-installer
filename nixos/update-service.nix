@@ -31,6 +31,7 @@ in {
   };
   systemd.services.aiueos-update-recover = lib.recursiveUpdate common {
    description = "Commit a healthy trial or restore the retained AiueOS boot";
+   unitConfig.ConditionPathExists = "/var/lib/aiueos-update/journal.json";
    wantedBy = [ "multi-user.target" ];
    after = [ "local-fs.target" "NetworkManager.service" ];
    before = [ "aiueos-update.service" ];

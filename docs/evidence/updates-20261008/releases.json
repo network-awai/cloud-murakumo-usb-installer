@@ -1,0 +1,46 @@
+[
+  {
+    "variant": "good",
+    "payload": {
+      "arch": "x86_64-linux",
+      "channel": "stable",
+      "sequence": 2,
+      "issuedAt": 1791420307944,
+      "expiresAt": 1791506767944,
+      "securityRisk": "low",
+      "applyRisk": "medium",
+      "systemPath": "/nix/store/is9qqw02yzjlkr2s972lbh39d946xmwk-nixos-system-aiueos-update-qa-26.05pre-git",
+      "hostContract": "uuid-v1",
+      "schema": "aiueos.release.v1",
+      "closureSha256": "4420ec80ab3e543ae2666ffff6e8395f8254fb82c1ed4851117be182bfea7581",
+      "closureBytes": 1439082000
+    },
+    "manifestHash": "7f88704571f060ad9c5cd072a99f0bd2f9fabf973ab408c8d3a9dc12131e0fdc",
+    "signerIds": [
+      "qa-only",
+      "qa-cosign"
+    ]
+  },
+  {
+    "variant": "bad",
+    "payload": {
+      "arch": "x86_64-linux",
+      "channel": "stable",
+      "sequence": 3,
+      "issuedAt": 1791420307945,
+      "expiresAt": 1791506767945,
+      "securityRisk": "critical",
+      "applyRisk": "medium",
+      "systemPath": "/nix/store/bzwnjv87szzwkql1gl6a3wpicgfsc591-nixos-system-aiueos-update-qa-26.05pre-git",
+      "hostContract": "uuid-v1",
+      "schema": "aiueos.release.v1",
+      "closureSha256": "87b12f5b265e46a466150257f39bbac41182cac750bd745e660e5adc74e56871",
+      "closureBytes": 1439083736
+    },
+    "manifestHash": "785d6945742e303cb0992745b76971e5654815752851e8868e42d0c25b426d24",
+    "signerIds": [
+      "qa-only",
+      "qa-cosign"
+    ]
+  }
+]

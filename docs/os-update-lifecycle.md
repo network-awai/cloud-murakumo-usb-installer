@@ -1,9 +1,11 @@
 # AiueOS / Murakumo Node update lifecycle
 
-2026-10-08. Integrated design and reference mechanism. No running-machine updater
-is enabled by this change. Signed production release keys, actual closure import,
-owner policy UI, fleet enforcement, Linux boot recovery and power-loss VM tests
-are still qualification gates. USB writing is not requested by this design change.
+2026-10-08. Integrated policy, publishing tools and Linux standalone UEFI updater.
+The installer includes conditional services; activation requires locally provisioned
+owner configuration and verification keys. No existing Node, production trust root
+or USB has been changed. See [operations](update-operations.md) and
+[qualification evidence](verification-updates-20261008.md). Production signing,
+owner policy UI, fleet coordination and physical hardware recovery remain gates.
 
 ## Ownership and layers
 
@@ -12,8 +14,9 @@ are still qualification gates. USB writing is not requested by this design chang
 - This installer: `nixos/update-release.mjs` verifies exact manifest bytes with
   locally trusted Ed25519 quorum keys; `update-controller.mjs` runs the provider
   boundary with journal CAS, first notice, staging, fleet lease and trial outcomes.
-- Linux host provider (not supplied): bounded streaming delivery, NAR import,
-  durable lock/fsync journal, storage/boot reconciliation, watchdog and reboot.
+- Linux host provider: bounded streaming delivery, NAR import, flock/fsync journal,
+  complete store verification, UEFI one-shot/fallback and boot health recovery.
+  Supports standalone Nodes only; fleet role refuses activation.
 - Murakumo controller (not supplied): publish signed announcements, staged fleet
   rollout, notifications and independent job-admission consumption of Node policy.
 
@@ -106,7 +109,8 @@ Controller providers must implement:
    SHA256 + length, trusted Nix NAR verification, complete requisites, exact
    resulting systemPath. Real artifacts use streaming; reference tests use buffers.
 3. `collectEvidence`, `decide`: build a fresh manifest-bound snapshot, invoke the
-   pinned CLJK port, combine all `grant.ota`/`grant.update` gates. Never accept
+   pinned CLJK lifecycle policy. Existing `grant.ota`/`grant.update` remain separate
+   libraries, not calls made by this provider. Never accept
    caller-supplied `signature-valid?` from a network message.
 4. `acquireFleetLease`, `recheckActivation`: atomic current-owner lease and full
    recheck; drain acknowledgement has a bounded freshness. A reboot must not
@@ -122,8 +126,10 @@ Controller providers must implement:
 7. `notify`, `restrictNewJobs`, `drain`: owner notification and scheduler
    enforcement. Local maintenance and private identity keys stay available.
 
-These are required interfaces, not implemented Linux operations. The reference
-controller cannot bypass them or fall back to a shell command. Crash during
+These interfaces are implemented for standalone Linux UEFI Nodes by
+`update-linux.mjs`. Fleet job drain, shared leases and scheduler consumption are
+not implemented: fleet role refuses rather than asserting those gates. The
+controller cannot bypass admission or accept a downloaded shell command. Crash during
 trial preparation must resolve to retained boot; crash after commit boot but
 before journal completion must reconcile running-generation identity. Rollback
 records block the release before changing boot state; recovery clears pending

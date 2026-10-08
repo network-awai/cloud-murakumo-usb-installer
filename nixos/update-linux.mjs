@@ -48,7 +48,7 @@ async function recover(config){let j=await readJournal();if(j?.pending?.phase!==
  const provider={withLock:fn=>fn(),readJournal,casJournal,collectLocalHealth:async()=>({'local-health':healthy?'pass':'fail','elapsed-ms':Date.now()-started,'timeout-ms':config.trialTimeoutMs||120000,attempts:1,'max-attempts':2}),decideTrial:e=>decide({operation:'trial',evidence:e}),installedSequence:async()=>p.sequence,commitBoot:async()=>{run('nix-env',['-p','/nix/var/nix/profiles/system','--set',p.system]);run('bootctl',['set-default','aiueos-trial.conf']);await admission({acceptNewJobs:true});await writeStatus({action:'committed',sequence:p.sequence,system:p.system});},restorePreviousBoot:restore};
  await finishTrial({journal:j,providers:provider});return true;
 }
-export async function main(operation='check'){await ensureRoot();let config;try{config=await privateJSON(CONFIG);}catch(e){const journal=await readJournal();if(journal?.pending?.phase==='trial-prepared'&&journal.pending.previous){await restore(journal);return;}throw e;}
+export async function main(operation='check'){await ensureRoot();let config;try{config=await privateJSON(CONFIG);}catch(e){const journal=await readJournal();if(journal?.pending?.phase==='trial-prepared'&&journal.pending.previous){const running=await realpath('/run/current-system');if(running===journal.pending.previous){await recover({});return;}if(running===journal.pending.system){await restore(journal);return;}throw Error('unreadable configuration and unexpected running generation; manual recovery required');}throw e;}
  if(await recover(config))return;
  if(operation==='recover')return;
  if(process.platform!=='linux'||process.arch!=='x64')throw Error('unsupported host');
