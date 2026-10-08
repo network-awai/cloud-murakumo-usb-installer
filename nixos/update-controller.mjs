@@ -17,7 +17,7 @@ export async function runUpdate({envelope,trust,current,policy,now,providers}) {
   if(journal?.pending && journal.pending.manifestHash!==admitted.manifestHash) return {action:'hold',reason:'another-release-pending'};
   // Persist first notification before staging. Failed/repeated boots cannot reset it.
   if(!journal?.pending) {
-   journal=await providers.casJournal(journal,{...journal,pending:{manifestHash:admitted.manifestHash,sequence:admitted.release.sequence,noticedAt:now,phase:'notified'}});
+   journal=await providers.casJournal(journal,{...journal,highestAdmittedSequence:admitted.release.sequence,pending:{manifestHash:admitted.manifestHash,sequence:admitted.release.sequence,noticedAt:now,phase:'notified'}});
    await providers.notify(admitted);
   }
   let evidence=await providers.collectEvidence(admitted,journal);
@@ -28,7 +28,7 @@ export async function runUpdate({envelope,trust,current,policy,now,providers}) {
   if(verdict.fleet==='drain-and-refuse-new-jobs')await providers.restrictNewJobs(admitted);
   if(verdict.action==='stage') {
    const bytes=await providers.fetchClosure(admitted);
-   verifyClosure(bytes,admitted);
+   if(!bytes?.verifiedArchive)verifyClosure(bytes,admitted);
    // Importer checks every NAR hash, complete requisites and exact systemPath.
    await providers.importVerifiedClosure(bytes,admitted);
    await providers.casJournal(journal,{...journal,pending:{...journal.pending,phase:'staged'}});

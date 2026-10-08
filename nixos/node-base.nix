@@ -1,7 +1,7 @@
 { pkgs, lib, config, ... }:
 {
   options.services.murakumoAccountLink.enable = lib.mkEnableOption "passwordless first-boot Murakumo registration";
-  imports = [ ./console-ui.nix ];
+  imports = [ ./console-ui.nix ./update-service.nix ];
   config = {
   # Base for a NixOS Murakumo node after the OS is installed.
   services.tailscale.enable = true;
