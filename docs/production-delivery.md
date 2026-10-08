@@ -50,3 +50,15 @@ Still pending: both source PRs are open; production signing authority has not
 been provisioned; Cloudflare authorization has expired; no KIOXIA external disk
 was detected. No production deployment, manifest publication or USB write is
 claimed. The prepared USB request is `action: check`, never `write`.
+
+Read-only inspection of the ISO squashfs confirms both UEFI and BIOS installed
+systems contain `aiueos-update.service`, `aiueos-update-recover.service` and the
+update timer. Recovery is conditioned on the durable journal, independently of
+owner config availability. The unit-referenced runtime SHA256 is
+`42a494666687d730d3a7005cce0c8483c77623a0ed528a7d1fb002906dd3d475`, matching
+the reviewed `nixos/update-linux.mjs`. The offline SCI/nbb policy runtime is
+included. Unit inspection and the language-screen image are stored under
+`docs/evidence/updates-20261008`. Dedicated media QA and builder VMs were
+normally powered down; other user VMs were left running. Trimming only the
+builder's unallocated ext4 blocks restored approximately 5.3 GiB of Mac capacity;
+the generated ISO and retained build closures were preserved.
