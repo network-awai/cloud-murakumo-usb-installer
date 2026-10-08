@@ -24,3 +24,12 @@ The existing serial-bound KIOXIA helper validates ISO length/hash before writing
 reidentifies external media, reads back exactly the ISO length and ejects only
 on a hash match. A USB write requires the configured KIOXIA to be attached; an
 old disk number is never an identity.
+
+To keep signing keys off the Linux builder, export with
+`scripts/publish-update.mjs SPEC --unsigned OUTPUT`; this writes
+`manifest.pending.json`, never an unsigned channel manifest. On Mac, invoke
+`scripts/sign-keychain-release.mjs MANIFEST KEY_ID COMPILED_SIGNER` for each
+approved signer. It verifies the returned signature against the public key
+before appending it to the unchanged payload and writing atomically. Promote
+only after the provisioned quorum verifies; source tests do not prove that a
+production Keychain key has been created or a live file published.
