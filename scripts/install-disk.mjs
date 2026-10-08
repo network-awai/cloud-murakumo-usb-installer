@@ -110,6 +110,7 @@ async function main() {
     run('nix-store', ['--check-validity', ...closure]);
     directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
     configFiles = ['node-base.nix', 'update-service.nix', 'update-release.mjs', 'update-controller.mjs', 'update-linux.mjs', 'update-policy.mjs', 'update-defaults.json', 'node-status.mjs', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs', 'acoustic-code.mjs', 'setup-sound.mjs', 'sound-link.html', 'voice-runtime.nix', 'voice-agent.mjs', 'voice-control.mjs', 'voice-policy.json', 'voice-tts.py', 'voice-NOTICES.txt', 'ble-setup.nix', 'ble-controller.mjs', 'ble-protocol.mjs', 'ble-gatt.js', 'ble-client.mjs', 'ble-setup.html'];
+    configFiles.push('remote-access.nix','remote-access.mjs','remote-ui.mjs','remote-access.html','remote-client.js');
     for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
     run('cp', ['-a', '/etc/murakumo/update-policy-runtime', join(directory, 'update-policy-runtime')]);
     rootUuid = randomUUID(); bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();

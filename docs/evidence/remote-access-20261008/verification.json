@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-08T10:00:53.599Z",
+  "unitTests": {
+    "passed": 108,
+    "failed": 0,
+    "skipped": 0,
+    "grantBridge": "actual Grant source with bundled SCI"
+  },
+  "browserFixtureChecks": 5,
+  "nixpkgsRevision": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
+  "vm": {
+    "diskless": true,
+    "networkDisabled": true,
+    "installerMasked": true
+  },
+  "physicalNodeActivated": false,
+  "newReleasePublished": false,
+  "usbUpdated": false,
+  "sourceHashes": {
+    "nixos/remote-access.mjs": "8d8984c7ab92bf344a40ab6bacdd8040b48aabb3b9442b059e5e6d4c7090ea6e",
+    "nixos/remote-access.nix": "f62a0a46733447ac783c6e88cc8d1dedbe093029247700b63fe802510666acad",
+    "nixos/remote-ui.mjs": "dc7221cd702480430d0f604a3a0a39fcf0f801cdbb52f386657fca825c190e17",
+    "nixos/remote-client.js": "ae84117bd7f891c7a9f6717bdf9fe697b52720e8869c768f723c891655fc361f",
+    "nixos/remote-access.html": "433e042831b3ac611ea067ba0e539937daa6aabcb8bb84442c63c0d8771de4ba",
+    "nixos/registration-ui.mjs": "e8e23566c2bc88f2b30295567c839d31d0f8893fba8d4c7af16cacae9da6a182"
+  }
+}
