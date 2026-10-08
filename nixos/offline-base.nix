@@ -44,6 +44,6 @@
   '';
   users.users.root.hashedPassword = "!";
   services.getty.autologinUser = "root";
-  services.openssh.enable = false;
+  # SSH requires a locally approved public key; passwords and root login stay disabled.
   system.stateVersion = "26.05";
 }

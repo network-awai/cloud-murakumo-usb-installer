@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "code creates pending request",
+    "no controls before physical approval",
+    "status after approval",
+    "SSH key awaits separate physical approval",
+    "closed session refuses status"
+  ],
+  "passed": 5,
+  "errors": [],
+  "nativeSSH": false,
+  "nativeCertificateTrust": false
+}

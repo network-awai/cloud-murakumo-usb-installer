@@ -51,8 +51,8 @@ export async function registerWithUI({link,screen,ui,t,options={},onFailure}){
 
 // The guide owns retries. Network or registration failures remain on an
 // actionable screen instead of exiting into a systemd restart loop.
-export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal,showStatus}) {
-  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false;
+export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal,showStatus,showRemote}) {
+  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false,linkReady=false;
   try {saved=await readSaved();local=await readLocal();if(saved||local)state='complete';}
   catch {storageError=true;state='complete';}
   for (;;) {
@@ -60,6 +60,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       const choice=ui.menu(t('使い方を選んでください。ローカルのセットアップはスマホ・アカウント・インターネットなしで完了します。','Choose how to use this device. Local setup needs no phone, account or Internet.'),[
         ...(completeLocal?[['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
         ['connect',t('Murakumoアカウントに連携する','Link a Murakumo account')],
+        ...(showRemote?[['remote',t('別のPCから設定する・SSH接続','Set up from another PC / SSH')]]:[]),
         ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
       ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
         ['shutdown',t('電源を切る','Shut down')],
@@ -68,6 +69,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
         try {local=await completeLocal();state='complete';failure=null;}
         catch {failure=t('ローカル設定を保存できませんでした。再試行できます。','Could not save local setup. Please retry.');state='complete';}
       } else if(choice==='status'&&showStatus){await showStatus();}
+      else if(choice==='remote'&&showRemote){await showRemote();}
       else if(choice==='connect'||choice==='network'){wantsLink=choice==='connect';state='network';}
       else if(choice==='shutdown'&&await poweroff())return;
       continue;
@@ -75,12 +77,22 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     if(state==='network') {
       try {
         const result=await network({registered:!!saved});
-        state=result==='back'?(saved||local?'complete':'choose'):result==='connected'&&wantsLink?'register':'complete';
+        linkReady=result==='connected';
+        state=result==='back'?(saved||local?'complete':'choose'):(result==='connected'||result==='local-connected')&&showRemote?'handoff':result==='connected'&&wantsLink?'register':'complete';
         failure=null;
       } catch {
         failure=t('接続設定を確認できませんでした。接続設定から再試行できます。','Could not check the network. Retry from connection settings.');
         state='complete';
       }
+      continue;
+    }
+    if(state==='handoff') {
+      const action=ui.menu(linkReady?t('ネット接続ができました。どの画面で続けますか？','Network connected. Where would you like to continue?'):t('LANで別のPCから設定できます。アカウント連携にはインターネットが必要です。','Continue from another PC on this LAN. Account linking needs Internet.'),[
+        ['remote',t('別のPCから設定する','Continue on another computer')],
+        ['continue',t('この端末で続ける','Continue on this device')],
+      ]);
+      if(action==='remote'){await showRemote();continue;}
+      state=action==='continue'?(wantsLink&&linkReady?'register':'complete'):(saved||local?'complete':'choose');
       continue;
     }
     if(state==='register') {
@@ -105,6 +117,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       ...(verified?[t('モデルと推論の稼働確認は別の手順です。','Model and inference readiness are verified separately.')]:[]),
     ].join('\n');
     const action=ui.menu(status,[
+      ...(showRemote?[['remote',t('別のPCから設定する・SSH接続','Set up from another PC / SSH')]]:[]),
       ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
       ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'スマホ・別のPCでアカウントを連携する',state==='retry'?'Retry registration':saved?'Verify registration online':'Link account using a phone or another computer')]]:[]),
       ...(!storageError&&!local&&completeLocal? [['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
@@ -113,6 +126,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       ['shutdown',t('電源を切る','Shut down')],
     ]);
     if(action==='status'&&showStatus){await showStatus();continue;}
+    if(action==='remote'&&showRemote){await showRemote();continue;}
     if(action==='shutdown') {
       if(await poweroff())return;
       failure=t('電源を切れませんでした。もう一度お試しください。','Could not shut down. Please retry.');

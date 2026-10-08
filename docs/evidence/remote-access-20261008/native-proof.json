@@ -1,0 +1,12 @@
+{
+  "nativeTLS": true,
+  "certificateMatchesLocalFingerprint": true,
+  "pendingStatusRefused": true,
+  "foreignOriginRefused": true,
+  "approvedStatus": true,
+  "nativeSSHKeyInstallation": true,
+  "closedSessionRefused": true,
+  "SSHLogin": false,
+  "systemdModuleActivated": false,
+  "fixtureCertificate": true
+}
