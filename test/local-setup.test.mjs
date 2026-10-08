@@ -32,6 +32,11 @@ test('corrupt local completion refuses to replace stored identity',async t=>{
  await writeFile(join(dir,'local-setup.json'),JSON.stringify({version:1,mode:'local',deviceDid:'did:key:other'}));
  await assert.rejects(completeLocal(dir),/mismatch/);assert.deepEqual(await readFile(join(dir,'account-device.json')),before);
 });
+test('network back preserves completed local setup and returns to its status',async t=>{
+ const dir=await directory(t);await completeLocal(dir);const actions=['network','shutdown'],screens=[];
+ await runSetup({t:(_ja,en)=>en,ui:{menu:m=>{screens.push(m);return actions.shift();}},readSaved:()=>savedLink(dir),readLocal:()=>readLocal(dir),network:async()=> 'back',register:()=>assert.fail('unexpected claim'),poweroff:async()=>true});
+ assert.equal(actions.length,0);assert.match(screens[1],/completed locally/);assert.equal(await savedLink(dir),null);
+});
 test('language selection persists Japanese and English and rejects arbitrary values',async t=>{
  const dir=await directory(t),previous={lang:process.env.MURAKUMO_UI_LANG,selected:process.env.MURAKUMO_UI_LANGUAGE_SELECTED};
  t.after(()=>{for(const [key,value] of [['MURAKUMO_UI_LANG',previous.lang],['MURAKUMO_UI_LANGUAGE_SELECTED',previous.selected]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}});

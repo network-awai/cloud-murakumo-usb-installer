@@ -103,7 +103,8 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
   for (;;) {
     const choice = ui.menu(`${help}\n\n${text('インストールはネットなしでも完了します。登録にはネット接続が必要です。','OS installation works offline. Account registration needs Internet.')}`,
       [['wifi',text('Wi-Fiに接続する','Connect to Wi-Fi')],...(backend.bluetoothAvailable?.()?[['bluetooth',text('BluetoothでWi-Fi設定を受け取る','Receive Wi-Fi settings by Bluetooth')]]:[]),['wired',text('LANケーブルで接続する','Connect with an Ethernet cable')],['later',later]]);
-    if (!choice || choice === 'later') return 'offline';
+    if (!choice) { if(stage==='installed')return 'back'; continue; }
+    if (choice === 'later') return 'offline';
     if(choice==='bluetooth'){
       let connected=false;
       try{if(backend.bluetoothStart?.())connected=ui.bluetooth?.()===true;}finally{backend.bluetoothStop?.();}
@@ -124,22 +125,39 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
       ui.busy(text('LANケーブルをルーターへ接続してください。接続を確認しています…','Connect the Ethernet cable to your router. Checking…'));
       connected = backend.connectWired(device);
     } else {
-      ui.busy(text('近くのWi-Fiを探しています…','Scanning for Wi-Fi…'));
-      const list = backend.scan(device);
-      const selected = ui.menu(text('Wi-Fiを選んでください。電波の強い順に表示しています。','Choose Wi-Fi. Strongest signal first.'),[
-        ...list.map((n,i) => [String(i),`${displayText(n.ssid)}  ${n.signal}%  ${n.security === '--' ? text('鍵なし','Open') : text('鍵あり','Secured')}`]),
-        ['rescan',text('一覧を更新する','Refresh')],['hidden',text('非表示のWi-Fiを入力する','Enter a hidden network')],
-      ]);
-      if (!selected || selected === 'rescan') continue;
-      const network = selected === 'hidden' ? {ssid: ui.input(text('Wi-Fi名（SSID）を入力してください','Enter the Wi-Fi name (SSID)')), security: 'hidden'} : list[Number(selected)];
-      if (!network?.ssid) continue;
-      if (network.security.includes('802.1X')) {
-        ui.message(text('会社向け認証のWi-Fiです。この案内では設定できません。別のWi-Fi、有線LAN、または保守画面の詳細設定をご利用ください。','Enterprise Wi-Fi needs advanced configuration. Use another network, Ethernet, or maintenance settings.')); continue;
+      for (;;) {
+        ui.busy(text('近くのWi-Fiを探しています…','Scanning for Wi-Fi…'));
+        const list = backend.scan(device);
+        const selected = ui.menu(text('Wi-Fiを選んでください。電波の強い順に表示しています。','Choose Wi-Fi. Strongest signal first.'),[
+          ...list.map((n,i) => [String(i),`${displayText(n.ssid)}  ${n.signal}%  ${n.security === '--' ? text('鍵なし','Open') : text('鍵あり','Secured')}`]),
+          ['rescan',text('一覧を更新する','Refresh')],['hidden',text('非表示のWi-Fiを入力する','Enter a hidden network')],
+        ]);
+        if (!selected) break;
+        if (selected === 'rescan') continue;
+        let network,password;
+        if(selected==='hidden'){
+          for(;;){
+            const ssid=ui.input(text('Wi-Fi名（SSID）を入力してください','Enter the Wi-Fi name (SSID)'));
+            if(!ssid)break;
+            password=ui.password(text(`${displayText(ssid)}\nWi-Fiのパスワードを入力してください。Murakumo用パスワードではありません。`,`${displayText(ssid)}\nEnter the Wi-Fi password, not a Murakumo password.`));
+            if(password===null)continue;
+            network={ssid,security:'hidden'};break;
+          }
+          if(!network)continue;
+        }else{
+          network=list[Number(selected)];
+          if(!network?.ssid)continue;
+          if(network.security.includes('802.1X')){
+            ui.message(text('会社向け認証のWi-Fiです。この案内では設定できません。別のWi-Fi、有線LAN、または保守画面の詳細設定をご利用ください。','Enterprise Wi-Fi needs advanced configuration. Use another network, Ethernet, or maintenance settings.'));continue;
+          }
+          password=network.security==='--'?'':ui.password(text(`${displayText(network.ssid)}\nWi-Fiのパスワードを入力してください。Murakumo用パスワードではありません。`,`${displayText(network.ssid)}\nEnter the Wi-Fi password, not a Murakumo password.`));
+          if(password===null)continue;
+        }
+        ui.busy(text('Wi-Fiに接続しています…','Connecting to Wi-Fi…'));
+        connected = backend.connectWifi(device, network.ssid, password, selected === 'hidden');
+        break;
       }
-      const password = network.security === '--' ? '' : ui.password(text(`${displayText(network.ssid)}\nWi-Fiのパスワードを入力してください。Murakumo用パスワードではありません。`,`${displayText(network.ssid)}\nEnter the Wi-Fi password, not a Murakumo password.`));
-      if (password === null) continue;
-      ui.busy(text('Wi-Fiに接続しています…','Connecting to Wi-Fi…'));
-      connected = backend.connectWifi(device, network.ssid, password, selected === 'hidden');
+      if(connected===undefined)continue;
     }
     if (!connected) {
       ui.message(text('接続できませんでした。Wi-Fiのパスワード、電波、またはLANケーブルを確認して、もう一度お試しください。別の方法や「あとで接続」も選べます。','Could not connect. Check the Wi-Fi password, signal, or cable. Try again, choose another method, or connect later.')); continue;
