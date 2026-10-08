@@ -65,43 +65,12 @@ trust, admission and execution readiness as separate observable states. Offline
 setup remains complete when all peers are unavailable. None of peer discovery,
 invitation admission, model execution or rewards is newly implemented here.
 
-## Proposed OS release/update contract (not enabled)
+## Integrated OS update design (not enabled)
 
-- **Trust before transport:** provision release verification keys and a policy
-  locally. Release signatures (optionally a quorum chosen by the operator) bind
-  architecture, schema, monotonic release number, closure digest/content address,
-  system path and compatibility constraints. Key changes require the previous
-  policy's authorization or explicit local recovery. A download cannot replace
-  its own trusted verification key.
-- **Multiple delivery paths:** peers, IPFS/content-addressed mirrors and USB carry
-  identical signed artifacts. Signed discovery pointers may advertise a release;
-  the artifact's digest and signatures remain authoritative. No mandatory hosted
-  controller or arbitrary remote script. Outdated advertisements cannot silently
-  downgrade the installed release.
-- **Prebuilt closure:** fetch all dependencies, verify every object and release
-  binding, and check architecture, free space and compatibility before activation.
-  No `nixpkgs` branch fetch or on-device Internet build is needed. Missing objects
-  retain the current running generation and show a retryable state.
-- **Preserve the host:** retain the selected disk's root/boot UUID parameters for
-  every new boot entry, Wi-Fi profiles, language, device keys, account receipts,
-  admission records and user data. Updates do not repartition or format a disk.
-- **Stage then activate:** use Nix generations with a durable update journal and
-  lock. At initial setup select a durable update policy: automatic stable updates
-  (recommended) or manual activation. Automatic mode applies only releases
-  admitted by the preconfigured signature policy, in a maintenance window after
-  draining jobs; it needs no repeated password prompt. Manual mode stages verified
-  artifacts and waits for a local apply action. A local pause keeps the current
-  generation. Power loss must leave a bootable previous generation.
-- **Health and rollback:** boot-counted trial activation, watchdog/health gate and
-  rollback to a retained generation after bounded boot failures. Local boot/storage
-  health must be independent of Internet/account availability. Network outages
-  alone must not cause endless rollback. Show version, update progress, validation
-  failure, reboot scheduling and rollback clearly in the setup/status UI.
-- **Recovery and evidence:** retain an offline rollback entry and signed USB update
-  path. Verify power loss at each journal step, wrong key/digest/architecture,
-  replay/downgrade, key rotation, two competing announcements, failed boot and
-  unchanged device identity before enabling automatic activation on real PCs.
-
-No updater executable, trusted release key, peer-distributed release artifact or
-health rollback service is shipped by this change. This is the implementation
-contract for a subsequent update release, not an automatic-update completion claim.
+See [the update lifecycle](os-update-lifecycle.md) for distribution, signed
+verification, durable staging, automatic scheduling, deadline-bound
+semi-mandatory updates and boot recovery. The shared Kotoba decision library and
+reference host controller now have executable tests. The Nix configuration ships
+reference modules and disabled defaults; it creates no update timer or reboot
+service. Production signing, fleet enforcement and Linux boot providers remain
+qualification gates.
