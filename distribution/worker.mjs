@@ -15,6 +15,6 @@ export default {async fetch(request,env){
  headers.set('Cache-Control',isManifest?'no-store':'public, max-age=31536000, immutable');
  headers.set('X-Content-Type-Options','nosniff');headers.set('Accept-Ranges','bytes');headers.set('ETag',object.httpEtag);
  let status=200;
- if(object.range){const {offset=0,length}=object.range;headers.set('Content-Range',`bytes ${offset}-${offset+length-1}/${object.size}`);headers.set('Content-Length',String(length));status=206;}else headers.set('Content-Length',String(object.size));
+ if(request.headers.has('range')&&object.range){const {offset=0,length}=object.range;headers.set('Content-Range',`bytes ${offset}-${offset+length-1}/${object.size}`);headers.set('Content-Length',String(length));status=206;}else headers.set('Content-Length',String(object.size));
  return new Response(request.method==='HEAD'?null:object.body,{status,headers});
 }};
