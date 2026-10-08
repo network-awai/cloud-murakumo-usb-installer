@@ -62,3 +62,28 @@ included. Unit inspection and the language-screen image are stored under
 normally powered down; other user VMs were left running. Trimming only the
 builder's unallocated ext4 blocks restored approximately 5.3 GiB of Mac capacity;
 the generated ISO and retained build closures were preserved.
+
+## Production publishing tools
+
+The distribution Worker accepts channel-relative immutable archive URLs as well
+as root-level URLs: the Node resolves an archive relative to `/stable/`, and
+both map to the same SHA256-named R2 object. A regression test uses the actual
+Node URL resolver. Cloudflare account selection is explicit in Wrangler config.
+
+`distribution/upload-worker.mjs` is a temporary operator publishing tool, not
+the read-only Node transport. Deploy it only with an exact `ALLOWED_KEYS` JSON
+list and the operator Ed25519 `PUBLIC_KEY`. Each request verifies a short-lived
+`aiueos.upload.v1` ticket binding operation, object, upload ID, part number,
+body length and SHA256. Parts are at most 32 MiB. It has no unsigned upload or
+command path. `scripts/upload-release-r2.mjs` signs tickets through the approved
+Keychain helper and checkpoints multipart receipts for resumption. Supply HTTPS
+URL, FILE, HASH_KEY, SIGNER_BINARY, KEY_ID and CHECKPOINT arguments. Never pass
+private key bytes to the Worker. After upload, verify the full object length and
+SHA256 through the read-only production transport before promoting the signed
+channel manifest, and delete the temporary publishing Worker.
+
+The real `aiueos-6600hs-2` at `100.84.134.120` was checked over Tailscale SSH on
+2026-10-08: Ubuntu 24.04.4, UEFI, no AiueOS update timer and no `/dev/watchdog0`.
+The AiueOS provider must not be installed/enabled there as an Ubuntu replacement.
+Physical automatic activation awaits the actual installed AiueOS target and
+qualified watchdog/fallback evidence; an online hostname alone is insufficient.
