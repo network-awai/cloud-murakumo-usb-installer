@@ -17,6 +17,13 @@ in
   environment.etc."murakumo/install-disk.mjs".source = ../scripts/install-disk.mjs;
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
+  environment.etc."murakumo/update-service.nix".source = ./update-service.nix;
+  environment.etc."murakumo/update-policy-runtime".source = ./update-policy-runtime;
+  environment.etc."murakumo/update-linux.mjs".source = ./update-linux.mjs;
+  environment.etc."murakumo/update-policy.mjs".source = ./update-policy.mjs;
+  environment.etc."murakumo/update-controller.mjs".source = ./update-controller.mjs;
+  environment.etc."murakumo/update-release.mjs".source = ./update-release.mjs;
+  environment.etc."murakumo/update-defaults.json".source = ./update-defaults.json;
   environment.etc."murakumo/console-ui.nix".source = ./console-ui.nix;
   environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
   environment.etc."murakumo/configuration.example.nix".source = ./configuration.example.nix;

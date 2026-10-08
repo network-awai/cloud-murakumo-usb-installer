@@ -1,0 +1,508 @@
+TAP version 13
+# Subtest: key survives restart and private files are 0600
+ok 1 - key survives restart and private files are 0600
+  ---
+  duration_ms: 242.838447
+  type: 'test'
+  ...
+# Subtest: approval persists public receipt only and repeated boot does not enroll again
+ok 2 - approval persists public receipt only and repeated boot does not enroll again
+  ---
+  duration_ms: 531.687169
+  type: 'test'
+  ...
+# Subtest: wrong device, challenge, model or unregistered receipt never persists
+ok 3 - wrong device, challenge, model or unregistered receipt never persists
+  ---
+  duration_ms: 59.017352
+  type: 'test'
+  ...
+# Subtest: disconnect retries within deadline; expired approval never succeeds
+ok 4 - disconnect retries within deadline; expired approval never succeeds
+  ---
+  duration_ms: 113.757678
+  type: 'test'
+  ...
+# Subtest: an existing factory signing identity is preserved without the factory daemon
+ok 5 - an existing factory signing identity is preserved without the factory daemon
+  ---
+  duration_ms: 53.154317
+  type: 'test'
+  ...
+# Subtest: a device key with group or world permissions is refused
+ok 6 - a device key with group or world permissions is refused
+  ---
+  duration_ms: 47.736285
+  type: 'test'
+  ...
+# Subtest: deferred approval never saves even if approval arrives during cancellation
+ok 7 - deferred approval never saves even if approval arrives during cancellation
+  ---
+  duration_ms: 73.879441
+  type: 'test'
+  ...
+# Subtest: unpublished registration service is distinct from an approval refusal
+ok 8 - unpublished registration service is distinct from an approval refusal
+  ---
+  duration_ms: 70.337419
+  type: 'test'
+  ...
+# Subtest: server expiry returns the new-QR recovery state
+ok 9 - server expiry returns the new-QR recovery state
+  ---
+  duration_ms: 92.444551
+  type: 'test'
+  ...
+# Subtest: playback tolerates output-device startup loss
+ok 10 - playback tolerates output-device startup loss
+  ---
+  duration_ms: 310.873853
+  type: 'test'
+  ...
+# Subtest: acoustic code survives offset, attenuation and background noise
+ok 11 - acoustic code survives offset, attenuation and background noise
+  ---
+  duration_ms: 139.711833
+  type: 'test'
+  ...
+# Subtest: damaged code, silence and ambient music never authorize or decode
+ok 12 - damaged code, silence and ambient music never authorize or decode
+  ---
+  duration_ms: 4374.419074
+  type: 'test'
+  ...
+# Subtest: ambient audio is quiet, finite and has faded boundaries
+ok 13 - ambient audio is quiet, finite and has faded boundaries
+  ---
+  duration_ms: 1494.555909
+  type: 'test'
+  ...
+# Subtest: browser WebCrypto interoperates with receiver and binds device/session
+ok 14 - browser WebCrypto interoperates with receiver and binds device/session
+  ---
+  duration_ms: 187.405117
+  type: 'test'
+  ...
+# Subtest: tampering, expiration and non-Wi-Fi commands refuse
+ok 15 - tampering, expiration and non-Wi-Fi commands refuse
+  ---
+  duration_ms: 28.049167
+  type: 'test'
+  ...
+# Subtest: fragmented BLE transfer executes once and refuses replay
+ok 16 - fragmented BLE transfer executes once and refuses replay
+  ---
+  duration_ms: 63.137376
+  type: 'test'
+  ...
+# Subtest: peer isolation, partial frame bounds and authentication failures
+ok 17 - peer isolation, partial frame bounds and authentication failures
+  ---
+  duration_ms: 13.235079
+  type: 'test'
+  ...
+# Subtest: expiry and failed backend never claim success
+ok 18 - expiry and failed backend never claim success
+  ---
+  duration_ms: 29.657177
+  type: 'test'
+  ...
+# Subtest: unmounted Windows disk is eligible, boot USB is never eligible
+ok 19 - unmounted Windows disk is eligible, boot USB is never eligible
+  ---
+  duration_ms: 25.728153
+  type: 'test'
+  ...
+# Subtest: every mounted child, swap, mapper or installer backing disk is refused
+ok 20 - every mounted child, swap, mapper or installer backing disk is refused
+  ---
+  duration_ms: 5.496033
+  type: 'test'
+  ...
+# Subtest: a changed or newly mounted disk is refused after approval
+ok 21 - a changed or newly mounted disk is refused after approval
+  ---
+  duration_ms: 8.33505
+  type: 'test'
+  ...
+# Subtest: NVMe/eMMC and SATA/virtio partition paths are correct
+ok 22 - NVMe/eMMC and SATA/virtio partition paths are correct
+  ---
+  duration_ms: 6.027036
+  type: 'test'
+  ...
+# Subtest: NVMe is refused in BIOS mode before any destructive preparation
+ok 23 - NVMe is refused in BIOS mode before any destructive preparation
+  ---
+  duration_ms: 5.593033
+  type: 'test'
+  ...
+# Subtest: installed configuration imports the shipped mode without host compilation
+ok 24 - installed configuration imports the shipped mode without host compilation
+  ---
+  duration_ms: 7.254043
+  type: 'test'
+  ...
+# Subtest: boot entries use installation UUIDs and replace only previous UUID parameters
+ok 25 - boot entries use installation UUIDs and replace only previous UUID parameters
+  ---
+  duration_ms: 19.987119
+  type: 'test'
+  ...
+# Subtest: offline manifest must identify the supported shipped system and labels
+ok 26 - offline manifest must identify the supported shipped system and labels
+  ---
+  duration_ms: 8.591051
+  type: 'test'
+  ...
+# Subtest: local setup persists device identity across boot without an account receipt
+ok 27 - local setup persists device identity across boot without an account receipt
+  ---
+  duration_ms: 390.525328
+  type: 'test'
+  ...
+# Subtest: local first-boot choice completes with zero network and registration calls
+ok 28 - local first-boot choice completes with zero network and registration calls
+  ---
+  duration_ms: 109.207651
+  type: 'test'
+  ...
+# Subtest: network settings in local mode never implicitly start registration
+ok 29 - network settings in local mode never implicitly start registration
+  ---
+  duration_ms: 103.076614
+  type: 'test'
+  ...
+# Subtest: corrupt local completion refuses to replace stored identity
+ok 30 - corrupt local completion refuses to replace stored identity
+  ---
+  duration_ms: 114.990686
+  type: 'test'
+  ...
+# Subtest: language selection persists Japanese and English and rejects arbitrary values
+ok 31 - language selection persists Japanese and English and rejects arbitrary values
+  ---
+  duration_ms: 52.780315
+  type: 'test'
+  ...
+# Subtest: bundled local setup loads through an etc-style symlink and preserves its identity dependency
+ok 32 - bundled local setup loads through an etc-style symlink and preserves its identity dependency
+  ---
+  duration_ms: 186.507111
+  type: 'test'
+  ...
+# Subtest: SSID delimiters and backslashes round trip; strongest duplicate wins
+ok 33 - SSID delimiters and backslashes round trip; strongest duplicate wins
+  ---
+  duration_ms: 45.191269
+  type: 'test'
+  ...
+# Subtest: Wi-Fi secrets go to stdin, never command arguments; failures do not expose output
+ok 34 - Wi-Fi secrets go to stdin, never command arguments; failures do not expose output
+  ---
+  duration_ms: 8.36405
+  type: 'test'
+  ...
+# Subtest: no NIC and Wi-Fi missing remain actionable and can finish installation offline
+ok 35 - no NIC and Wi-Fi missing remain actionable and can finish installation offline
+  ---
+  duration_ms: 10.604063
+  type: 'test'
+  ...
+# Subtest: a saved connection skips password entry and proceeds only after connection confirmation
+ok 36 - a saved connection skips password entry and proceeds only after connection confirmation
+  ---
+  duration_ms: 8.235049
+  type: 'test'
+  ...
+# Subtest: Wi-Fi failure returns to method selection and a second attempt succeeds
+ok 37 - Wi-Fi failure returns to method selection and a second attempt succeeds
+  ---
+  duration_ms: 7.868047
+  type: 'test'
+  ...
+# Subtest: LAN association without Internet must not be presented as ready for registration
+ok 38 - LAN association without Internet must not be presented as ready for registration
+  ---
+  duration_ms: 5.419032
+  type: 'test'
+  ...
+# Subtest: cancel Wi-Fi selection returns without connecting or erasing
+ok 39 - cancel Wi-Fi selection returns without connecting or erasing
+  ---
+  duration_ms: 5.461033
+  type: 'test'
+  ...
+# Subtest: TLS/captive probe failure is not reported as successful connectivity
+ok 40 - TLS/captive probe failure is not reported as successful connectivity
+  ---
+  duration_ms: 10.326062
+  type: 'test'
+  ...
+# Subtest: saved connection that becomes ready at the chooser skips scanning and secrets
+ok 41 - saved connection that becomes ready at the chooser skips scanning and secrets
+  ---
+  duration_ms: 7.911047
+  type: 'test'
+  ...
+# Subtest: Bluetooth success closes its pairing window and checks Internet before proceeding
+ok 42 - Bluetooth success closes its pairing window and checks Internet before proceeding
+  ---
+  duration_ms: 14.325085
+  type: 'test'
+  ...
+# Subtest: Bluetooth cancellation closes its pairing window and offers offline completion
+ok 43 - Bluetooth cancellation closes its pairing window and offers offline completion
+  ---
+  duration_ms: 6.205037
+  type: 'test'
+  ...
+# Subtest: status is bounded and never requests Wi-Fi secrets
+ok 44 - status is bounded and never requests Wi-Fi secrets
+  ---
+  duration_ms: 63.395377
+  type: 'test'
+  ...
+# Subtest: refresh recollects and back leaves the screen
+ok 45 - refresh recollects and back leaves the screen
+  ---
+  duration_ms: 5.507033
+  type: 'test'
+  ...
+# Subtest: a stored registration receipt does not prove authority or unlock the vault
+ok 46 - a stored registration receipt does not prove authority or unlock the vault
+  ---
+  duration_ms: 54.709327
+  type: 'test'
+  ...
+# Subtest: phone approval closes QR before returning the bound account
+ok 47 - phone approval closes QR before returning the bound account
+  ---
+  duration_ms: 26.250157
+  type: 'test'
+  ...
+# Subtest: defer aborts poll and leaves no completion message
+ok 48 - defer aborts poll and leaves no completion message
+  ---
+  duration_ms: 5.02303
+  type: 'test'
+  ...
+# Subtest: expiry closes QR before actionable error; service failure needs no QR
+ok 49 - expiry closes QR before actionable error; service failure needs no QR
+  ---
+  duration_ms: 16.328097
+  type: 'test'
+  ...
+# Subtest: service unavailable offers retry directly, then defer without background claims
+ok 50 - service unavailable offers retry directly, then defer without background claims
+  ---
+  duration_ms: 36.458217
+  type: 'test'
+  ...
+# Subtest: offline install finishes on a page, connect resumes phone approval and shows owner
+ok 51 - offline install finishes on a page, connect resumes phone approval and shows owner
+  ---
+  duration_ms: 12.056072
+  type: 'test'
+  ...
+# Subtest: phone cancellation returns to finished page without silently retrying
+ok 52 - phone cancellation returns to finished page without silently retrying
+  ---
+  duration_ms: 6.344038
+  type: 'test'
+  ...
+# Subtest: expired approval closes QR before showing retry options
+ok 53 - expired approval closes QR before showing retry options
+  ---
+  duration_ms: 12.506075
+  type: 'test'
+  ...
+# Subtest: unreadable saved receipt blocks claims but still allows network settings and shutdown
+ok 54 - unreadable saved receipt blocks claims but still allows network settings and shutdown
+  ---
+  duration_ms: 6.598039
+  type: 'test'
+  ...
+# Subtest: network and unexpected registration errors stay in the guide; shutdown failure can retry
+ok 55 - network and unexpected registration errors stay in the guide; shutdown failure can retry
+  ---
+  duration_ms: 19.151114
+  type: 'test'
+  ...
+# Subtest: Node details returns to setup without claiming an account or touching network
+ok 56 - Node details returns to setup without claiming an account or touching network
+  ---
+  duration_ms: 16.8971
+  type: 'test'
+  ...
+# Subtest: offline Kotoba runtime enforces deadline without installed kbb
+ok 57 - offline Kotoba runtime enforces deadline without installed kbb
+  ---
+  duration_ms: 502.492995
+  type: 'test'
+  ...
+# Subtest: atomic journal round trip and private permissions
+ok 58 - atomic journal round trip and private permissions
+  ---
+  duration_ms: 150.290896
+  type: 'test'
+  ...
+# Subtest: closure streams over HTTP/file; corrupt bytes never become staged artifact
+ok 59 - closure streams over HTTP/file; corrupt bytes never become staged artifact
+  ---
+  duration_ms: 1028.832133
+  type: 'test'
+  ...
+# Subtest: boot entry keeps root and ESP UUID and excludes stale kernel bindings
+ok 60 - boot entry keeps root and ESP UUID and excludes stale kernel bindings
+  ---
+  duration_ms: 15.467093
+  type: 'test'
+  ...
+# Subtest: signed release -> real Kotoba policy -> trial -> local-health commit
+ok 61 - signed release -> real Kotoba policy -> trial -> local-health commit # SKIP
+  ---
+  duration_ms: 8.509051
+  type: 'test'
+  ...
+# Subtest: exact signed release and closure; modified content refused
+ok 62 - exact signed release and closure; modified content refused
+  ---
+  duration_ms: 59.743357
+  type: 'test'
+  ...
+# Subtest: quorum cannot count duplicate signer, wrong key or unsafe manifest
+ok 63 - quorum cannot count duplicate signer, wrong key or unsafe manifest
+  ---
+  duration_ms: 40.372241
+  type: 'test'
+  ...
+# Subtest: stage is repeatable, notice persists, no reboot while downloading
+ok 64 - stage is repeatable, notice persists, no reboot while downloading
+  ---
+  duration_ms: 42.877256
+  type: 'test'
+  ...
+# Subtest: tampered release produces no notice, staging or restriction
+ok 65 - tampered release produces no notice, staging or restriction
+  ---
+  duration_ms: 6.903042
+  type: 'test'
+  ...
+# Subtest: activation rechecks evidence under atomic fleet lease
+ok 66 - activation rechecks evidence under atomic fleet lease
+  ---
+  duration_ms: 12.696076
+  type: 'test'
+  ...
+# Subtest: trial commits only after local health, failure blocks same release
+ok 67 - trial commits only after local health, failure blocks same release
+  ---
+  duration_ms: 19.726118
+  type: 'test'
+  ...
+# Subtest: durable high-water allows only exact pending release to resume
+ok 68 - durable high-water allows only exact pending release to resume
+  ---
+  duration_ms: 20.04112
+  type: 'test'
+  ...
+# Subtest: two independent Ed25519 keys satisfy a two-signer policy
+ok 69 - two independent Ed25519 keys satisfy a two-signer policy
+  ---
+  duration_ms: 10.389062
+  type: 'test'
+  ...
+# Subtest: AI selects only current UI candidates, duplicate utterances execute once
+ok 70 - AI selects only current UI candidates, duplicate utterances execute once
+  ---
+  duration_ms: 42.415253
+  type: 'test'
+  ...
+# Subtest: arbitrary tool, command, path and model erase requests are refused
+ok 71 - arbitrary tool, command, path and model erase requests are refused
+  ---
+  duration_ms: 18.250109
+  type: 'test'
+  ...
+# Subtest: state changes and invalidation cancel in-flight model results
+ok 72 - state changes and invalidation cancel in-flight model results
+  ---
+  duration_ms: 25.765153
+  type: 'test'
+  ...
+# Subtest: secret spelling never calls model or speaks secret; completion passes to backend only
+ok 73 - secret spelling never calls model or speaks secret; completion passes to backend only
+  ---
+  duration_ms: 23.343139
+  type: 'test'
+  ...
+# Subtest: secret cancel clears memory; unknown character is refused
+ok 74 - secret cancel clears memory; unknown character is refused
+  ---
+  duration_ms: 4.858029
+  type: 'test'
+  ...
+# Subtest: destructive consent is fresh, exact, serial-bound and unavailable to model
+ok 75 - destructive consent is fresh, exact, serial-bound and unavailable to model
+  ---
+  duration_ms: 11.62107
+  type: 'test'
+  ...
+# Subtest: missing serial blocks voice erase, changed target invalidates old confirmation
+ok 76 - missing serial blocks voice erase, changed target invalidates old confirmation
+  ---
+  duration_ms: 6.637039
+  type: 'test'
+  ...
+# Subtest: approval sound transport cannot approve an account
+ok 77 - approval sound transport cannot approve an account
+  ---
+  duration_ms: 6.481039
+  type: 'test'
+  ...
+# Subtest: segmented PCM voice activity uses silence boundary and skips silence
+ok 78 - segmented PCM voice activity uses silence boundary and skips silence
+  ---
+  duration_ms: 101.618606
+  type: 'test'
+  ...
+# Subtest: voice audio controls are fixed operations and never intercept secret spelling
+ok 79 - voice audio controls are fixed operations and never intercept secret spelling
+  ---
+  duration_ms: 23.094138
+  type: 'test'
+  ...
+# Subtest: audio control cancels prior disk confirmation instead of carrying consent forward
+ok 80 - audio control cancels prior disk confirmation instead of carrying consent forward
+  ---
+  duration_ms: 8.577051
+  type: 'test'
+  ...
+# Subtest: explicit lower case survives ASR returning an uppercase Latin character
+ok 81 - explicit lower case survives ASR returning an uppercase Latin character
+  ---
+  duration_ms: 6.74604
+  type: 'test'
+  ...
+# Subtest: explicit spoken secret phrases parse without exposing or silently completing empty secrets
+ok 82 - explicit spoken secret phrases parse without exposing or silently completing empty secrets
+  ---
+  duration_ms: 13.736082
+  type: 'test'
+  ...
+# Subtest: English punctuation and named symbols do not become accidental password characters
+ok 83 - English punctuation and named symbols do not become accidental password characters
+  ---
+  duration_ms: 8.42705
+  type: 'test'
+  ...
+1..83
+# tests 83
+# suites 0
+# pass 82
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 26188.499094

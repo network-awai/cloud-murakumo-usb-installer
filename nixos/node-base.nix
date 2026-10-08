@@ -1,7 +1,7 @@
 { pkgs, lib, config, ... }:
 {
   options.services.murakumoAccountLink.enable = lib.mkEnableOption "passwordless first-boot Murakumo registration";
-  imports = [ ./console-ui.nix ];
+  imports = [ ./console-ui.nix ./update-service.nix ];
   config = {
   # Base for a NixOS Murakumo node after the OS is installed.
   services.tailscale.enable = true;
@@ -12,6 +12,11 @@
     vulkan-tools
     qrencode
   ];
+  # Reference update mechanism shipped disabled: no timer or boot activation
+  # until signed release roots, owner policy and recovery providers qualify.
+  environment.etc."murakumo/update-release.mjs".source = ./update-release.mjs;
+  environment.etc."murakumo/update-controller.mjs".source = ./update-controller.mjs;
+  environment.etc."murakumo/update-defaults.json".source = ./update-defaults.json;
   environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
   systemd.services."getty@tty1".enable = lib.mkIf config.services.murakumoAccountLink.enable false;
   systemd.services.murakumo-account-link = lib.mkIf config.services.murakumoAccountLink.enable {

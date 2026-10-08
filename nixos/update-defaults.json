@@ -1,0 +1,17 @@
+{
+  "schema": "aiueos.update-policy.v1",
+  "enabled": false,
+  "mode": "automatic-stable",
+  "channel": "stable",
+  "semiMandatory": true,
+  "highGraceHours": 72,
+  "criticalGraceHours": 24,
+  "maxApplyRisk": "medium",
+  "maintenanceWindow": "03:00-05:00 local",
+  "maxConcurrentPerOwner": 1,
+  "trialTimeoutSeconds": 120,
+  "maxTrialBoots": 2,
+  "retainedHealthyGenerations": 2,
+  "requiresCurrentOwnerAuthorization": true,
+  "requiresQualifiedBootRecovery": true
+}

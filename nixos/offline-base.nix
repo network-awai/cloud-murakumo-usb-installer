@@ -3,6 +3,7 @@
   networking.hostName = "murakumo-node";
   networking.networkmanager.enable = true;
   services.murakumoAccountLink.enable = true;
+  services.aiueosUpdate.enable = true;
   # Prebuilt generic x86_64 storage support; no host-side build is needed.
   boot.initrd.availableKernelModules = [
     "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod"
