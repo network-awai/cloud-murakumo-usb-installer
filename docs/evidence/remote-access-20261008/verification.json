@@ -1,7 +1,7 @@
 {
-  "recordedAt": "2026-10-08T10:00:53.599Z",
+  "recordedAt": "2026-10-08T10:15:11.549Z",
   "unitTests": {
-    "passed": 108,
+    "passed": 110,
     "failed": 0,
     "skipped": 0,
     "grantBridge": "actual Grant source with bundled SCI"
@@ -11,7 +11,8 @@
   "vm": {
     "diskless": true,
     "networkDisabled": true,
-    "installerMasked": true
+    "installerMasked": true,
+    "poweredDown": true
   },
   "physicalNodeActivated": false,
   "newReleasePublished": false,
@@ -22,6 +23,7 @@
     "nixos/remote-ui.mjs": "dc7221cd702480430d0f604a3a0a39fcf0f801cdbb52f386657fca825c190e17",
     "nixos/remote-client.js": "ae84117bd7f891c7a9f6717bdf9fe697b52720e8869c768f723c891655fc361f",
     "nixos/remote-access.html": "433e042831b3ac611ea067ba0e539937daa6aabcb8bb84442c63c0d8771de4ba",
-    "nixos/registration-ui.mjs": "e8e23566c2bc88f2b30295567c839d31d0f8893fba8d4c7af16cacae9da6a182"
+    "nixos/registration-ui.mjs": "eeb133f942960899bb94daf7026864ba06aab462cabdb55afd2ad698a43a220c",
+    "nixos/network-setup.mjs": "37ed204bb909fff87e3706682cf56ec62ed2f89324ec66ad649d063247655478"
   }
 }

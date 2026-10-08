@@ -52,7 +52,7 @@ export async function registerWithUI({link,screen,ui,t,options={},onFailure}){
 // The guide owns retries. Network or registration failures remain on an
 // actionable screen instead of exiting into a systemd restart loop.
 export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal,showStatus,showRemote}) {
-  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false;
+  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false,linkReady=false;
   try {saved=await readSaved();local=await readLocal();if(saved||local)state='complete';}
   catch {storageError=true;state='complete';}
   for (;;) {
@@ -77,7 +77,8 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     if(state==='network') {
       try {
         const result=await network({registered:!!saved});
-        state=result==='back'?(saved||local?'complete':'choose'):result==='connected'&&showRemote?'handoff':result==='connected'&&wantsLink?'register':'complete';
+        linkReady=result==='connected';
+        state=result==='back'?(saved||local?'complete':'choose'):(result==='connected'||result==='local-connected')&&showRemote?'handoff':result==='connected'&&wantsLink?'register':'complete';
         failure=null;
       } catch {
         failure=t('接続設定を確認できませんでした。接続設定から再試行できます。','Could not check the network. Retry from connection settings.');
@@ -86,12 +87,12 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       continue;
     }
     if(state==='handoff') {
-      const action=ui.menu(t('ネット接続ができました。どの画面で続けますか？','Network connected. Where would you like to continue?'),[
+      const action=ui.menu(linkReady?t('ネット接続ができました。どの画面で続けますか？','Network connected. Where would you like to continue?'):t('LANで別のPCから設定できます。アカウント連携にはインターネットが必要です。','Continue from another PC on this LAN. Account linking needs Internet.'),[
         ['remote',t('別のPCから設定する','Continue on another computer')],
         ['continue',t('この端末で続ける','Continue on this device')],
       ]);
       if(action==='remote'){await showRemote();continue;}
-      state=action==='continue'?(wantsLink?'register':'complete'):(saved||local?'complete':'choose');
+      state=action==='continue'?(wantsLink&&linkReady?'register':'complete'):(saved||local?'complete':'choose');
       continue;
     }
     if(state==='register') {

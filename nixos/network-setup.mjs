@@ -94,9 +94,10 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
       text(`Murakumo：${state.murakumo ? (registered ? '到達しました（登録状態を確認できます）' : '到達しました（登録はこれから）') : '到達できません'}`,`Murakumo: ${state.murakumo ? (registered ? 'reachable (ready to verify registration)' : 'reachable (registration pending)') : 'unreachable'}`)].join('\n');
     const next = ui.menu(message, [
       ...(state.internet ? [['next',text(stage === 'installer' ? 'インストールへ進む' : registered ? '登録状態を確認する' : 'アカウント連携する',stage === 'installer' ? 'Continue to installation' : registered ? 'Verify registration' : 'Link an account')]] : []),
+      ...(stage==='installed'?[['local',text('LAN経由で別のPCから設定する','Set up from another PC on this LAN')]]:[]),
       ['settings',text('接続方法を変更・再試行','Change connection / retry')], ['later',later],
     ]);
-    return next === 'next' ? 'connected' : next === 'later' ? 'offline' : null;
+    return next === 'next' ? 'connected' : next==='local' ? 'local-connected' : next === 'later' ? 'offline' : null;
   };
   // Saved Wi-Fi and already connected Ethernet need no repeated password entry.
   if (backend.devices().some(d => d.connected)) { const r = await check(); if (r) return r; }
