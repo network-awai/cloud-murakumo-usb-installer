@@ -75,7 +75,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     if(state==='network') {
       try {
         const result=await network({registered:!!saved});
-        state=result==='connected'&&wantsLink?'register':'complete';
+        state=result==='back'?(saved||local?'complete':'choose'):result==='connected'&&wantsLink?'register':'complete';
         failure=null;
       } catch {
         failure=t('接続設定を確認できませんでした。接続設定から再試行できます。','Could not check the network. Retry from connection settings.');
@@ -90,7 +90,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       try {receipt=await register(e=>{error=e;});}catch(e){error=e;}
       if(receipt){saved=receipt;verified=true;failure=null;state='complete';}
       else if(error){failure=registrationFailure(error,t);verified=false;state='retry';}
-      else {failure=null;state='complete';}
+      else {failure=null;state=saved||local?'complete':'choose';}
       continue;
     }
     const status=[

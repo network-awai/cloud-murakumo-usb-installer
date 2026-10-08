@@ -31,6 +31,13 @@ function connectVoice(){
   try{voiceConnection=new Gio.SocketClient().connect(new Gio.UnixSocketAddress({path}),null);voiceInput=new Gio.DataInputStream({base_stream:voiceConnection.get_input_stream()});voiceListen();}catch{voiceCaption.set_label(tr('音声会話を起動できません。画面で続けられます','Voice unavailable. Continue using the screen'));}
 }
 const tr=(ja,en)=>language==='ja'?ja:en;
+function backKey(keyval){
+  if(keyval!==Gdk.KEY_Escape)return false;
+  // The backend owns the previous step. Busy/progress screens deliberately
+  // have no back action: Esc must never acknowledge or interrupt a disk write.
+  active?.back?.();
+  return true;
+}
 const label=(text,cls='body')=>{const w=new Gtk.Label({label:text,wrap:cls!=='brand',wrap_mode:Pango.WrapMode.WORD_CHAR,max_width_chars:44,xalign:0,selectable:false});w.add_css_class(cls);return w;};
 const box=(orientation=Gtk.Orientation.VERTICAL,spacing=16)=>new Gtk.Box({orientation,spacing});
 function button(text,callback,cls='secondary'){
@@ -102,6 +109,7 @@ function serve(request,connection,input){
       row.append(words);row.append(new Gtk.Label({label:'›'}));b.set_child(row);b.connect('clicked',()=>respond(0,key));list.append(b);
     }
     const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);list.get_first_child()?.grab_focus();
+    content.append(button(tr('戻る · Esc','Back · Esc'),actions.back));
   }else if(type==='--inputbox'||type==='--passwordbox'){
     const phrase=message.match(/ERASE \/dev\/(?:nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+)/)?.[0];
     if(phrase){
@@ -180,7 +188,7 @@ function serve(request,connection,input){
     voice={kind:'message',message,canContinue:true};actions={continue:()=>respond(0)};
     const next=button(/再起動|restart/i.test(message)?tr('再起動する','Restart'):tr('続ける','Continue'),()=>respond(0),'primary');content.append(next);next.grab_focus();
   }
-  if(active===token)voicePublish(voice,actions);
+  if(active===token){token.back=actions.back;voicePublish(voice,actions);}
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{stream.read_line_finish_utf8(result);}catch{}
@@ -223,6 +231,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   voiceCaption=label('','muted');outer.append(voiceCaption);connectVoice();
   musicButton=button('BGM 停止 / Stop music',()=>{musicEnabled=!musicEnabled;if(musicEnabled)playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label(tr('音声出力なし','Audio unavailable'));});else stopAudio();musicButton.set_label(musicEnabled?tr('BGMを停止','Stop BGM'):tr('BGMを再生','Play BGM'));});outer.append(musicButton);
   const viewport=new Gtk.ScrolledWindow({child:outer,hscrollbar_policy:Gtk.PolicyType.NEVER});window.set_child(viewport);show(tr('Murakumoへようこそ','Welcome to Murakumo'),'セットアップを準備しています…');window.fullscreen();window.present();
+  const keys=new Gtk.EventControllerKey();keys.set_propagation_phase(Gtk.PropagationPhase.CAPTURE);
+  keys.connect('key-pressed',(_controller,keyval)=>backKey(keyval));window.add_controller(keys);
   const socketPath=GLib.getenv('MURAKUMO_UI_SOCKET');
   if(!socketPath||!socketPath.startsWith('/run/murakumo-ui/'))throw Error('Missing private socket');
   const service=new Gio.SocketService();service.add_address(new Gio.UnixSocketAddress({path:socketPath}),Gio.SocketType.STREAM,Gio.SocketProtocol.DEFAULT,null);Gio.File.new_for_path(socketPath).set_attribute_uint32('unix::mode',0o600,Gio.FileQueryInfoFlags.NONE,null);

@@ -98,7 +98,8 @@ async function main() {
   for (;;) {
     const disks = inventory(), eligible = disks.filter(d => !diskReason(d, {uefi}));
     if (!eligible.length) throw Error('No unused internal disk of at least 16 GiB. NVMe requires restarting with the UEFI USB entry. Use the recovery console to inspect disks.');
-    selected = dialog(['--menu', text(`起動方式：${uefi ? 'UEFI' : 'BIOS（NVMeにはUEFI起動が必要です）'}。インストール先の内蔵ディスクを選んでください。Windowsを含む、選んだディスクの全データを消去します。USBは対象外です。電源を接続してください。`, `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires UEFI)'}. Choose the internal disk to REPLACE. All data including Windows will be erased. USB is excluded. Connect AC power.`), '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])]);
+    selected = dialog(['--menu', text(`起動方式：${uefi ? 'UEFI' : 'BIOS（NVMeにはUEFI起動が必要です）'}。インストール先の内蔵ディスクを選んでください。Windowsを含む、選んだディスクの全データを消去します。USBは対象外です。電源を接続してください。`, `Boot mode: ${uefi ? 'UEFI' : 'BIOS (NVMe requires UEFI)'}. Choose the internal disk to REPLACE. All data including Windows will be erased. USB is excluded. Connect AC power.`), '0', '0', '8', ...eligible.flatMap(d => [d.path, `${String(d.model || '').trim()} | ${(Number(d.size) / 1024 ** 3).toFixed(1)} GiB | ${d.serial || d.wwn || 'no serial'}`])], {allowCancel:true});
+    if(selected===null){await setupNetwork({stage:"installer"});continue;}
     target = eligible.find(d => d.path === selected);
     if (!target || realpathSync(selected) !== selected) throw Error('Invalid target selection.');
     identity = fingerprint(target);

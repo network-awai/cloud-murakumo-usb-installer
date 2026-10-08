@@ -67,3 +67,7 @@ test('Bluetooth cancellation closes its pairing window and offers offline comple
   let stopped=false;const f=fixture(['bluetooth','later'],[],{bluetoothAvailable:()=>true,bluetoothStart:()=>true,bluetoothStop:()=>{stopped=true;},probe:()=>{throw Error('no connection');}});
   f.ui.bluetooth=()=>false;assert.equal(await setupNetwork(f),'offline');assert.equal(stopped,true);
 });
+test('back from Wi-Fi password returns to the SSID list without connecting',async()=>{const f=fixture(['wifi','0',null,'later'],[{name:'wlan0',type:'wifi',connected:false}]);f.ui.password=()=>null;assert.equal(await setupNetwork(f),'offline');assert.equal(f.calls.length,0);});
+test('back from hidden password returns to SSID input before returning to the list',async()=>{const f=fixture(['wifi','hidden',null,'later'],[{name:'wlan0',type:'wifi',connected:false}]);let inputs=0;f.ui.input=()=>++inputs===1?'hidden-home':null;f.ui.password=()=>null;assert.equal(await setupNetwork(f),'offline');assert.equal(inputs,2);assert.equal(f.calls.length,0);});
+test('back on installer network chooser never implies consent to install offline',async()=>{const f=fixture([null,'later']);assert.equal(await setupNetwork(f),'offline');assert.equal(f.messages.filter(m=>m.includes('Ethernet is optional')).length,2);});
+test('back on installed network chooser returns to parent without claiming completion',async()=>{const f=fixture([null]);assert.equal(await setupNetwork({...f,stage:'installed'}),'back');assert.equal(f.calls.length,0);});

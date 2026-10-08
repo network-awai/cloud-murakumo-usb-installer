@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {runSetup,registerWithUI} from '../nixos/registration-ui.mjs';
 const t=(_ja,en)=>en;
 async function guide(actions,{readSaved=async()=>null,network=async()=> 'connected',register=async()=>null,poweroff=async()=>true}={}) {
-  const screens=[],events=[];
+  const screens=[],events=[];let firstChoice=true;
   await runSetup({t,readSaved,
     ui:{busy:()=>{},menu:(message,items)=>{
-      if(message.startsWith('Choose how to use'))return 'connect';
+      if(message.startsWith('Choose how to use')&&firstChoice){firstChoice=false;return 'connect';}
       screens.push(message);const action=actions.shift();assert.notEqual(action,undefined,'unexpected screen');
       if(action!==null)assert.ok(items.some(([key])=>key===action),`missing action ${action}`);return action;
     }},
@@ -30,8 +30,12 @@ test('offline install finishes on a page, connect resumes phone approval and sho
   assert.match(screens[0],/registration pending/);assert.match(screens[1],/verified during this boot/);
   assert.match(screens[1],/did:key:owner/);
 });
-test('phone cancellation returns to finished page without silently retrying',async()=>{
-  const {events}=await guide(['shutdown']);assert.deepEqual(events,['network','register','shutdown']);
+test('phone cancellation returns to mode choice without silently retrying or claiming completion',async()=>{
+  const {events,screens}=await guide(['shutdown']);assert.deepEqual(events,['network','register','shutdown']);assert.match(screens[0],/^Choose how to use/);
+});
+test('network back returns to mode choice without registration or claiming completion',async()=>{
+  const {events,screens}=await guide(['shutdown'],{network:async()=> 'back',register:()=>assert.fail('unexpected registration')});
+  assert.deepEqual(events,['network','shutdown']);assert.match(screens[0],/^Choose how to use/);
 });
 test('expired approval closes QR before showing retry options',async()=>{
   const order=[];
