@@ -22,8 +22,11 @@ func main() throws {
   let status=SecItemAdd(q as CFDictionary,nil);guard status==errSecSuccess else {throw Failure(text:"Keychain create refused: \(status)")}
  } else {key=try load(id)}
  if args[1]=="sign" {
-  let data=try FileHandle.standardInput.read(upToCount:131073) ?? Data()
-  guard data.count<=131072 else {throw Failure(text:"Payload bound exceeded")}
+  var data=Data()
+  while let chunk=try FileHandle.standardInput.read(upToCount:4096), !chunk.isEmpty {
+   data.append(chunk)
+   guard data.count<=131072 else {throw Failure(text:"Payload bound exceeded")}
+  }
   print(try key.signature(for:data).base64EncodedString())
  } else {print(key.publicKey.rawRepresentation.base64EncodedString())}
 }
