@@ -33,3 +33,20 @@ approved signer. It verifies the returned signature against the public key
 before appending it to the unchanged payload and writing atomically. Promote
 only after the provisioned quorum verifies; source tests do not prove that a
 production Keychain key has been created or a live file published.
+
+## Prepared installer media, 2026-10-08
+
+Full offline installer ISO: 5,248,696,320 bytes; SHA256
+`8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3`.
+The Linux builder and Mac streaming hashes match. A dedicated no-network UEFI
+VM booted this ISO to the graphical Japanese/English language selector; no disk
+approval or formatting was issued. The ISO's offline system manifest identifies
+UEFI `rh66qxk7wy88pavi6vnxllcranq21c1c` and BIOS
+`05h4l5l146bbd4khnnh32mxdkr759fg6`. Source tests pass 86/86 and distribution
+Worker dry-run succeeds. Full recovery qualification remains the preceding
+committed update VM evidence; this media boot alone is not a new recovery test.
+
+Still pending: both source PRs are open; production signing authority has not
+been provisioned; Cloudflare authorization has expired; no KIOXIA external disk
+was detected. No production deployment, manifest publication or USB write is
+claimed. The prepared USB request is `action: check`, never `write`.
