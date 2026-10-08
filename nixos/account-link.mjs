@@ -101,6 +101,8 @@ export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetch
   const started=await post('/api/devices/link/start',{deviceDid:id.did,challenge,model,pollToken,deviceProof:sign(null,Buffer.from(message),id.key).toString('base64url')});
   const flow=started.data;
   if(started.status!==201||! /^[A-Za-z0-9_-]{40,128}$/.test(flow.flowId||'')||! /^[A-Z0-9_-]{10}$/.test(flow.userCode||'')||flow.expiresIn!==300||flow.verificationUriComplete!==authority+'/portal/#device-link?code='+flow.userCode) throw Error('invalid registration flow');
+  // Keep signed node authority and stored receipts stable; move only the human approval UI.
+  flow.verificationUriComplete='https://setup.murakumo.cloud/#device-link?code='+flow.userCode;
   display('Scan the QR with your phone and approve this device using a Passkey.\n'+flow.verificationUriComplete+'\nDevice code: '+flow.userCode+'\nDevice ID: '+id.did+'\nExpires in: 5 minutes');
   if(onFlow)await onFlow({...flow,deviceDid:id.did});
   else spawnSync('qrencode',['-t','ANSIUTF8',flow.verificationUriComplete],{stdio:['ignore','inherit','ignore']});
