@@ -1,4 +1,4 @@
-# Production delivery preparation
+# Production delivery
 
 The dedicated `distribution/worker.mjs` provides read-only GET/HEAD access to
 signed channel manifests and SHA256-addressed ISO/NAR exports in an R2 bucket.
@@ -46,10 +46,7 @@ UEFI `rh66qxk7wy88pavi6vnxllcranq21c1c` and BIOS
 Worker dry-run succeeds. Full recovery qualification remains the preceding
 committed update VM evidence; this media boot alone is not a new recovery test.
 
-Still pending: both source PRs are open; production signing authority has not
-been provisioned; Cloudflare authorization has expired; no KIOXIA external disk
-was detected. No production deployment, manifest publication or USB write is
-claimed. The prepared USB request is `action: check`, never `write`.
+The initial preparation snapshot preceded main integration, Keychain provisioning, Cloudflare reauthorization and the completed USB write. Current production results are recorded separately below; preparation-only checks are not publication evidence.
 
 Read-only inspection of the ISO squashfs confirms both UEFI and BIOS installed
 systems contain `aiueos-update.service`, `aiueos-update-recover.service` and the
@@ -87,3 +84,63 @@ The real `aiueos-6600hs-2` at `100.84.134.120` was checked over Tailscale SSH on
 The AiueOS provider must not be installed/enabled there as an Ubuntu replacement.
 Physical automatic activation awaits the actual installed AiueOS target and
 qualified watchdog/fallback evidence; an online hostname alone is insufficient.
+
+## Production release and activation boundaries, 2026-10-08
+
+The production transport is `https://aiueos-updates.04-feasts-minded.workers.dev`,
+with the private R2 bucket `aiueos-releases`. Production keys
+`aiueos-production-release-20261008` and `aiueos-production-owner-20261008` are
+held in the same operator's Mac login Keychain. Two verified signatures meet the
+configured threshold; they do not constitute independent signing authorities.
+The OS source is frozen at installer main `efb39056e3b3abc5b5673b9ec5d55a19b5c3dc20`
+and Grant main `2e0496249fb969b52cf3bdbbc1d8b0238c7ac559`. Subsequent main changes
+fix distribution paths, authenticated multipart publishing and full HTTP status,
+without changing the USB OS runtime.
+
+Sequence 4 is a new production-signed full system closure (not a QA fixture),
+7,488,473,952 bytes, SHA256
+`60530f0ffcbb8b4f6ecaecdb82e876b9dd3a558e0c06a4081fa2e7152bd8df60`.
+The updater independently admits both signatures, channel, architecture,
+`uuid-v1` host contract, expiry and monotonic sequence. Archive verification
+must complete before `/stable/manifest.json` promotion. Evidence receipts below
+are authoritative for whether promotion and full public readback completed.
+
+The networked production QA uses a new copy-on-write overlay of the previously
+qualified update VM. It leaves the original QA disk and other user VMs untouched.
+A virtual NIC changed the EFI device path, so the existing systemd bootloader was
+launched from the EFI shell; this is not a fresh automatic EFI boot qualification.
+Its existing timer is enabled and active. The final reviewed runtime is supplied
+by a `/run/systemd/system` service override in this QA clone; that override is
+transient and is not a deployed physical-node OS generation. Production public
+keys/configuration are installed only in this test clone. Owner authorization
+and watchdog qualification there are test evidence, not a real account claim.
+No offline-time exception, apply-now override or shortened grace is used.
+
+Physical activation requires the actual installed AiueOS target, owner policy,
+qualified recovery and adequate space. The installer includes the update units
+but intentionally ships without production owner config/trust roots. An enabled
+unit without this configuration does not establish active automatic updating.
+The normal stable policy polls every 15 minutes with up to two minutes of jitter,
+uses the 03:00-05:00 local maintenance window, and keeps a previous boot generation.
+High security risk has a 72-hour grace and critical risk a 24-hour grace, followed
+by refusal of new jobs/draining; high application risk still needs review. These
+deadlines never override signature, capacity or recovery checks. Fleet activation
+remains unavailable until real scheduler leases and drain integration qualify.
+
+The [production receipt](evidence/production-updates-20261008/delivery-status-20261008.json)
+records completed full public readback of both artifacts, stable sequence 4
+publication, two valid signatures and tamper refusal. The temporary upload Worker
+was deleted: its endpoint returns 404; the manifest returns 200 and transport
+mutation returns 405. All 90 source tests passed with the pinned Grant checkout.
+
+The QA VM fetched the actual public manifest and admitted sequence 4 using both
+production public keys. The timer was enabled/active with the next check scheduled.
+The provider recorded `hold: insufficient staging space`, exited nonzero without
+import or reboot, and persisted the notification/high-water sequence 4 while
+retaining installed sequence 2 and prior block history. Its 10,871,119,872 free
+bytes were below the 22,465,421,856 staging requirement. This verifies refusal,
+not a completed installation or trial of the new production closure. The QA VM
+was normally powered down after evidence capture. Physical automatic updating
+remains disabled pending the installed AiueOS target; the Ubuntu machine was
+only inspected. The verified/ejected KIOXIA media from the preceding delivery
+is unchanged and already contains the final reviewed updater.
