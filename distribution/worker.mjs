@@ -3,8 +3,11 @@ export default {async fetch(request,env){
  const url=new URL(request.url);
  if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}});
  const path=url.pathname;
- if(!/^\/(stable|canary)\/manifest\.json$/.test(path)&&!/^\/[a-f0-9]{64}\.(nar-export|iso)$/.test(path))return new Response('Not found',{status:404});
- const key=path.slice(1),isManifest=key.endsWith('manifest.json');
+ if(!/^\/(stable|canary)\/manifest\.json$/.test(path)&&!/^\/(?:stable\/|canary\/)?[a-f0-9]{64}\.(nar-export|iso)$/.test(path))return new Response('Not found',{status:404});
+ // Nodes resolve archive URLs relative to the channel manifest directory.
+ // Both aliases refer to the same globally content-addressed R2 object.
+ const isManifest=path.endsWith('/manifest.json');
+ const key=isManifest?path.slice(1):path.replace(/^\/(?:stable\/|canary\/)?/,'');
  const object=await env.RELEASES.get(key,{range:request.headers});
  if(!object)return new Response('Not found',{status:404});
  const headers=new Headers();object.writeHttpMetadata(headers);
