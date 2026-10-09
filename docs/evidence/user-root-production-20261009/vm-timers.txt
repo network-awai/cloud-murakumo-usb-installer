@@ -1,0 +1,7 @@
+NEXT                          LEFT LAST                        PASSED UNIT                         ACTIVATES
+Fri 2026-10-09 13:57:24 UTC   5min -                                - aiueos-update.timer          aiueos-update.service
+Fri 2026-10-09 14:00:00 UTC   8min -                                - logrotate.timer              logrotate.service
+Fri 2026-10-09 14:05:31 UTC  13min -                                - systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
+Mon 2026-10-12 00:24:03 UTC 2 days Thu 2026-10-08 01:02:41 UTC      - fstrim.timer                 fstrim.service
+
+4 timers listed.
