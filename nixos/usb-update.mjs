@@ -30,7 +30,7 @@ export function profileSystem(root,readlink=readlinkSync){
 export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,configureBoot}){
  if(process.getuid?.()!==0||!existsSync('/etc/murakumo/installation-media'))throw Error('USB media and root required.');
  if(!existsSync('/sys/firmware/efi'))throw Error('Restart this USB in UEFI mode to update an existing installation.');
- const inventory=()=>JSON.parse(run('lsblk',['--json','--bytes','--paths','--output','PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID,FSTYPE'])).blockdevices;
+ const inventory=()=>JSON.parse(run('lsblk',['--json','--tree','--bytes','--paths','--output','PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID,FSTYPE'])).blockdevices;
  const disks=inventory().filter(d=>!diskReason(d,{uefi:true})&&(d.children||[]).some(x=>x.label==='MURAKUMO_ROOT'));
  if(!disks.length){ui.message(t('更新できるAiueOSが見つかりません。新規インストールで代用しないでください。','No eligible AiueOS installation found. Do not use a new installation to update.'));return;}
  const selected=ui.menu(t('更新する内蔵ディスクを選びます。設定・データは保持します。','Choose the internal AiueOS disk to update. Settings and data are kept.'),disks.map(d=>[d.path,`${d.model||''} · ${d.serial||d.path}`]));

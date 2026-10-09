@@ -74,7 +74,7 @@ function run(program, args, options = {}) {
 }
 function capture(program, args, options = {}) { return run(program, args, {...options, stdio: ['pipe', 'pipe', 'inherit']}); }
 function inventory() {
-  return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
+  return JSON.parse(capture('lsblk', ['--json', '--tree', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
 }
 function dialog(args, {allowCancel = false} = {}) {
   const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'AiueOS installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
