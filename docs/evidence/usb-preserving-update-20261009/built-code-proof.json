@@ -1,0 +1,20 @@
+{
+  "runtimeSourceCommit": "60a56cc",
+  "files": [
+    {
+      "name": "usb-update.mjs",
+      "sha256": "92701912143eb338ab4198716a5bad7c536fb7b39bd766706f339ff2bf808ad5",
+      "matchesSource": true
+    },
+    {
+      "name": "install-disk.mjs",
+      "sha256": "45066bd3ddc48a38a317ed65877517752323a0de91039915f4d0366e3d5b843b",
+      "matchesSource": true
+    },
+    {
+      "name": "update-ui.mjs",
+      "sha256": "8cf19f731094cbe5db3293beeb248483cabcb749741a95171069c4a90f5e134b",
+      "matchesSource": true
+    }
+  ]
+}
