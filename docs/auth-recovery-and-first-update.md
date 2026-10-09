@@ -1,5 +1,19 @@
 # Authentication recovery and first physical update
 
+## Superseding owner direction, 2026-10-09
+
+The owner has retired Kotobase and identified root PR #3529, merged as
+`3ab11be9f8c86def4967a397784fb164fc5a4e7d`, as the current authority policy.
+ADR-2610091510 and ADR-2610091640 replace server-held identity custody with a
+user-owned Base smart account and user-rooted capability chains. The historical
+recovery investigation below is evidence of the outage, not authorization to
+redeploy the retired Worker or introduce replacement custody keys.
+
+Privy is connect-only. The PR adopts rules; its ADR explicitly says the new flow
+is not implemented. See [the Node migration plan](user-rooted-node-linking.md).
+Removing a remote Authn dependency or verifying an old Biscuit locally does not
+implement this new user-rooted account-linking ceremony.
+
 ## Confirmed outage, 2026-10-08
 
 The separate Worker cleanup receipt records deletion of `kotobase-authn` and its `kotobase-authn_AuthnStore` on 2026-10-08. Live API checks return 404 for the script, versions and service. No matching Durable Object namespace is listed in the three accessible accounts. All three former authentication hosts (`auth.murakumo.cloud`, `auth.kotoba.cloud`, `auth.kotobase.net`) fail DNS resolution. This is an authentication infrastructure outage, not a Node installation failure.

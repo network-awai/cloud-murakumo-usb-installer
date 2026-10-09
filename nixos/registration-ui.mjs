@@ -78,7 +78,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     }
     if(state==='network') {
       try {
-        const result=await network({registered:!!saved});
+        const result=await network({registered:!!saved,autoProceed:wantsLink});
         linkReady=result==='connected';
         state=result==='back'?(saved||local?'complete':'choose'):(result==='connected'||result==='local-connected')&&showRemote?'handoff':result==='connected'&&wantsLink?'register':'complete';
         failure=null;
