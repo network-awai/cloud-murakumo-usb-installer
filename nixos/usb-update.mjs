@@ -43,11 +43,14 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   for(const path of ['/etc','/etc/nixos','/boot','/nix','/nix/store','/nix/var','/nix/var/nix','/nix/var/nix/profiles','/var','/var/lib','/var/lib/aiueos-update','/var/lib/aiueos-usb-update'])if(existsSync(mount+path)){const s=lstatSync(mount+path);if(s.isSymbolicLink()||!s.isDirectory())throw Error('Unsafe installed directory: '+path);}
   const binding=installedBinding(readFileSync(mount+'/etc/nixos/configuration.nix','utf8'));
   const target=existingTarget(disk,binding.root,binding.boot);
+  const partitions=inventory().flatMap(d=>d.children||[]);
+  if(partitions.filter(p=>p.uuid===binding.root).length!==1||partitions.filter(p=>p.uuid===binding.boot).length!==1)throw Error('Duplicate installation UUIDs on connected disks.');
   previous=profileSystem(mount);
   if(!existsSync(mount+previous+'/init'))throw Error('Previous generation is incomplete.');
   run('mount',['-o','ro',target.boot,mount+'/boot']);
   const entries=mount+'/boot/loader/entries';
   if(!existsSync(entries)||!readdirSync(entries).some(n=>n.endsWith('.conf')&&readFileSync(entries+'/'+n,'utf8').includes('murakumo.root_uuid='+binding.root)))throw Error('Previous UUID-bound boot entry is missing.');
+  if(Number(run('df',['--output=avail','-B1',mount+'/boot']).split('\n').at(-1))<128*1024**2)throw Error('The EFI partition needs at least 128 MiB free.');
   const journalPath=mount+'/var/lib/aiueos-update/journal.json';
   if(existsSync(journalPath)){const s=lstatSync(journalPath);if(s.isSymbolicLink()||!s.isFile()||s.uid!==0||(s.mode&0o077))throw Error('Unsafe update journal.');}
   const journal=existsSync(journalPath)?JSON.parse(readFileSync(journalPath,'utf8')):null;
