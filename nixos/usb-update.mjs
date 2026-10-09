@@ -60,6 +60,7 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   if(!Number.isSafeInteger(bytes)||bytes<=0)throw Error('Invalid closure size.');
   const available=Number(run('df',['--output=avail','-B1',mount]).split('\n').at(-1));
   updateGuard({previous,pending:journal?.pending,available,needed:bytes});
+  ui.busy(t('USB内の更新データを検証しています。内蔵ディスクはまだ変更していません。','Verifying the USB update data. The internal disk has not been changed.'));
   const closure=run('nix-store',['--query','--requisites',system]).split('\n');
   run('nix-store',['--verify-path',...closure]);
   const choice=ui.menu(t('AiueOSを更新します。端末ID・Wi-Fi・アカウント・保存データと以前の起動世代を保持します。電源を接続してください。','Update AiueOS. Device identity, Wi-Fi, account, stored data and the previous boot generation are retained. Connect AC power.'),[['apply',t('更新する','Update')],['back',t('戻る','Back')]]);
