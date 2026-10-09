@@ -18,7 +18,7 @@
   environment.etc."murakumo/update-release.mjs".source = ./update-release.mjs;
   environment.etc."murakumo/update-controller.mjs".source = ./update-controller.mjs;
   environment.etc."murakumo/update-defaults.json".source = ./update-defaults.json;
-  environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
+  environment.etc."murakumo/account-link.mjs".source = "${import ./account-link-runtime.nix { inherit pkgs; }}/account-link.mjs";
   systemd.services."getty@tty1".enable = lib.mkIf config.services.murakumoAccountLink.enable false;
   systemd.services.murakumo-account-link = lib.mkIf config.services.murakumoAccountLink.enable {
     description = "Set up this Murakumo device locally or link an account";

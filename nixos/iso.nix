@@ -26,7 +26,9 @@ in
   environment.etc."murakumo/update-release.mjs".source = ./update-release.mjs;
   environment.etc."murakumo/update-defaults.json".source = ./update-defaults.json;
   environment.etc."murakumo/console-ui.nix".source = ./console-ui.nix;
-  environment.etc."murakumo/account-link.mjs".source = ./account-link.mjs;
+  environment.etc."murakumo/account-link-runtime.nix".source = ./account-link-runtime.nix;
+  environment.etc."murakumo/node-root-receipt.mjs".source = ./node-root-receipt.mjs;
+  environment.etc."murakumo/account-link.mjs".source = "${import ./account-link-runtime.nix { inherit pkgs; }}/account-link.mjs";
   environment.etc."murakumo/configuration.example.nix".source = ./configuration.example.nix;
   # Include complete installed systems, not just installation tools.
   isoImage.storeContents = [ uefi bios ];
