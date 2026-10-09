@@ -46,7 +46,7 @@ export function patchBootEntry(content, options) {
   if (!count) throw Error('No kernel boot entry was generated.');
   return patched;
 }
-function configureBoot(mount, options) {
+export function configureBoot(mount, options) {
   const files = options.uefi
     ? readdirSync(`${mount}/boot/loader/entries`).filter(n => /^nixos.*\.conf$/.test(n)).map(n => `${mount}/boot/loader/entries/${n}`)
     : [`${mount}/boot/grub/grub.cfg`];
@@ -74,7 +74,7 @@ function run(program, args, options = {}) {
 }
 function capture(program, args, options = {}) { return run(program, args, {...options, stdio: ['pipe', 'pipe', 'inherit']}); }
 function inventory() {
-  return JSON.parse(capture('lsblk', ['--json', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
+  return JSON.parse(capture('lsblk', ['--json', '--tree', '--bytes', '--paths', '--output', 'PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID'])).blockdevices;
 }
 function dialog(args, {allowCancel = false} = {}) {
   const result = spawnSync('dialog', ['--clear', '--stdout', '--title', 'AiueOS installation', ...args], {stdio: ['inherit', 'pipe', 'inherit']});
@@ -92,6 +92,18 @@ async function main() {
   const {chooseLanguage} = await import("/etc/murakumo/language.mjs");
   const {dialogUI, setupNetwork, text} = await import("/etc/murakumo/network-setup.mjs");
   chooseLanguage(dialogUI("installer"));
+  for (;;) {
+  const mode = dialogUI('installer').menu(text('AiueOSを更新、または新しくインストールします。更新は設定とデータを保持します。', 'Update AiueOS or install a new system. Updates preserve settings and data.'), [
+    ['update', text('既存AiueOSを更新（データを保持）', 'Update existing AiueOS (keep data)')],
+    ['install', text('新規インストール（選択したディスクを消去）', 'New installation (erase selected disk)')],
+    ['shutdown', text('電源を切る', 'Shut down')],
+  ]);
+  if (mode == null) continue;
+  if (mode === 'shutdown') { run('systemctl', ['poweroff']); return; }
+  if (mode === 'update') { const {updateFromUSB}=await import('/etc/murakumo/usb-update.mjs'); if(await updateFromUSB({ui:dialogUI('installer'),t:text,diskReason,fingerprint,offlineSystem,configureBoot}))return; continue; }
+  if (mode !== 'install') throw Error('Unknown installation action.');
+  break;
+  }
   await setupNetwork({stage: "installer"});
   const uefi = existsSync('/sys/firmware/efi');
   let selected, target, identity, system, directory, configFiles, rootUuid, bootUuid;
@@ -111,6 +123,7 @@ async function main() {
     directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
     configFiles = ['node-base.nix', 'update-service.nix', 'update-release.mjs', 'update-controller.mjs', 'update-linux.mjs', 'update-policy.mjs', 'update-defaults.json', 'node-status.mjs', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs', 'acoustic-code.mjs', 'setup-sound.mjs', 'sound-link.html', 'voice-runtime.nix', 'voice-agent.mjs', 'voice-control.mjs', 'voice-policy.json', 'voice-tts.py', 'voice-NOTICES.txt', 'ble-setup.nix', 'ble-controller.mjs', 'ble-protocol.mjs', 'ble-gatt.js', 'ble-client.mjs', 'ble-setup.html'];
     configFiles.push('remote-access.nix','remote-access.mjs','remote-ui.mjs','remote-access.html','remote-client.js');
+    configFiles.push('update-ui.mjs','production-update-trust.json');
     for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
     run('cp', ['-a', '/etc/murakumo/update-policy-runtime', join(directory, 'update-policy-runtime')]);
     rootUuid = randomUUID(); bootUuid = randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase();

@@ -1,5 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {existsSync} from 'node:fs';
+import {isIP} from 'node:net';
 
 export const text = (ja, en) => process.env.MURAKUMO_UI_LANG === 'ja' ? ja : en;
 // SSIDs are untrusted display text. Keep the original separately for nmcli.
@@ -25,6 +26,11 @@ export function networks(value) {
     if (!unique.has(ssid) || unique.get(ssid).signal < item.signal) unique.set(ssid, item);
   }
   return [...unique.values()].sort((a,b) => b.signal - a.signal);
+}
+export function usableAddress(value) {
+  const address=String(value).replace(/\\:/g,':').split('/')[0];
+  if(isIP(address)===4){const parts=address.split('.').map(Number);return parts[0]>0&&parts[0]!==127&&parts[0]<224&&!(parts[0]===169&&parts[1]===254);}
+  return isIP(address)===6&&address!=='::'&&address!=='::1'&&!/^fe[89ab]|^ff/i.test(address);
 }
 export function dialogUI(stage) {
   function screen(args) {
@@ -68,27 +74,37 @@ export function networkBackend(run = command, fetcher = fetch) {
       return r.status === 0;
     },
     connectWired: device => nm(['--wait','15','device','connect',device]).status === 0,
+    ready: () => rows(nm(['-t','-f','DEVICE,TYPE,STATE','device','status']).stdout || '')
+      .filter(([,type,state])=>['wifi','ethernet'].includes(type)&&state.startsWith('connected'))
+      .some(([name])=>(nm(['-g','IP4.ADDRESS,IP6.ADDRESS','device','show',name]).stdout||'').split('\n').some(usableAddress)),
+    autoWired: () => {
+      for(const [name,type,state] of rows(nm(['-t','-f','DEVICE,TYPE,STATE','device','status']).stdout||'')){
+        if(type!=='ethernet'||state.startsWith('connected')||state==='unmanaged')continue;
+        if((nm(['-g','WIRED-PROPERTIES.CARRIER','device','show',name]).stdout||'').trim()==='on')nm(['--wait','15','device','connect',name]);
+      }
+    },
     probe: async () => {
       let internet = false, murakumo = false;
-      try {
-        const r = await fetcher('https://connectivitycheck.gstatic.com/generate_204',{redirect:'error',signal:AbortSignal.timeout(5000)});
-        internet = r.status === 204; await r.body?.cancel();
-      } catch {}
-      try {
-        const r = await fetcher('https://murakumo.cloud/',{redirect:'error',signal:AbortSignal.timeout(5000)});
-        murakumo = r.ok; await r.body?.cancel();
-      } catch {}
+      await Promise.all(['https://setup.murakumo.cloud/health','https://murakumo.cloud/','https://connectivitycheck.gstatic.com/generate_204'].map(async url=>{
+        try{
+          const r=await fetcher(url,{redirect:'error',signal:AbortSignal.timeout(5000)});
+          if(url.includes('generate_204'))internet ||= r.status===204;
+          else {internet ||= r.status>=200&&r.status<600;murakumo ||= r.ok===true;}
+          await r.body?.cancel();
+        }catch{}
+      }));
       // Reachable HTTPS Murakumo also proves an external connection if the probe is filtered.
       return {internet: internet || murakumo, murakumo};
     },
   };
 }
-export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), backend = networkBackend(), registered = false} = {}) {
+export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), backend = networkBackend(), registered = false, autoProceed = true} = {}) {
   const later = text(stage === 'installer' ? '接続せずにインストールする' : '登録はあとで行う', stage === 'installer' ? 'Install without a connection' : 'Register later');
   const help = text(process.env.MURAKUMO_UI_SOCKET ? '接続方法を選んでください。Wi-Fiだけでも利用できます。' : '↑↓で選択、Enterで決定。Wi-Fiだけでも利用できます。', 'Choose a connection. Ethernet is optional.');
   const check = async () => {
     ui.busy(text('接続を確認しています…', 'Checking the connection…'));
     const state = await backend.probe();
+    if(autoProceed&&(backend.ready?.()??backend.devices().some(d=>d.connected)))return state.internet?'connected':'local-connected';
     const message = [text('ネットワーク：接続済み','Network: connected'),
       text(`インターネット：${state.internet ? '接続済み' : '確認できません'}`,`Internet: ${state.internet ? 'connected' : 'not confirmed'}`),
       text(`Murakumo：${state.murakumo ? (registered ? '到達しました（登録状態を確認できます）' : '到達しました（登録はこれから）') : '到達できません'}`,`Murakumo: ${state.murakumo ? (registered ? 'reachable (ready to verify registration)' : 'reachable (registration pending)') : 'unreachable'}`)].join('\n');
@@ -100,6 +116,7 @@ export async function setupNetwork({stage = 'installer', ui = dialogUI(stage), b
     return next === 'next' ? 'connected' : next==='local' ? 'local-connected' : next === 'later' ? 'offline' : null;
   };
   // Saved Wi-Fi and already connected Ethernet need no repeated password entry.
+  if(autoProceed)backend.autoWired?.();
   if (backend.devices().some(d => d.connected)) { const r = await check(); if (r) return r; }
   for (;;) {
     const choice = ui.menu(`${help}\n\n${text('インストールはネットなしでも完了します。登録にはネット接続が必要です。','OS installation works offline. Account registration needs Internet.')}`,

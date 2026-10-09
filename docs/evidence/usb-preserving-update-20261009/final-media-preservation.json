@@ -1,0 +1,26 @@
+{
+  "receipt": {
+    "schema": "aiueos.usb-update.v1",
+    "previous": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+    "target": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+    "rootUuid": "00000000-0000-0000-0000-000000000001",
+    "bootUuid": "ABCD-1234",
+    "state": "installed"
+  },
+  "profile": "system-6-link",
+  "system": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+  "highestSequence": 4,
+  "pending": null,
+  "bootEntries": [
+    "aiueos-previous.conf",
+    "aiueos-trial.conf",
+    "nixos-generation-1.conf",
+    "nixos-generation-2.conf",
+    "nixos-generation-3.conf",
+    "nixos-generation-4.conf",
+    "nixos-generation-5.conf",
+    "nixos-generation-6.conf"
+  ],
+  "fixtureHashesMatch": true,
+  "previousRootRetained": true
+}

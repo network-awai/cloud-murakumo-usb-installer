@@ -4,8 +4,10 @@ The installation medium opens the network screen before disk selection. The
 installed OS opens the same screen before phone registration. No console
 switch or command entry is needed for ordinary Wi-Fi or Ethernet onboarding.
 
-1. An already connected Ethernet or saved Wi-Fi connection goes straight to
-   connection confirmation. Otherwise choose Wi-Fi, Ethernet, or continue offline.
+1. A managed Ethernet adapter with physical carrier is activated automatically.
+   Connected Ethernet or saved Wi-Fi with a usable IP address skips the connection
+   chooser and password prompt. Loopback and link-local addresses do not qualify.
+   Explicitly opening network settings still shows the controls.
 2. Wi-Fi lists nearby networks by signal strength, deduplicating repeated SSIDs.
    Select a network, enter its Wi-Fi password with masked characters, and connect.
    The entered secret is passed to NetworkManager via stdin, not process arguments,
@@ -13,11 +15,13 @@ switch or command entry is needed for ordinary Wi-Fi or Ethernet onboarding.
    remain in NetworkManager's private system-connections directory.
 3. Ethernet activation waits up to 15 seconds for the connection. Wi-Fi activation
    waits up to 25 seconds. Cancellation and failures return to the available choices.
-4. The confirmation screen separates local connection, Internet access and HTTPS
-   reachability of Murakumo. Internet probing uses Google's HTTPS 204 endpoint;
-   Murakumo HTTPS reachability can also confirm Internet access when that probe is
-   filtered. Reachability does not claim the registration API is deployed or the
-   account is linked. HTTPS redirects are refused and probes have 5-second limits.
+4. Probes check setup.murakumo.cloud/health, the Murakumo apex and Google's HTTPS
+   204 endpoint concurrently, with 5-second limits and no redirects. A valid HTTPS
+   response from a Murakumo origin proves external reachability even if that service
+   returns 503; it does not prove registration is ready. A usable LAN connection
+   without confirmed Internet also skips network setup, returning local-connected
+   rather than claiming account registration can proceed. Manual network settings
+   display local connection, Internet access and service reachability separately.
 5. Offline continuation does not block OS installation. Its saved Wi-Fi profiles
    are copied into the installed OS. At first boot, “register later” displays a
    completed-installation screen with reconnect/register and shutdown choices.

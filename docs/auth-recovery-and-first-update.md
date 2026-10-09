@@ -1,5 +1,19 @@
 # Authentication recovery and first physical update
 
+## Superseding owner direction, 2026-10-09
+
+The owner has retired Kotobase and identified root PR #3529, merged as
+`3ab11be9f8c86def4967a397784fb164fc5a4e7d`, as the current authority policy.
+ADR-2610091510 and ADR-2610091640 replace server-held identity custody with a
+user-owned Base smart account and user-rooted capability chains. The historical
+recovery investigation below is evidence of the outage, not authorization to
+redeploy the retired Worker or introduce replacement custody keys.
+
+Privy is connect-only. The PR adopts rules; its ADR explicitly says the new flow
+is not implemented. See [the Node migration plan](user-rooted-node-linking.md).
+Removing a remote Authn dependency or verifying an old Biscuit locally does not
+implement this new user-rooted account-linking ceremony.
+
 ## Confirmed outage, 2026-10-08
 
 The separate Worker cleanup receipt records deletion of `kotobase-authn` and its `kotobase-authn_AuthnStore` on 2026-10-08. Live API checks return 404 for the script, versions and service. No matching Durable Object namespace is listed in the three accessible accounts. All three former authentication hosts (`auth.murakumo.cloud`, `auth.kotoba.cloud`, `auth.kotobase.net`) fail DNS resolution. This is an authentication infrastructure outage, not a Node installation failure.
@@ -23,6 +37,6 @@ Setup remains available at `https://setup.murakumo.cloud/health`. Its sign-in br
 
 At this inspection, public stable sequence 4 remains the published image. It predates the setup-domain and Escape navigation source changes. Rebuild and publish a new signed release for those changes; neither a restart nor checking sequence 4 obtains newer source code.
 
-The current production closure is 7,488,473,952 bytes. The provider reserves roughly three archive lengths (22,465,421,856 bytes, about 20.9 GiB) for staging; it can hold an update for insufficient space. Never erase or reinstall the internal disk to resolve an update hold. USB is installer media, not an in-place updater: its current installer can erase the selected disk and is not the recommended update path.
+At the 2026-10-08 inspection, the production closure was 7,488,473,952 bytes. The provider reserves roughly three archive lengths (22,465,421,856 bytes, about 20.9 GiB) for staging; it can hold an update for insufficient space. Never erase or reinstall the internal disk to resolve an update hold. The old USB installer only offered destructive installation. PR #16 adds a separate [data-preserving USB update](usb-preserving-update.md), qualified on the dedicated VM but not yet delivered on KIOXIA or verified on the physical Node. Select that action only on media confirmed to include it.
 
-Physical activation and a successful update remain pending the actual AiueOS target. Authentication restoration remains pending the original custody and account-store backup.
+Physical activation and a successful update remain pending the actual AiueOS target. The new authentication path remains pending the user-rooted migration above. Historic backup custody matters for deliberate legacy-account migration, not for reactivating the retired login service.

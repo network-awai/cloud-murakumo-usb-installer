@@ -15,6 +15,7 @@ in
   environment.systemPackages = with pkgs; [ curl git pciutils vim nodejs_22 dialog networkmanager iproute2 parted dosfstools e2fsprogs grub2 ];
   environment.etc."murakumo/installation-media".text = "Murakumo installer\n";
   environment.etc."murakumo/install-disk.mjs".source = ../scripts/install-disk.mjs;
+  environment.etc."murakumo/usb-update.mjs".source = ./usb-update.mjs;
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
   environment.etc."murakumo/update-service.nix".source = ./update-service.nix;

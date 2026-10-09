@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "6a4d17480b2337156dfe2660442ca0c522e91aac",
+  "bootedWithoutUSB": true,
+  "directKernelOverride": false,
+  "runningSystem": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+  "expectedSystem": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+  "networkManager": "active",
+  "fixtureHashesMatch": true,
+  "manualRecoveryBoot": true,
+  "recoverySystem": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+  "expectedRecoverySystem": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+  "recoveryFixtureHashesMatch": true,
+  "serialConsoleAddedForQA": true,
+  "registrationUIMaskedForQA": true,
+  "physicalNode": false
+}
