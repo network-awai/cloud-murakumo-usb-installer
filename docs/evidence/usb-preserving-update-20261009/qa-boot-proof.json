@@ -1,0 +1,12 @@
+{
+  "bootedWithoutUSB": true,
+  "expectedSystem": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+  "runningSystem": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+  "matchesTarget": true,
+  "fixtureHashesMatch": true,
+  "networkManager": "active",
+  "serialConsoleAddedForQA": true,
+  "registrationUIMaskedForQA": true,
+  "physicalNode": false,
+  "media": "retained production ISO with current update handler"
+}
