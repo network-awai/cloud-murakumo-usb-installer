@@ -1,6 +1,7 @@
 # User-rooted Node linking
 
-Status: design and integration gates, not implemented or deployed. Authority:
+Status: narrow Node-linking implementation deployed; physical Node delivery and
+real-phone approval remain separate qualification gates. Authority:
 [root PR #3529](https://github.com/com-junkawasaki/root/pull/3529), merged as
 `3ab11be9f8c86def4967a397784fb164fc5a4e7d`; ADR-2610091510 and ADR-2610091640.
 These supersede restoring the retired kotobase-authn service as the default plan.
@@ -25,8 +26,8 @@ These supersede restoring the retired kotobase-authn service as the default plan
 5. Delegate narrowly to the browser's non-exportable session key and the specific
    Node key. Bind approval to the immutable request CID, Node DID, fresh single-use
    challenge, audience, chain and expiry. Prove control of the Base smart account
-   with ERC-1271, or ERC-6492 for an undeployed account. An external EOA uses the
-   admitted SIWE/ERC-191 path with the same nonce/origin/chain/expiry checks.
+   with ERC-1271, or ERC-6492 for an undeployed account. An external EOA signs the
+   bounded dango root capability with ERC-191; this is not a SIWE session.
 6. The registration boundary verifies the user-rooted capability chain, current
    account/registry authority, attenuation, revocation and request binding before
    accepting the claim. The Node verifies its bound receipt before persisting it.
@@ -57,16 +58,27 @@ These supersede restoring the retired kotobase-authn service as the default plan
 
 ## Current evidence boundary
 
-The accepted ADR says its implementation is still absent. The current setup
-Worker's health endpoint is reachable, while the retired auth.murakumo.cloud
-endpoint does not resolve. The new signing window and user-rooted claim verifier
-have not been deployed or exercised on a real phone in this task. Old signed
-receipt checks and VM fixture approval remain legacy evidence only.
+The canonical signer is deployed at `auth.kotoba.cloud`, with Privy used only
+for external-wallet connection. The registration Worker independently checks
+user-root capabilities; the installed Node independently verifies the public
+receipt before saving version 2. Existing server custody and account migrations
+elsewhere in the ecosystem are not completed by this narrow Node flow.
 
-The network-skip implementation passed 123 installer tests. A built ISO completed
-an offline update on the dedicated VM, preserving fixture hashes, sequence floor,
-previous GC roots and boot entries. That ISO predates the network-skip source;
-neither the latest USB delivery nor physical Node account linking is complete.
+On 2026-10-09, production registration source
+`111ef2c913e778313c5d41f2ed98abde2a3ad1e4` was deployed as
+`63085e1f-81a0-47f9-9e92-49c65d1e0b99`. A signature refusal on the former fixed
+Base RPC path was recovered by selecting a different fixed operator-configured
+Base endpoint. Verification still fails closed; caller-selected RPCs are not
+accepted. A temporary unfunded EOA and a virtual WebAuthn Passkey each passed
+real production approval, actual Node receipt verification, version-2 persistence
+and a saved-record re-read. The virtual Passkey also passed read-only Base
+mainnet verification. No transactions or real-phone ceremony were performed.
+
+The user reports phone authentication succeeded but the physical Node is not
+registered. This remains incomplete until a fresh request is approved and the
+Node reports completion. An authentication screen alone is not registration
+completion. Automatic update activation remains gated on owner policy and
+physical recovery qualification; a timer being active does not establish it.
 
 ## Legacy registration recovery
 
@@ -78,3 +90,57 @@ verified user receipt replaces it atomically with version 2. A mismatched or
 unreadable record remains blocked for maintenance; boot does not start a claim.
 
 Recovery checks: account-link, setup-flow and registration-ui tests: 27 passed.
+
+## Physical Node handoff
+
+Use the newly written KIOXIA to boot the Node, then choose **Update existing
+AiueOS**. This path preserves device identity, network profiles and stored data;
+reinstallation is unnecessary. Restart from the internal disk after removing the
+USB. Open **Link account using a phone or another computer** and use a fresh QR.
+On `auth.kotoba.cloud`, use the existing owner credential, compare the Node ID
+and approve the request. Completion requires the Node's registered state, not
+only the phone's authentication result. Creating a new Passkey is a separate
+account and never implicitly merges the previous identity.
+
+The **AiueOS updates** screen exposes status and manual signed checks. Periodic
+checks can be enabled through the owner's standalone policy. Automatic
+activation remains held while physical recovery qualification is false; USB
+update qualification in a VM does not release this hardware gate.
+
+## ISO and VM delivery qualification
+
+The runtime revision is Installer main
+`a35fca0eccde9e7c3860fa512b40c8538a4c118d` (PR #18). The immutable snapshot
+was built with pinned Nixpkgs and exported as a 5,248,696,320-byte ISO, SHA-256
+`7293c23edd4ceaaca9ba2a18dee1acc9b2f0c64e5c793b1163453bdf959c7ff8`.
+Mac hashing matched the transfer receipt. The bundled public receipt verifier is
+`ac71377f95afd1d25c5767fe1f470a887b77020fbe28dd2eee64a70eedd2a3a0`.
+
+On a dedicated QA disk overlay with no NIC, the actual ISO updater completed and
+retained hashes for device identity, legacy account evidence, saved data and a
+NetworkManager profile. The new system profile is
+`/nix/store/6904529k5ragcl7dy2ww58q54dvjnvl7-nixos-system-murakumo-node-26.05pre-git`.
+Generation 8, previous system GC root and boot entries were retained. Legacy
+ownership remained unverified and explicit relinking was offered.
+
+The same disk booted through UEFI without a CD or external kernel/initrd. The
+running system matched the update receipt, all four hashes still matched,
+NetworkManager was active and the update timer was present. The installed
+account module reported that fresh user proof is required for the legacy record.
+QA boot entries add serial output and mask the account GUI service solely for
+this headless test. GUI rendering, fresh installation from a blank disk, physical
+boot/recovery and real-phone approval are not established by these VM results.
+
+Receipts are in [user-root-production-20261009](evidence/user-root-production-20261009).
+The USB source is newer than remote production sequence 4; the preserving updater
+retains the sequence floor so that older release cannot replace this manual update.
+No new automatic fleet release is promoted by this qualification.
+
+The fixed KIOXIA TransMemory (serial `0022CFF6B899CA205987CBC4`, capacity
+61,949,214,720 bytes) was written with this ISO, read back for exactly
+5,248,696,320 bytes and safely ejected. ISO and readback SHA-256 both match the
+hash above. The fixed helper ran without another password prompt; its request
+was returned to non-destructive check mode. Task-owned builder and QA VMs were
+normally shut down. The expired QA signing tab was closed; user apps and VMs
+were left alone. The USB is ready to unplug. Physical Node registration remains
+pending the user's update and fresh credential approval.
