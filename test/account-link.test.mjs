@@ -42,4 +42,18 @@ test('server expiry returns the new-QR recovery state',async()=>{
   assert.equal(await savedLink(d),null);
 });
 test('QR moves to setup domain while Node signatures retain original authority',async()=>{const d=await dir();let start,shown;await assert.rejects(link({dir:d,display:()=>{},onFlow:f=>{shown=f.verificationUriComplete;},fetcher:async(url,opts)=>{assert.equal(new URL(url).origin,'https://murakumo.cloud');const body=JSON.parse(opts.body);if(url.endsWith('/start')){start=body;return new Response(JSON.stringify(flow),{status:201});}return new Response(JSON.stringify(receipt(start)));}}),{code:'proof'});assert.equal(shown,'https://setup.murakumo.cloud/#device-link?code=ABCD123456');assert.equal(await savedLink(d),null);});
-test('legacy registration is preserved but cannot become verified ownership on reboot',async()=>{const d=await dir(),id=await identity(d);const legacy={version:1,authority:'https://murakumo.cloud',deviceDid:id.did,accountDid:'did:key:legacy',registrationState:'registered'};await writeFile(join(d,'account-link.json'),JSON.stringify(legacy),{mode:0o600});await assert.rejects(savedLink(d),{code:'invalid'});assert.deepEqual(JSON.parse(await readFile(join(d,'account-link.json'),'utf8')),legacy);});
+test('legacy registration is preserved but cannot become verified ownership on reboot',async()=>{const d=await dir(),id=await identity(d);const legacy={version:1,authority:'https://murakumo.cloud',deviceDid:id.did,accountDid:'did:key:legacy',registrationState:'registered'};await writeFile(join(d,'account-link.json'),JSON.stringify(legacy),{mode:0o600});await assert.rejects(savedLink(d),{code:'legacy-proof-required'});assert.deepEqual(JSON.parse(await readFile(join(d,'account-link.json'),'utf8')),legacy);});
+
+test('legacy approval can start a fresh flow without replacing its evidence or identity on refusal',async()=>{
+  const d=await dir(),id=await identity(d),legacy={version:1,authority:'https://murakumo.cloud',deviceDid:id.did,accountDid:'did:key:legacy',registrationState:'registered'};
+  const path=join(d,'account-link.json');await writeFile(path,JSON.stringify(legacy),{mode:0o600});let start,shown=false;
+  await assert.rejects(link({dir:d,display:()=>{},onFlow:()=>{shown=true;},fetcher:async(url,opts)=>{
+    const body=JSON.parse(opts.body);if(url.endsWith('/start')){start=body;return new Response(JSON.stringify({...flow,expiresAt:Date.now()+300000}),{status:201});}
+    assert.ok(url.endsWith('/poll'));return new Response(JSON.stringify(receipt(start)));
+  }}),{code:'proof'});
+  assert.equal(shown,true);assert.equal(start.deviceDid,id.did);assert.equal((await identity(d)).did,id.did);assert.deepEqual(JSON.parse(await readFile(path,'utf8')),legacy);
+});
+test('a legacy record for another device stays blocked before network requests',async()=>{
+  const d=await dir();await identity(d);await writeFile(join(d,'account-link.json'),JSON.stringify({version:1,authority:'https://murakumo.cloud',deviceDid:'did:key:other',accountDid:'did:key:legacy',registrationState:'registered'}),{mode:0o600});
+  await assert.rejects(link({dir:d,fetcher:()=>assert.fail('no network request')}),{code:'invalid'});
+});

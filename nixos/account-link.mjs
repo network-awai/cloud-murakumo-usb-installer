@@ -72,7 +72,10 @@ export class LinkError extends Error {
 export async function savedLink(dir='/var/lib/murakumo'){
   try {
     const saved=JSON.parse(await readFile(join(dir,'account-link.json'),'utf8'));
-    if(saved.version===1) throw new LinkError('invalid','This registration needs a fresh user signature. Local installation and settings are preserved.');
+    if(saved.version===1){
+      if(saved.authority!==authority||saved.registrationState!=='registered'||!/^did:[a-z0-9]+:\S+$/.test(saved.accountDid||'')||saved.deviceDid!==(await identity(dir)).did) throw new LinkError('invalid','Stored registration does not match this device.');
+      throw new LinkError('legacy-proof-required','This registration needs a fresh user signature. Local installation and settings are preserved.');
+    }
     if(saved.version!==2||saved.authority!==authority||saved.registrationState!=='registered'||!/^did:pkh:eip155:8453:0x[0-9a-f]{40}$/.test(saved.accountDid||'')||saved.deviceDid!==(await identity(dir)).did||saved.userRootReceipt?.['account-did']!==saved.accountDid||saved.userRootReceipt?.['device-did']!==saved.deviceDid||saved.verification?.rootCid!==saved.userRootReceipt?.['root-cid']||!Number.isSafeInteger(saved.verification?.verifiedAt)) throw new LinkError('invalid','Stored registration does not match this device.');
     return saved;
   } catch(e){if(e.code==='ENOENT')return null;throw e;}
@@ -98,7 +101,7 @@ export async function link({dir='/var/lib/murakumo',model='Murakumo-NixOS',fetch
     if(status.status!==200) throw Error('registration status unavailable');
     if(status.data.registered===true&&status.data.deviceDid===id.did&&status.data.accountDid===saved.accountDid){display('Murakumo device registration verified.');return saved;}
     throw new LinkError('revoked','registration revoked; owner must approve re-registration after explicit local reset');
-  } catch(e){if(e.code!=='ENOENT')throw e;}
+  } catch(e){if(e.code!=='ENOENT'&&e.code!=='legacy-proof-required')throw e;}
   const message=['murakumo-device-link-start-v1',authority,id.did,challenge,model,pollToken].join('\n');
   const started=await post('/api/devices/link/start',{deviceDid:id.did,challenge,model,pollToken,deviceProof:sign(null,Buffer.from(message),id.key).toString('base64url')});
   const flow=started.data;

@@ -59,3 +59,12 @@ test('network and unexpected registration errors stay in the guide; shutdown fai
 });
 test('Node details returns to setup without claiming an account or touching network',async()=>{let details=0;const actions=['status','network','status','shutdown'];await runSetup({t,readSaved:async()=>null,ui:{menu:(_,items)=>{const action=actions.shift();assert.ok(items.some(([id])=>id===action));return action;}},showStatus:async()=>{details++;},network:async()=> 'offline',register:async()=>assert.fail('status must not register'),poweroff:async()=>true});assert.equal(details,2);assert.equal(actions.length,0);});
 test('updates is available before and after local completion without registering',async()=>{let opened=0;const actions=['updates','local','updates','shutdown'];await runSetup({t,readSaved:async()=>null,readLocal:async()=>null,completeLocal:async()=>({deviceDid:'did:key:local'}),showUpdates:async()=>{opened++;},ui:{menu:(_,items)=>{const a=actions.shift();assert.ok(items.some(([id])=>id===a));return a;}},network:async()=>assert.fail('updates must not alter network'),register:async()=>assert.fail('updates must not register'),poweroff:async()=>true});assert.equal(opened,2);assert.equal(actions.length,0);});
+
+test('legacy evidence offers explicit relinking without an automatic claim on boot',async()=>{
+  const {screens,events}=await guide(['connect','shutdown'],{readSaved:async()=>{throw Object.assign(Error(),{code:'legacy-proof-required'});},register:async()=>({accountDid:'did:pkh:eip155:8453:0x'+'1'.repeat(40),deviceDid:'did:key:node'})});
+  assert.match(screens[0],/fresh user signature/);assert.deepEqual(events,['network','register','shutdown']);assert.doesNotMatch(screens[1],/Previous registration/);
+});
+test('legacy notice can be deferred without any registration call',async()=>{
+  const {events}=await guide(['shutdown'],{readSaved:async()=>{throw Object.assign(Error(),{code:'legacy-proof-required'});},register:()=>assert.fail()});
+  assert.deepEqual(events,['shutdown']);
+});

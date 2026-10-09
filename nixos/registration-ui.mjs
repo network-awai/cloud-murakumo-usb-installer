@@ -52,9 +52,11 @@ export async function registerWithUI({link,screen,ui,t,options={},onFailure}){
 // The guide owns retries. Network or registration failures remain on an
 // actionable screen instead of exiting into a systemd restart loop.
 export async function runSetup({ui,t,readSaved,network,register,poweroff,readLocal=async()=>null,completeLocal,showStatus,showRemote,showUpdates}) {
-  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,wantsLink=false,linkReady=false;
-  try {saved=await readSaved();local=await readLocal();if(saved||local)state='complete';}
-  catch {storageError=true;state='complete';}
+  let saved=null,local=null,verified=false,failure=null,state='choose',storageError=false,legacyProofRequired=false,wantsLink=false,linkReady=false;
+  try {saved=await readSaved();}
+  catch(e){if(e.code==='legacy-proof-required')legacyProofRequired=true;else storageError=true;}
+  try {local=await readLocal();}catch{storageError=true;}
+  if(saved||local||storageError||legacyProofRequired)state='complete';
   for (;;) {
     if(state==='choose') {
       const choice=ui.menu(t('使い方を選んでください。ローカルのセットアップはスマホ・アカウント・インターネットなしで完了します。','Choose how to use this device. Local setup needs no phone, account or Internet.'),[
@@ -102,7 +104,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       let error;
       let receipt;
       try {receipt=await register(e=>{error=e;});}catch(e){error=e;}
-      if(receipt){saved=receipt;verified=true;failure=null;state='complete';}
+      if(receipt){saved=receipt;verified=true;legacyProofRequired=false;failure=null;state='complete';}
       else if(error){failure=registrationFailure(error,t);verified=false;state='retry';}
       else {failure=null;state=saved||local?'complete':'choose';}
       continue;
@@ -116,6 +118,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       t('Wi-Fi / 有線の設定は保存されます。再インストールは不要です。','Network settings are saved. Reinstallation is not needed.'),
       ...(failure?['',failure]:[]),
       ...(storageError?[t('保存済みの登録情報を読み取れません。登録情報を保持したまま、保守担当者に確認してください。','Saved registration cannot be read. Contact maintenance; registration information is preserved.')]:[]),
+      ...(legacyProofRequired?[t('以前の登録には新しい本人署名が必要です。「アカウントを連携する」から再承認してください。端末IDと設定は保持されます。','Previous registration needs a fresh user signature. Select Link account to approve again. Device identity and settings are preserved.')]:[]),
       ...(verified?[t('モデルと推論の稼働確認は別の手順です。','Model and inference readiness are verified separately.')]:[]),
     ].join('\n');
     const action=ui.menu(status,[
