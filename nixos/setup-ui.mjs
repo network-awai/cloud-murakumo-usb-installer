@@ -7,10 +7,11 @@ import {spawnSync} from 'node:child_process';
 import {completeLocal,readLocal} from '/etc/murakumo/local-setup.mjs';
 import {chooseLanguage} from '/etc/murakumo/language.mjs';
 import {showRemote} from '/etc/murakumo/remote-ui.mjs';
+import {showUpdates} from '/etc/murakumo/update-ui.mjs';
 const ui=dialogUI('installed');
 chooseLanguage(ui);
 await runSetup({
-  ui,t:text,showStatus:()=>showNodeStatus(ui,text),showRemote:()=>showRemote(ui,text),readSaved:savedLink,readLocal,completeLocal,
+  ui,t:text,showStatus:()=>showNodeStatus(ui,text),showRemote:()=>showRemote(ui,text),showUpdates:()=>showUpdates(ui,text),readSaved:savedLink,readLocal,completeLocal,
   network:options=>setupNetwork({stage:'installed',ui,...options}),
   register:onFailure=>registerWithUI({link,screen:approvalScreen,ui,t:text,onFailure}),
   poweroff:()=>spawnSync('systemctl',['poweroff'],{stdio:'inherit'}).status===0,
