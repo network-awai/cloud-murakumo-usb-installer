@@ -1,8 +1,20 @@
 import {spawnSync} from 'node:child_process';
-import {existsSync,readFileSync,readlinkSync,readdirSync,lstatSync,mkdtempSync,mkdirSync,cpSync,writeFileSync,symlinkSync} from 'node:fs';
+import {existsSync,readFileSync,readlinkSync,readdirSync,lstatSync,mkdtempSync,mkdirSync,cpSync,writeFileSync,symlinkSync,renameSync,rmSync,realpathSync} from 'node:fs';
 import {posix} from 'node:path';
 const run=(p,a,options={})=>{const r=spawnSync(p,a,{encoding:'utf8',maxBuffer:64*1024*1024,stdio:['ignore','pipe','pipe'],...options});if(r.status!==0)throw Error(`${p} failed: ${(r.stderr||r.error?.message||'').slice(0,400)}`);return (r.stdout||'').trim();};
 const systemPath=/^\/nix\/store\/[a-z0-9]{32}-nixos-system-[A-Za-z0-9._+-]+$/;
+export function replaceShippedSource(source,destination,{directory=false,dereference=true}={}){
+ const stage=mkdtempSync(posix.join(posix.dirname(destination),'.aiueos-source-'));
+ try{
+  const staged=stage+'/content';
+  if(directory)cpSync(realpathSync(source),staged,{recursive:true,dereference});
+  else writeFileSync(staged,readFileSync(source),{mode:0o644});
+  // Replace the directory entry, never write through an existing store symlink.
+  // A repeated USB update can have exactly the same source and target link.
+  if(directory)rmSync(destination,{recursive:true,force:true});
+  renameSync(staged,destination);
+ }finally{rmSync(stage,{recursive:true,force:true});}
+}
 export function existingTarget(disk,rootUUID,bootUUID){
  const root=(disk.children||[]).find(x=>x.uuid===rootUUID&&x.fstype==='ext4');
  const boot=(disk.children||[]).find(x=>x.uuid===bootUUID&&x.fstype==='vfat');
@@ -91,8 +103,8 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   configureBoot(mount,{uefi:true,rootUuid:binding.root,bootUuid:binding.boot});
   // Retain the installed UUID/hardware configuration and update only shipped
   // source modules. Never replace host policy, credentials or identity files.
-  for(const name of readdirSync('/etc/murakumo'))if(/\.(nix|mjs|js|svg|json|html|py|txt)$/.test(name)&&!['configuration.example.nix','offline-systems.json','voice-policy.json'].includes(name))cpSync('/etc/murakumo/'+name,mount+'/etc/nixos/'+name);
-  cpSync('/etc/murakumo/update-policy-runtime',mount+'/etc/nixos/update-policy-runtime',{recursive:true});
+  for(const name of readdirSync('/etc/murakumo'))if(/\.(nix|mjs|js|svg|json|html|py|txt)$/.test(name)&&!['configuration.example.nix','offline-systems.json','voice-policy.json'].includes(name))replaceShippedSource('/etc/murakumo/'+name,mount+'/etc/nixos/'+name);
+  replaceShippedSource('/etc/murakumo/update-policy-runtime',mount+'/etc/nixos/update-policy-runtime',{directory:true});
   // The USB source is newer than production sequence 4. Preserve all journal
   // fields and prevent an older published image from replacing this manual update.
   if(journal){const next={...journal,revision:(journal.revision||0)+1,highestSequence:Math.max(journal.highestSequence||0,4)};writeFileSync(journalPath+'.usb-new',JSON.stringify(next),{mode:0o600});run('mv',[journalPath+'.usb-new',journalPath]);}
@@ -107,7 +119,7 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   if(backup&&mounted){
    run('nix-env',['--store',mount,'--profile',mount+'/nix/var/nix/profiles/system','--set',previous]);
    cpSync(backup+'/boot',mount+'/boot',{recursive:true});
-   cpSync(backup+'/nixos',mount+'/etc/nixos',{recursive:true});run('sync',[]);
+   replaceShippedSource(backup+'/nixos',mount+'/etc/nixos',{directory:true,dereference:false});run('sync',[]);
   }
   throw e;
  }finally{if(mounted)run('umount',['--recursive',mount]);}
