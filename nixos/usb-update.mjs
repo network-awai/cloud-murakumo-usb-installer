@@ -25,6 +25,9 @@ export function profileSystem(root,readlink=readlinkSync){
  for(let i=0;i<8;i++){const link=readlink(root+path);path=posix.resolve(posix.dirname(path),link);if(systemPath.test(path))return path;if(!path.startsWith('/nix/var/nix/profiles/'))break;}
  throw Error('Invalid installed system profile.');
 }
+export function verifyInstalledState(before,after){
+ if(before.previous!==after.previous||JSON.stringify(before.binding)!==JSON.stringify(after.binding)||JSON.stringify(before.journal)!==JSON.stringify(after.journal))throw Error('Installed state changed. Boot the internal disk to complete recovery before updating.');
+}
 // Manual, owner-selected USB update. No partitioning, formatting, account reset,
 // automatic-update journal replacement, or changes to NetworkManager secrets.
 export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,configureBoot}){
@@ -72,6 +75,9 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   run('umount',['--recursive',mount]);mounted=false;
   run('mount',[target.root,mount]);mounted=true;
   run('mount',[target.boot,mount+'/boot']);
+  // An ext4 recovery replay on the writable mount can reveal a newer journal
+  // or generation than the read-only preflight. Never overwrite that history.
+  verifyInstalledState({previous,binding,journal},{previous:profileSystem(mount),binding:installedBinding(readFileSync(mount+'/etc/nixos/configuration.nix','utf8')),journal:existsSync(journalPath)?JSON.parse(readFileSync(journalPath,'utf8')):null});
   backup=mount+'/var/lib/aiueos-usb-update/'+Date.now();mkdirSync(backup,{recursive:true,mode:0o700});
   cpSync(mount+'/boot',backup+'/boot',{recursive:true});
   cpSync(mount+'/etc/nixos',backup+'/nixos',{recursive:true});

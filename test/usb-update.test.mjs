@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {existingTarget,installedBinding,updateGuard,profileSystem} from '../nixos/usb-update.mjs';
+import {existingTarget,installedBinding,updateGuard,profileSystem,verifyInstalledState} from '../nixos/usb-update.mjs';
 const root='12345678-1234-1234-1234-123456789abc',boot='1234-ABCD';
 const previous='/nix/store/'+ 'a'.repeat(32)+'-nixos-system-murakumo-node-26.05';
 const disk={children:[{path:'/dev/vda2',uuid:root,fstype:'ext4',label:'MURAKUMO_ROOT'},{path:'/dev/vda1',uuid:boot,fstype:'vfat',label:'MURA_BOOT'}]};
@@ -8,3 +8,4 @@ test('reads retained installation UUIDs; rejects generic or BIOS config',()=>{as
 test('refuses pending recovery, missing generation and insufficient space',()=>{assert.doesNotThrow(()=>updateGuard({previous,pending:null,available:5*2**30,needed:2**30}));assert.throws(()=>updateGuard({previous,pending:{system:previous},available:9*2**30,needed:2**30}));assert.throws(()=>updateGuard({previous:'/etc/passwd',available:9*2**30,needed:2**30}));assert.throws(()=>updateGuard({previous,available:2**30,needed:2**30}));});
 test('resolves profiles inside mounted root without following host absolute store symlinks',()=>{let reads=[];assert.equal(profileSystem('/mnt/target',p=>{reads.push(p);return p.endsWith('/system')?'system-4-link':previous;}),previous);assert.deepEqual(reads,['/mnt/target/nix/var/nix/profiles/system','/mnt/target/nix/var/nix/profiles/system-4-link']);assert.throws(()=>profileSystem('/mnt/target',()=>'/etc/passwd'));});
 test('invalid space evidence cannot allow a write',()=>{assert.throws(()=>updateGuard({previous,available:NaN,needed:1024}));assert.throws(()=>updateGuard({previous,available:2**40,needed:NaN}));});
+test('filesystem recovery cannot make USB update overwrite newer generation or replay history',()=>{const before={previous,binding:{root,boot},journal:{highestSequence:4,pending:null}};assert.doesNotThrow(()=>verifyInstalledState(before,structuredClone(before)));assert.throws(()=>verifyInstalledState(before,{...before,journal:{highestSequence:8,pending:null}}));assert.throws(()=>verifyInstalledState(before,{...before,previous:'/nix/store/'+'b'.repeat(32)+'-nixos-system-new'}));});
