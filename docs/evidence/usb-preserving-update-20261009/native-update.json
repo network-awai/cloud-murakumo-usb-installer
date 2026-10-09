@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "6a4d17480b2337156dfe2660442ca0c522e91aac",
+  "handlerSha256": "f54121caaf57bdb4421da772fa2d3a65c164823039cfa2299c55b6bf1f90643e",
+  "media": "intermediate ISO with exact corrected source handler supplied in live RAM",
+  "physicalNode": false,
+  "networkDevices": false,
+  "UISelections": "QA harness",
+  "receipt": {
+    "schema": "aiueos.usb-update.v1",
+    "previous": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+    "target": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+    "rootUuid": "00000000-0000-0000-0000-000000000001",
+    "bootUuid": "ABCD-1234",
+    "state": "installed"
+  },
+  "profile": "system-6-link",
+  "system": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+  "highestSequence": 4,
+  "pending": null,
+  "bootEntries": [
+    "aiueos-previous.conf",
+    "aiueos-trial.conf",
+    "nixos-generation-1.conf",
+    "nixos-generation-2.conf",
+    "nixos-generation-3.conf",
+    "nixos-generation-4.conf",
+    "nixos-generation-5.conf",
+    "nixos-generation-6.conf"
+  ],
+  "fixtureHashesMatch": true,
+  "previousRootRetained": true
+}

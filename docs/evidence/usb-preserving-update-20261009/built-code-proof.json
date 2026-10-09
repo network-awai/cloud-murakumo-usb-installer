@@ -1,20 +1,28 @@
 {
-  "runtimeSourceCommit": "60a56cc",
+  "sourceCommit": "6a4d17480b2337156dfe2660442ca0c522e91aac",
+  "isoSystem": "/nix/store/9m299nkk48ry192yz6d3rf1p3ivg55kb-nixos-system-nixos-26.05pre-git",
   "files": [
     {
-      "name": "usb-update.mjs",
-      "sha256": "92701912143eb338ab4198716a5bad7c536fb7b39bd766706f339ff2bf808ad5",
-      "matchesSource": true
+      "file": "nixos/usb-update.mjs",
+      "sha256": "f54121caaf57bdb4421da772fa2d3a65c164823039cfa2299c55b6bf1f90643e",
+      "builtSha256": "f54121caaf57bdb4421da772fa2d3a65c164823039cfa2299c55b6bf1f90643e"
     },
     {
-      "name": "install-disk.mjs",
+      "file": "scripts/install-disk.mjs",
       "sha256": "45066bd3ddc48a38a317ed65877517752323a0de91039915f4d0366e3d5b843b",
-      "matchesSource": true
+      "builtSha256": "45066bd3ddc48a38a317ed65877517752323a0de91039915f4d0366e3d5b843b"
     },
     {
-      "name": "update-ui.mjs",
+      "file": "nixos/update-ui.mjs",
       "sha256": "8cf19f731094cbe5db3293beeb248483cabcb749741a95171069c4a90f5e134b",
-      "matchesSource": true
+      "builtSha256": "8cf19f731094cbe5db3293beeb248483cabcb749741a95171069c4a90f5e134b"
     }
-  ]
+  ],
+  "offlineSystems": {
+    "bios": "/nix/store/iqpsw8rk1n6ihhhd8zpyfxwczbqs73xg-nixos-system-murakumo-node-26.05pre-git",
+    "bootLabel": "MURA_BOOT",
+    "rootLabel": "MURAKUMO_ROOT",
+    "uefi": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+    "version": 2
+  }
 }
