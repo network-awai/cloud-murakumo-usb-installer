@@ -80,20 +80,28 @@ advertised as supported by the current CLI script.
 
 The example enables `services.murakumoAccountLink.enable`. On the installed system,
 TTY1 shows a five-minute QR/device code and the public Device ID. Scan it with a phone,
-compare the full Device ID, and approve using the existing Murakumo Passkey sign-in.
+compare the full Device ID, and open the canonical `auth.kotoba.cloud` signer.
+Approve with a user-owned Base-account Passkey or an external wallet connected
+through Privy. Privy sessions and historical cookies do not grant Node ownership.
 The node does not request an account ID/password. Administrative SSH access is configured
 separately with the operator's public key; account linking does not grant remote shell access.
 
 The node keeps a local signing key with mode 0600 and a public registration receipt.
-On reboot it verifies registration online. Revocation fails closed; an intentional local
+Before saving ownership it independently verifies the user proof against the
+original Node, flow, challenge and expiry, including current Base-chain verification.
+A server `registered` projection alone is refused. The generated verifier's
+source commit and digest are recorded in `nixos/node-root-receipt-provenance.json`.
+On reboot it loads the previously verified local record and checks online status;
+this is not a fresh user ceremony or a claim of fresh chain verification on every boot.
+Legacy receipts are preserved but require fresh user proof. Revocation fails closed; an intentional local
 relink uses `node /etc/murakumo/account-link.mjs --relink`, preserving the device key.
 No model service or fleet worker is enabled by account linking.
 
-This requires the matching Portal/Worker registration routes and database migration to be
-published. The local integration tests use an explicitly labelled authentication verdict
-fixture; they do not verify a real Passkey ceremony. The registration module
-comes from frozen local review commit `bf6e9adc`; installer changes do not
-publish its Worker/Portal dependencies.
+This requires the matching dedicated registration Worker, canonical signer and
+database migration to be published. Synthetic proof qualification exercised the
+compiled verifier and Node persistence with live Base RPC and an unfunded test
+wallet; its registration transport was a fixture. It does not verify a real
+phone Passkey ceremony, deployment or fleet admission.
 
 Run `node --test test/*.test.mjs` for registration and offline/disk safety tests.
 On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`

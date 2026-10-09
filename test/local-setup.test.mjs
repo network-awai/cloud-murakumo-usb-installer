@@ -50,7 +50,7 @@ test('language selection persists Japanese and English and rejects arbitrary val
 test('bundled local setup loads through an etc-style symlink and preserves its identity dependency',async t=>{
  const dir=await directory(t),bundle=join(dir,'store-bundle'),etc=join(dir,'etc');
  await mkdir(bundle);await mkdir(etc);
- for(const name of ['local-setup.mjs','account-link.mjs'])await copyFile(new URL('../nixos/'+name,import.meta.url),join(bundle,name));
+ for(const name of ['local-setup.mjs','account-link.mjs','node-root-receipt.mjs'])await copyFile(new URL('../nixos/'+name,import.meta.url),join(bundle,name));
  await symlink(join(bundle,'local-setup.mjs'),join(etc,'local-setup.mjs'));
  const loaded=await import(new URL('file://'+join(etc,'local-setup.mjs')));
  const state=await loaded.completeLocal(join(dir,'state'));

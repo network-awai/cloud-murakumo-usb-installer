@@ -6,6 +6,7 @@ let
     mkdir -p $out
     cp ${./local-setup.mjs} $out/local-setup.mjs
     cp ${./account-link.mjs} $out/account-link.mjs
+    cp ${./node-root-receipt.mjs} $out/node-root-receipt.mjs
   '';
   sound = pkgs.runCommand "murakumo-setup-sound" {} ''
     mkdir -p $out

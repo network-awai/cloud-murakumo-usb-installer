@@ -1,0 +1,10 @@
+{
+  "sourceRepository": "https://github.com/cloud-kotoba/kotobase-control-plane",
+  "sourceCommit": "36c10907663c786d31261ae9f74ca96a379914b3",
+  "sourceClean": true,
+  "artifact": "authn/node-dist/node-root-receipt.mjs",
+  "sha256": "ac71377f95afd1d25c5767fe1f470a887b77020fbe28dd2eee64a70eedd2a3a0",
+  "packageLockSha256": "92f76667e8cfd2be57e6b16eaed74f544e85aeffb23805c823a8422c3dfb9d38",
+  "verification": "Original flow, Node DID, challenge and expiry plus user-rooted capability and current Base-chain proof; no server approval projection grants authority.",
+  "compiler": "CLJS/SCI compatibility build; native compiler parity is not claimed"
+}
