@@ -67,3 +67,14 @@ The network-skip implementation passed 123 installer tests. A built ISO complete
 an offline update on the dedicated VM, preserving fixture hashes, sequence floor,
 previous GC roots and boot entries. That ISO predates the network-skip source;
 neither the latest USB delivery nor physical Node account linking is complete.
+
+## Legacy registration recovery
+
+A matching version-1 record is retained as migration evidence, not accepted as
+user-root authority. Setup offers explicit account linking again with the same
+Node identity and saved network configuration. Cancellation, service failure or
+an unsigned server response leaves the old record intact. Only a freshly
+verified user receipt replaces it atomically with version 2. A mismatched or
+unreadable record remains blocked for maintenance; boot does not start a claim.
+
+Recovery checks: account-link, setup-flow and registration-ui tests: 27 passed.
