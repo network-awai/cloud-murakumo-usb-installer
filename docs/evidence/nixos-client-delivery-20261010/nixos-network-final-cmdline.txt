@@ -1,0 +1,1 @@
+initrd=\aiueos\aiueos-trial\initrd init=/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git/init loglevel=4 lsm=landlock,yama,bpf murakumo.root_uuid=00000000-0000-0000-0000-000000000001 murakumo.boot_uuid=ABCD-1234 panic=30
