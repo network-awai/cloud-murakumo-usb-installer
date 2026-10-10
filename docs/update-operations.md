@@ -61,7 +61,7 @@ otherwise NTP synchronization is required. None is accepted from release data.
 On the qualified Linux build host, prepare a release spec with `arch`, `channel`,
 `sequence`, `issuedAt`, `expiresAt`, `securityRisk`, `applyRisk`, `systemPath`,
 `hostContract:"uuid-v1"` and `keyId`. Run
-`scripts/publish-update.mjs SPEC PRIVATE_ED25519_KEY OUTPUT_DIRECTORY`.
+`scripts/publish-update.mjs SPEC PRIVATE_ED25519_KEY OUTPUT_DIRECTORY PINNED_NIXPKGS`.
 It queries/exports the complete Nix closure, computes streaming SHA256 and length,
 then signs exact manifest bytes. Keep the private key off Nodes and mirrors.
 Use `scripts/sign-update.mjs MANIFEST PRIVATE_ED25519_KEY KEY_ID` to append a

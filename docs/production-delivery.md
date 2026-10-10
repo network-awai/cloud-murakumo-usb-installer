@@ -38,7 +38,7 @@ network QA outcomes and the remaining physical activation boundaries. Historical
 sequence-4 results below do not describe this new release's verification.
 
 To keep signing keys off the Linux builder, export with
-`scripts/publish-update.mjs SPEC --unsigned OUTPUT`; this writes
+`scripts/publish-update.mjs SPEC --unsigned OUTPUT PINNED_NIXPKGS`; this writes
 `manifest.pending.json`, never an unsigned channel manifest. On Mac, invoke
 `scripts/sign-keychain-release.mjs MANIFEST KEY_ID COMPILED_SIGNER` for each
 approved signer. It verifies the returned signature against the public key
