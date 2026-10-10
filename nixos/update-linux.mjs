@@ -15,6 +15,12 @@ export async function atomicJSON(path,value){const file=await open(path+'.new','
 async function privateJSON(path){const s=await lstat(path);if(!s.isFile()||s.isSymbolicLink()||s.uid!==0||(s.mode&0o077))throw Error('unsafe private configuration');return JSON.parse(await readFile(path,'utf8'));}
 async function readJournal(){try{return await privateJSON(STATE+'/journal.json');}catch(e){if(e.code==='ENOENT')return null;throw e;}}
 async function casJournal(old,next){const current=await readJournal();if(JSON.stringify(current)!==JSON.stringify(old))throw Error('journal CAS conflict');const value={...next,revision:(old?.revision||0)+1};await atomicJSON(STATE+'/journal.json',value);return value;}
+// USB updates may advance the installed floor beyond earlier network admission.
+export function releaseFloor(journal,config){
+ const values=[journal?.highestSequence??0,journal?.highestAdmittedSequence??0,config.initialSequence??0];
+ if(values.some(n=>!Number.isSafeInteger(n)||n<0))throw Error('invalid release sequence floor');
+ return Math.max(...values);
+}
 export function transportURL(base,name){const u=new URL(base);if(u.protocol==='file:')return new URL(name,u);if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['127.0.0.1','[::1]','localhost'].includes(u.hostname)))throw Error('transport must be HTTPS, local file or loopback');return new URL(name,u);}
 async function bytesAt(url,max){if(url.protocol==='file:'){const s=await lstat(fileURLToPath(url));if(!s.isFile()||s.size>max)throw Error('invalid transport file');return readFile(url);}const r=await fetch(url,{signal:AbortSignal.timeout(30000),redirect:'error'});if(!r.ok)throw Error(`transport HTTP ${r.status}`);const chunks=[];let n=0;for await(const c of r.body){n+=c.length;if(n>max)throw Error('transport bound');chunks.push(c);}return Buffer.concat(chunks);}
 export async function download(base,admitted,path){const r=admitted.release,url=transportURL(base,r.closureSha256+'.nar-export');let n=0;const hash=createHash('sha256');try{const source=url.protocol==='file:'?createReadStream(fileURLToPath(url)):Readable.fromWeb((await fetch(url,{signal:AbortSignal.timeout(1800000),redirect:'error'}).then(x=>{if(!x.ok)throw Error('closure HTTP '+x.status);return x;})).body);await pipeline(source,new Transform({transform(c,e,cb){n+=c.length;hash.update(c);cb(n>r.closureBytes?Error('oversized closure'):null,c);}}),createWriteStream(path+'.part',{mode:0o600}));if(n!==r.closureBytes||hash.digest('hex')!==r.closureSha256)throw Error('closure digest');const file=await open(path+'.part','r');try{await file.sync();}finally{await file.close();}}catch(e){await rm(path+'.part',{force:true});throw e;}await rename(path+'.part',path);return path;}
@@ -54,7 +60,7 @@ export async function main(operation='check'){await ensureRoot();let config;try{
  if(process.platform!=='linux'||process.arch!=='x64')throw Error('unsupported host');
  if(config.schema!=='aiueos.update-config.v1'||config.enabled!==true)throw Error('updates disabled');if(!config.ownerPolicyAuthorized||config.role!=='standalone')throw Error('owner policy/fleet provider missing');
  const j=await readJournal(),running=await realpath('/run/current-system');
- const current={arch:'x86_64-linux',hostContract:'uuid-v1',highestSequence:j?.highestAdmittedSequence??j?.highestSequence??config.initialSequence,pendingManifestHash:j?.pending?.manifestHash};
+ const current={arch:'x86_64-linux',hostContract:'uuid-v1',highestSequence:releaseFloor(j,config),pendingManifestHash:j?.pending?.manifestHash};
  // A journal is required after provisioning; deleting it cannot reset replay protection.
  if(!j)throw Error('provisioned journal missing');
  let admitted,envelope,base;const errors=[];
