@@ -1,10 +1,11 @@
-# Murakumo Node setup, account linking, language and AiueOS updates
+# Murakumo Node setup, account linking, language and NixOS updates
 
 ## Current implementation
 
-The OS is named **AiueOS**; the device is a **Murakumo Node**. Murakumo Server
-can describe its serving role when a serving process is actually configured.
-This installer contains an offline, prebuilt AiueOS system based on NixOS. The
+The current OS is **NixOS**. **Murakumo Client** is the software suite;
+**Murakumo Node** is a participating instance or host. **AiueOS** is a future
+replacement OS and remains incomplete. This installer contains an offline,
+prebuilt NixOS system. See [naming and compatibility](product-naming.md). The
 installed system now includes a signed-release timer and boot recovery service.
 They run only after a local owner provisions private update configuration and
 trusted verification keys. No production keys or update source are shipped.

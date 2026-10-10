@@ -64,7 +64,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
         ['connect',t('Murakumoアカウントに連携する','Link a Murakumo account')],
         ...(showRemote?[['remote',t('別のPCから設定する・SSH接続','Set up from another PC / SSH')]]:[]),
         ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
-        ...(showUpdates? [['updates',t('AiueOSの更新を確認','AiueOS updates')]]:[]),
+        ...(showUpdates? [['updates',t('NixOSの更新を確認','NixOS updates')]]:[]),
       ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],
         ['shutdown',t('電源を切る','Shut down')],
       ]);
@@ -110,8 +110,8 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
       continue;
     }
     const status=[
-      t('AiueOS：インストール完了','AiueOS: installed'),
-      ...(local?[t('セットアップ：この端末で完了（スマホ不要）','Setup: completed locally (no phone needed)'),`Device ID: ${local.deviceDid}`,t('共有ネットワーク・推論・報酬の利用には別途確認が必要です。','Shared network participation, inference and rewards require separate verification.')]:[]),
+      t('NixOS：インストール完了','NixOS: installed'),
+      ...(local?[t('Murakumo Client：ローカル設定完了（スマホ不要）','Murakumo Client setup: completed locally (no phone needed)'),`Device ID: ${local.deviceDid}`,t('共有ネットワーク・推論・報酬の利用には別途確認が必要です。','Shared network participation, inference and rewards require separate verification.')]:[]),
       t(saved?'アカウント：連携情報を保存済み':'アカウント：あとで登録できます',saved?'Account: linking information saved':'Account: registration pending'),
       t('スマホ・別のPCで連携できます。秘密情報の保管庫は操作する機器で開きます。','Link using a phone or another computer. Unlock the secret vault on the device you use to manage this Node.'),
       ...(saved?[t(verified?'登録状態：今回の起動で確認済み':'登録状態：オンライン確認前',verified?'Registration: verified during this boot':'Registration: online verification pending'),`Account ID: ${saved.accountDid}`,`Device ID: ${saved.deviceDid}`]:[]),
@@ -124,7 +124,7 @@ export async function runSetup({ui,t,readSaved,network,register,poweroff,readLoc
     const action=ui.menu(status,[
       ...(showRemote?[['remote',t('別のPCから設定する・SSH接続','Set up from another PC / SSH')]]:[]),
       ...(showStatus? [['status',t('Nodeの詳細状態','Node details')]]:[]),
-      ...(showUpdates? [['updates',t('AiueOSの更新を確認','AiueOS updates')]]:[]),
+      ...(showUpdates? [['updates',t('NixOSの更新を確認','NixOS updates')]]:[]),
       ...(!storageError?[[state==='retry'?'retry':'connect',t(state==='retry'?'登録を再試行する':saved?'オンラインで登録状態を確認する':'スマホ・別のPCでアカウントを連携する',state==='retry'?'Retry registration':saved?'Verify registration online':'Link account using a phone or another computer')]]:[]),
       ...(!storageError&&!local&&completeLocal? [['local',t('この端末だけでセットアップを完了する','Complete setup on this device')]]:[]),
       ['network',t('Wi-Fi / 有線の接続設定','Wi-Fi / Ethernet settings')],

@@ -82,7 +82,7 @@ channel manifest, and delete the temporary publishing Worker.
 The real `aiueos-6600hs-2` at `100.84.134.120` was checked over Tailscale SSH on
 2026-10-08: Ubuntu 24.04.4, UEFI, no AiueOS update timer and no `/dev/watchdog0`.
 The AiueOS provider must not be installed/enabled there as an Ubuntu replacement.
-Physical automatic activation awaits the actual installed AiueOS target and
+Physical automatic activation awaits the actual installed NixOS target and
 qualified watchdog/fallback evidence; an online hostname alone is insufficient.
 
 ## Production release and activation boundaries, 2026-10-08
@@ -116,7 +116,7 @@ keys/configuration are installed only in this test clone. Owner authorization
 and watchdog qualification there are test evidence, not a real account claim.
 No offline-time exception, apply-now override or shortened grace is used.
 
-Physical activation requires the actual installed AiueOS target, owner policy,
+Physical activation requires the actual installed NixOS target, owner policy,
 qualified recovery and adequate space. The installer includes the update units
 but intentionally ships without production owner config/trust roots. An enabled
 unit without this configuration does not establish active automatic updating.
@@ -141,6 +141,6 @@ retaining installed sequence 2 and prior block history. Its 10,871,119,872 free
 bytes were below the 22,465,421,856 staging requirement. This verifies refusal,
 not a completed installation or trial of the new production closure. The QA VM
 was normally powered down after evidence capture. Physical automatic updating
-remains disabled pending the installed AiueOS target; the Ubuntu machine was
+remains disabled pending the installed NixOS target; the Ubuntu machine was
 only inspected. The verified/ejected KIOXIA media from the preceding delivery
 is unchanged and already contains the final reviewed updater.

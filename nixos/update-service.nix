@@ -22,15 +22,15 @@ let
   };
  };
 in {
- options.services.aiueosUpdate.enable = lib.mkEnableOption "signed AiueOS updates with trial boot recovery";
+ options.services.aiueosUpdate.enable = lib.mkEnableOption "signed NixOS updates with trial boot recovery";
  config = lib.mkIf cfg.enable {
   systemd.services.aiueos-update = lib.recursiveUpdate common {
-   description = "Verify, stage and apply signed AiueOS releases";
+   description = "Verify, stage and apply signed NixOS releases";
    after = [ "network.target" "aiueos-update-recover.service" ];
    serviceConfig.ExecStart = command "check";
   };
   systemd.services.aiueos-update-recover = lib.recursiveUpdate common {
-   description = "Commit a healthy trial or restore the retained AiueOS boot";
+   description = "Commit a healthy trial or restore the retained NixOS boot";
    unitConfig.ConditionPathExists = "/var/lib/aiueos-update/journal.json";
    wantedBy = [ "multi-user.target" ];
    after = [ "local-fs.target" "NetworkManager.service" ];

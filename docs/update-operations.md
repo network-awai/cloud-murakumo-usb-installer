@@ -1,11 +1,11 @@
-# AiueOS signed update operations
+# NixOS signed update operations
 
 ## Runtime and scope
 
-Installed UEFI AiueOS includes an update timer (15 minutes plus jitter) and an
+Installed UEFI NixOS includes an update timer (15 minutes plus jitter) and an
 on-boot recovery service. Updates run only after a private owner configuration and anti-replay journal are
 provisioned. Recovery uses the retained journal even if configuration is missing. No release verification root is invented or
-shipped as a trusted production key. BIOS machines and non-AiueOS systems are
+shipped as a trusted production key. BIOS machines and non-NixOS systems are
 not automatically activated. An unqualified/missing watchdog holds activation.
 
 This implementation supports **standalone Nodes**. A fleet worker is explicitly
@@ -47,7 +47,7 @@ Only set it after a real reboot/fallback test. Add required long-running Node
 services to `healthServices`; do not include a completed oneshot setup wizard. Missing config is shown as updates
 not configured. A downloaded manifest cannot grant owner policy authorization.
 
-Run `scripts/provision-updates.mjs CONFIG` as root on the installed AiueOS. It
+Run `scripts/provision-updates.mjs CONFIG` as root on the installed NixOS. It
 refuses an existing journal/config; journal is written before enabled config.
 Deleting a journal does not start from sequence zero: the updater stops. Journal
 and config are outside the Nix store. Owner changes are root-authorized local

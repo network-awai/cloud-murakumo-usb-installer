@@ -1,4 +1,4 @@
-# AiueOS startup music and Murakumo Node acoustic linking
+# NixOS startup music and Murakumo Node acoustic linking
 
 The graphical setup language page plays a quiet, original 24-second synthesized ambient
 piece. Its waveform peaks below 3.2% full scale; actual loudness depends on the

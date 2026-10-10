@@ -18,7 +18,7 @@ export function replaceShippedSource(source,destination,{directory=false,derefer
 export function existingTarget(disk,rootUUID,bootUUID){
  const root=(disk.children||[]).find(x=>x.uuid===rootUUID&&x.fstype==='ext4');
  const boot=(disk.children||[]).find(x=>x.uuid===bootUUID&&x.fstype==='vfat');
- if(!root||!boot||root.label!=='MURAKUMO_ROOT'||boot.label!=='MURA_BOOT')throw Error('Not an AiueOS UEFI installation on one disk.');
+ if(!root||!boot||root.label!=='MURAKUMO_ROOT'||boot.label!=='MURA_BOOT')throw Error('Not a NixOS UEFI installation on one disk.');
  return {root:root.path,boot:boot.path,rootUuid:rootUUID,bootUuid:bootUUID};
 }
 export function installedBinding(config){
@@ -28,7 +28,7 @@ export function installedBinding(config){
  return {root,boot};
 }
 export function updateGuard({previous,pending,available,needed}){
- if(!systemPath.test(previous))throw Error('Previous AiueOS generation is missing.');
+ if(!systemPath.test(previous))throw Error('Previous NixOS generation is missing.');
  if(pending)throw Error('An update trial is pending. Boot the internal disk to recover first.');
  if(!Number.isFinite(available)||!Number.isSafeInteger(needed)||needed<=0||available<needed+2*1024**3)throw Error('Not enough free space. Data will not be erased.');
 }
@@ -47,8 +47,8 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
  if(!existsSync('/sys/firmware/efi'))throw Error('Restart this USB in UEFI mode to update an existing installation.');
  const inventory=()=>JSON.parse(run('lsblk',['--json','--tree','--bytes','--paths','--output','PATH,MAJ:MIN,SIZE,MODEL,SERIAL,WWN,TRAN,RM,HOTPLUG,RO,TYPE,MOUNTPOINTS,LABEL,UUID,FSTYPE'])).blockdevices;
  const disks=inventory().filter(d=>!diskReason(d,{uefi:true})&&(d.children||[]).some(x=>x.label==='MURAKUMO_ROOT'));
- if(!disks.length){ui.message(t('更新できるAiueOSが見つかりません。新規インストールで代用しないでください。','No eligible AiueOS installation found. Do not use a new installation to update.'));return;}
- const selected=ui.menu(t('更新する内蔵ディスクを選びます。設定・データは保持します。','Choose the internal AiueOS disk to update. Settings and data are kept.'),disks.map(d=>[d.path,`${d.model||''} · ${d.serial||d.path}`]));
+ if(!disks.length){ui.message(t('更新できるNixOSが見つかりません。新規インストールで代用しないでください。','No eligible NixOS installation found. Do not use a new installation to update.'));return;}
+ const selected=ui.menu(t('更新する内蔵ディスクを選びます。設定・データは保持します。','Choose the internal NixOS disk to update. Settings and data are kept.'),disks.map(d=>[d.path,`${d.model||''} · ${d.serial||d.path}`]));
  if(!selected)return;
  const disk=disks.find(x=>x.path===selected);if(!disk||(disk.children||[]).filter(x=>x.label==='MURAKUMO_ROOT').length!==1)throw Error('Unknown or ambiguous disk.');
  const identity=fingerprint(disk),root=(disk.children||[]).find(x=>x.label==='MURAKUMO_ROOT');
@@ -78,7 +78,7 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   ui.busy(t('USB内の更新データを検証しています。内蔵ディスクはまだ変更していません。','Verifying the USB update data. The internal disk has not been changed.'));
   const closure=run('nix-store',['--query','--requisites',system]).split('\n');
   run('nix-store',['--verify-path',...closure]);
-  const choice=ui.menu(t('AiueOSを更新します。端末ID・Wi-Fi・アカウント・保存データと以前の起動世代を保持します。電源を接続してください。','Update AiueOS. Device identity, Wi-Fi, account, stored data and the previous boot generation are retained. Connect AC power.'),[['apply',t('更新する','Update')],['back',t('戻る','Back')]]);
+  const choice=ui.menu(t('NixOSを更新します。端末ID・Wi-Fi・アカウント・保存データと以前の起動世代を保持します。電源を接続してください。','Update NixOS. Device identity, Wi-Fi, account, stored data and the previous boot generation are retained. Connect AC power.'),[['apply',t('更新する','Update')],['back',t('戻る','Back')]]);
   if(choice!=='apply')return;
   const current=inventory().find(x=>x.path===selected);
   // Expected mount belongs to this update; all other identity fields must match.

@@ -1,8 +1,9 @@
 # cloud-murakumo-usb-installer
 
-AiueOS installation media definition and target-host configuration for Murakumo
-Nodes. AiueOS is the OS, built on NixOS; Murakumo Node names the device and its
-Murakumo role. This repository owns the OS installation boundary: boot media, disk
+NixOS installation media and Murakumo Client setup for Murakumo Nodes.
+NixOS is the current operating system. Murakumo Client names the software suite;
+Murakumo Node names a participating instance or host. AiueOS is an unfinished
+future OS intended to replace NixOS, not the OS delivered by this installer. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
 installer on boot: choose Wi-Fi, Ethernet or offline continuation, then select
 and approve the internal disk. The bundled OS
@@ -106,6 +107,20 @@ phone Passkey ceremony, deployment or fleet admission.
 Run `node --test test/*.test.mjs` for registration and offline/disk safety tests.
 On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`
 to parse and evaluate both generated boot configurations with Nix.
+
+## Product names and roles
+
+- **NixOS**: current operating system, installation and system updates.
+- **Murakumo Client**: software suite installed and configured on NixOS.
+- **Murakumo Daemon**: name for the resident participation process, when supplied.
+- **Murakumo CLI**: command interface; **Murakumo App**: user-facing application.
+- **Murakumo Node**: running participant, host and its observed status.
+- **AiueOS**: future replacement OS; incomplete and not delivered here.
+
+The journey is **Install NixOS → Set up Murakumo Client → Participate as a
+Murakumo Node**. Local configuration and account linking alone do not prove a
+running daemon, inference readiness or fleet admission. See
+[naming and compatibility](docs/product-naming.md).
 
 ## Local setup and startup language
 

@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart TD
-  A[Start AiueOS: choose language] --> B[Wi-Fi / Ethernet / Bluetooth Wi-Fi provisioning]
+  A[Start NixOS: choose language] --> B[Wi-Fi / Ethernet / Bluetooth Wi-Fi provisioning]
   B --> C[Offline disk installation]
   C --> D[Network available]
   D --> E{Continue on which screen?}
@@ -33,7 +33,7 @@ The 8-digit code lasts five minutes with five global attempts per window. A corr
 
 The Node has a per-installation self-signed TLS certificate. The owner must compare its SHA256 fingerprint on the Node before trusting it on the managing PC. This first-trust step is a current UX limitation; a numeric code alone cannot authenticate a hostile LAN endpoint. No certificate warning is silently bypassed. URLs use the Node's numeric LAN IP on port 8443. No public reverse tunnel or relay is supplied.
 
-Tailscale is included in AiueOS, but this change does not implement account enrollment inside the browser. After approved SSH access, use `sudo tailscale up` and complete its official login into the owner's tailnet; verify owner ACLs and connectivity before claiming ongoing remote access. Tailscale SSH is an additional explicit policy choice, not enabled by this pairing code. Bluetooth is the existing Wi-Fi provisioning path, not a screen-control or shell transport.
+Tailscale is included in NixOS, but this change does not implement account enrollment inside the browser. After approved SSH access, use `sudo tailscale up` and complete its official login into the owner's tailnet; verify owner ACLs and connectivity before claiming ongoing remote access. Tailscale SSH is an additional explicit policy choice, not enabled by this pairing code. Bluetooth is the existing Wi-Fi provisioning path, not a screen-control or shell transport.
 
 Account approval is separate from local administration and remains blocked by the missing original authentication Worker/custody/account-store backup. Local setup and LAN SSH approval do not claim an account, open the vault, qualify inference or authorize an OS update. A Node administrator must separately provision and qualify update trust, owner policy and trial recovery.
 
