@@ -8,7 +8,7 @@ These supersede restoring the retired kotobase-authn service as the default plan
 
 ## User journey
 
-1. Install AiueOS offline. Reuse connected Ethernet or saved Wi-Fi automatically.
+1. Install NixOS offline. Reuse connected Ethernet or saved Wi-Fi automatically.
    Preserve the Node's existing did:key identity, network profiles and data.
    Local setup can finish before an account is linked.
 2. Open setup.murakumo.cloud from the Node QR or on another computer. The code
@@ -94,7 +94,7 @@ Recovery checks: account-link, setup-flow and registration-ui tests: 27 passed.
 ## Physical Node handoff
 
 Use the newly written KIOXIA to boot the Node, then choose **Update existing
-AiueOS**. This path preserves device identity, network profiles and stored data;
+NixOS**. This path preserves device identity, network profiles and stored data;
 reinstallation is unnecessary. Restart from the internal disk after removing the
 USB. Open **Link account using a phone or another computer** and use a fresh QR.
 On `auth.kotoba.cloud`, use the existing owner credential, compare the Node ID
@@ -102,7 +102,7 @@ and approve the request. Completion requires the Node's registered state, not
 only the phone's authentication result. Creating a new Passkey is a separate
 account and never implicitly merges the previous identity.
 
-The **AiueOS updates** screen exposes status and manual signed checks. Periodic
+The **NixOS updates** screen exposes status and manual signed checks. Periodic
 checks can be enabled through the owner's standalone policy. Automatic
 activation remains held while physical recovery qualification is false; USB
 update qualification in a VM does not release this hardware gate.

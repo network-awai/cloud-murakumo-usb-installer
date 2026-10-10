@@ -1,4 +1,4 @@
-# AiueOS / Murakumo Node update lifecycle
+# NixOS / Murakumo Node update lifecycle
 
 2026-10-08. Integrated policy, publishing tools and Linux standalone UEFI updater.
 The installer includes conditional services; activation requires locally provisioned

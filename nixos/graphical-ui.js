@@ -65,7 +65,7 @@ function heading(type,message,args){
     if(ids.some(x=>x.startsWith('/dev/')))return tr('インストール先を選ぶ','Choose an installation disk');
     if(ids.includes('retry'))return tr('アカウントの連携を確認','Check account linking');
     if(ids.includes('local'))return tr('使い方を選ぶ','Choose how to use this device');
-    if(ids.includes('network'))return tr('Murakumo Nodeのセットアップ','Set up Murakumo Node');
+    if(ids.includes('network'))return tr('Murakumo Clientのセットアップ','Set up Murakumo Client');
   }
   if(type==='--textbox')return tr('アカウントを連携','Link an account');
   if(type==='--passwordbox')return tr('Wi-Fiに接続','Connect to Wi-Fi');
@@ -73,7 +73,7 @@ function heading(type,message,args){
   if(/\/dev\/(nvme|sd|vd|mmcblk)/.test(message))return tr('インストール先を選ぶ','Choose an installation disk');
   if(type==='--msgbox'&&/インストールが完了|Installation completed/.test(message))return tr('準備ができました','Ready to continue');
   if(/停止|stopped|できません|見つかりません|unavailable|failed/i.test(message))return tr('操作を確認してください','Check this operation');
-  if(/インストールしています|Installing/.test(message))return tr('AiueOSをインストール','Install AiueOS');
+  if(/インストールしています|Installing/.test(message))return tr('NixOSをインストール','Install NixOS');
   if(/準備しています|Preparing|確認しています|Checking|Verifying/.test(message))return tr('準備しています','Getting ready');
   return tr('Murakumoへようこそ','Welcome to Murakumo');
 }
@@ -225,8 +225,8 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');
   const logoPixels=GdkPixbuf.Pixbuf.new_from_file('/etc/murakumo/logo.png').scale_simple(240,37,GdkPixbuf.InterpType.BILINEAR);
   const logo=Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(logoPixels));logo.set_size_request(240,37);logo.can_shrink=true;logo.set_alternative_text('Murakumo');header.append(logo);card.append(header);
-  steps=label('ネット接続    ›    インストール    ›    セットアップ','steps');card.append(steps);
-  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('AiueOS · インストールはオフラインでも完了できます','muted');outer.append(footer);
+  steps=label('ネット接続    ›    NixOS    ›    Murakumo Client','steps');card.append(steps);
+  content=box(Gtk.Orientation.VERTICAL,18);card.append(content);outer.append(card);footer=label('NixOS · インストールはオフラインでも完了できます','muted');outer.append(footer);
   voiceStatus=label(tr('AIとの音声会話を準備しています','Preparing AI voice conversation'),'muted');outer.append(voiceStatus);
   voiceCaption=label('','muted');outer.append(voiceCaption);connectVoice();
   musicButton=button('BGM 停止 / Stop music',()=>{musicEnabled=!musicEnabled;if(musicEnabled)playAudio('/etc/murakumo/startup.wav',ok=>{if(!ok)musicButton.set_label(tr('音声出力なし','Audio unavailable'));});else stopAudio();musicButton.set_label(musicEnabled?tr('BGMを停止','Stop BGM'):tr('BGMを再生','Play BGM'));});outer.append(musicButton);
@@ -246,7 +246,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
   const startBackend=selected=>{
   if(backend)return;
   voiceInvalidate();
-  language=selected;steps.set_label(tr('ネット接続    ›    インストール    ›    セットアップ','Network    ›    Install    ›    Setup'));footer.set_label(tr('AiueOS · インストールはオフラインでも完了できます','AiueOS · Installation works offline'));
+  language=selected;steps.set_label(tr('ネット接続    ›    NixOS    ›    Murakumo Client','Network    ›    NixOS    ›    Murakumo Client'));footer.set_label(tr('NixOS · インストールはオフラインでも完了できます','NixOS · Installation works offline'));
   show(tr('Murakumoへようこそ','Welcome to Murakumo'),tr('セットアップを準備しています…','Preparing setup…'));
   const launcher=new Gio.SubprocessLauncher({flags:Gio.SubprocessFlags.NONE});launcher.set_stdout_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend.log');launcher.set_stderr_file_path(GLib.getenv('MURAKUMO_UI_SESSION')+'/backend-error.log');
   launcher.setenv('MURAKUMO_UI_LANG',language,true);launcher.setenv('MURAKUMO_UI_LANGUAGE_SELECTED','1',true);

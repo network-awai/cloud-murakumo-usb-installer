@@ -1,6 +1,6 @@
 # Conversational setup runtime
 
-AiueOS uses the existing Murakumo Node setup controllers. The GTK window sends
+NixOS uses the existing Murakumo Node setup controllers. The GTK window sends
 the currently actionable choices over a root-private Unix socket. A local
 Whisper recognizer and Qwen dialogue model turn speech into a bounded choice;
 the existing controller performs the operation and presents the next screen.
