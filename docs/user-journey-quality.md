@@ -36,7 +36,7 @@ The policy, probe and graphical driver live under `nixos/tests`, included in the
 
 `node --test test/journey-score.test.mjs test/release-vm-gate.test.mjs` checks missing evidence, increased operations, missing Esc, approval bypass, revocation failure, premature activation, lost saved consent and report tampering. These are score-policy regression tests. The VM's keyboard/OCR path also catches a frontend Esc failure before publication; physical/voice paths cannot be certified by these unit tests.
 
-Dedicated fleet runner provisioning is still awaiting explicit approval. Until a real fleet run is green, this gate is prepared in draft PRs, not an activated fleet CD route. Existing production/USB builds are not changed by this CI-only work.
+On 2026-10-10 the owner approved dedicated CI runner provisioning. The non-root `murakumo-ci` account on the 6600HS fleet host has KVM and Nix daemon access, without copied credentials or sudo privileges. The normal fleet `ci-verify` path passed Installer PR #24 (`97767eb`) with signed receipt `7883be8aaa54` after authoritative west-derived DB and SSH alias fixes. Main integration and standing operation are recorded separately in the fleet activation report. Existing production/USB builds are not changed by this CI-only work.
 
 The optional `escape-return` mutation in `scripts/check-setup-vm-negative.mjs PIN LOG_DIR escape-return` removes the actual frontend Esc handler. The real VM must fail with `MURAKUMO-UX-ESC-FAIL`; this qualification is separate from the unit score mutations. Default invocation now qualifies all four runtime/keyboard/layout regressions.
 
