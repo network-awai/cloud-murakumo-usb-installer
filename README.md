@@ -33,6 +33,8 @@ explicit commit, or the immutable store path behind a pinned NixOS channel:
 ./scripts/build-iso.sh /absolute/path/to/nixpkgs
 ```
 
+The [VM release gate](docs/vm-release-gate.md) must pass against the same source
+and package pin before ISO creation or system-export publication.
 The script prints the nixpkgs commit and produces `result/iso/*.iso`. Review
 that commit and record the ISO SHA-256 before writing a USB stick. Use the
 [official NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation)

@@ -108,7 +108,7 @@ function serve(request,connection,input){
       if(disk)words.append(label(text.split('|').slice(1).join(' · ')+' · '+key,'muted'));
       row.append(words);row.append(new Gtk.Label({label:'›'}));b.set_child(row);b.connect('clicked',()=>respond(0,key));list.append(b);
     }
-    const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);list.get_first_child()?.grab_focus();
+    const scroll=new Gtk.ScrolledWindow({child:list,propagate_natural_height:true,min_content_height:240,max_content_height:400,hscrollbar_policy:Gtk.PolicyType.NEVER});content.append(scroll);list.get_first_child()?.grab_focus();
     content.append(button(tr('戻る · Esc','Back · Esc'),actions.back));
   }else if(type==='--inputbox'||type==='--passwordbox'){
     const phrase=message.match(/ERASE \/dev\/(?:nvme\d+n\d+|sd[a-z]+|vd[a-z]+|mmcblk\d+)/)?.[0];
