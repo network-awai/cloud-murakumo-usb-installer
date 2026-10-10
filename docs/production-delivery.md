@@ -17,13 +17,25 @@ Production activation needs: integrated source commits; explicit signing root
 provisioning; successful Cloudflare authorization; uploaded complete closure;
 verified published manifest/hash; owner configuration; qualified local watchdog
 and rollback. Nothing named QA becomes production by changing its filename.
-The current installer ships update services but no owner configuration or
-production signing roots. Installing it alone does not activate remote updates.
+The current installer ships update services and public production verification
+keys. It does not ship a preauthorized owner configuration. Installing it alone
+does not qualify hardware recovery or activate automatic application.
 
 The existing serial-bound KIOXIA helper validates ISO length/hash before writing,
 reidentifies external media, reads back exactly the ISO length and ejects only
 on a hash match. A USB write requires the configured KIOXIA to be attached; an
 old disk number is never an identity.
+
+## Current NixOS / Murakumo Client delivery, 2026-10-10
+
+Stable sequence **5**, frozen OS source `77fb995`, is live with two verified
+production signatures. Both the new ISO and complete UEFI system export were
+read back in full through the public transport before manifest promotion.
+KIOXIA received the same ISO and was safely ejected after a reconnect recovery.
+The [current delivery evidence](nixos-client-delivery-20261010.md) records exact
+hashes, media recovery, preserving update/native boot tests, replay refusal,
+network QA outcomes and the remaining physical activation boundaries. Historical
+sequence-4 results below do not describe this new release's verification.
 
 To keep signing keys off the Linux builder, export with
 `scripts/publish-update.mjs SPEC --unsigned OUTPUT`; this writes
@@ -85,7 +97,7 @@ The AiueOS provider must not be installed/enabled there as an Ubuntu replacement
 Physical automatic activation awaits the actual installed NixOS target and
 qualified watchdog/fallback evidence; an online hostname alone is insufficient.
 
-## Production release and activation boundaries, 2026-10-08
+## Historical production release and activation boundaries, 2026-10-08
 
 The production transport is `https://aiueos-updates.04-feasts-minded.workers.dev`,
 with the private R2 bucket `aiueos-releases`. Production keys
@@ -117,8 +129,8 @@ and watchdog qualification there are test evidence, not a real account claim.
 No offline-time exception, apply-now override or shortened grace is used.
 
 Physical activation requires the actual installed NixOS target, owner policy,
-qualified recovery and adequate space. The installer includes the update units
-but intentionally ships without production owner config/trust roots. An enabled
+qualified recovery and adequate space. That historical installer included the
+update units but shipped without production owner config/trust roots. An enabled
 unit without this configuration does not establish active automatic updating.
 The normal stable policy polls every 15 minutes with up to two minutes of jitter,
 uses the 03:00-05:00 local maintenance window, and keeps a previous boot generation.

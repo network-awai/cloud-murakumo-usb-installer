@@ -1,0 +1,11 @@
+--- /nix/store/b8vp8jg3xxgz1f1ffm3zki4k8p9slyz6-aiueos-update-runtime/update-linux.mjs	1970-01-01 00:00:01.000000000 +0000
++++ /run/nixos-network-qa-runtime/update-linux.mjs	2026-10-10 03:13:36.125420944 +0000
+@@ -32,7 +32,7 @@
+ async function localHealth(config,target){try{if(await realpath('/run/current-system')!==target)return false;await statfs('/');for(const service of config.healthServices||['NetworkManager.service'])if(run('systemctl',['is-active',service])!=='active')return false;return true;}catch{return false;}}
+ async function installEntry(system,tag,hostParams){await mkdir('/boot/aiueos/'+tag,{recursive:true});for(const name of ['kernel','initrd'])await copyFile(system+'/'+name,'/boot/aiueos/'+tag+'/'+name);const text=bootEntry(system,await readFile(system+'/kernel-params','utf8'),hostParams,tag);await writeFile('/boot/loader/entries/'+tag+'.conf.new',text);await rename('/boot/loader/entries/'+tag+'.conf.new','/boot/loader/entries/'+tag+'.conf');run('sync',['-f','/boot']);}
+ async function pin(system,label){await mkdir(STATE+'/roots',{recursive:true,mode:0o700});run('nix-store',['--add-root',STATE+'/roots/'+label,'--indirect','--realise',system,'--option','substituters','']);}
+-async function imported(admitted){try{const paths=run('nix-store',['--query','--requisites',admitted.release.systemPath]).split('\n');if(!paths.length)return false;run('nix-store',['--verify-path',...paths]);return true;}catch{return false;}}
++async function imported(admitted){try{const paths=run('nix-store',['--query','--requisites',admitted.release.systemPath]).split('\n');if(!paths.length)return false;run('nix-store',['--verify-path',...paths],{timeout:1800000});return true;}catch{return false;}}
+ async function workerEvidence(config){if(config.role==='standalone')return {drained:true,peers:0};throw Error('fleet coordinator provider required; standalone cannot update a fleet worker');}
+ async function admission(state){await atomicJSON(STATE+'/admission.json',state);}
+ async function prepare(config,admitted,journal){const system=admitted.release.systemPath,previous=await realpath('/run/current-system'),hostParams=params(await readFile('/proc/cmdline','utf8'));

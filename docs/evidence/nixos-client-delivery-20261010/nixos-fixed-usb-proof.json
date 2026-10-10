@@ -1,0 +1,12 @@
+{
+  "status": "readback-verified-reconnected-and-ejected",
+  "serial": "0022CFF6B899CA205987CBC4",
+  "capacity": 61949214720,
+  "bytes": 5248696320,
+  "isoSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+  "usbSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+  "readbackBasis": "Installed fixed helper completed exact byte digest and passed SHA256 equality before its post-close diskutil info failed. Same fixed media was reidentified after reconnect; no second write occurred.",
+  "helperSha256": "3b424555f51c72c90860cb1393d242ab6586750775c16a9938bf09da385da689",
+  "ejection": "Disk /dev/disk6 ejected",
+  "verifiedAt": "2026-10-10T02:39:04.415Z"
+}

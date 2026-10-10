@@ -1,0 +1,29 @@
+Oct 08 01:11:10 aiueos-update-qa systemd[1]: aiueos-update.service: Deactivated successfully.
+Oct 08 01:11:10 aiueos-update-qa systemd[1]: Stopped Verify, stage and apply signed AiueOS releases.
+Oct 08 01:11:10 aiueos-update-qa systemd[1]: aiueos-update.service: Consumed 59.434s CPU time over 1min 5.940s wall clock time, 668.9M memory peak, 543.5M read from disk, 12K written to disk.
+-- Boot 931d4ab9690d498daa311ec6cef89812 --
+Oct 08 01:12:32 aiueos-update-qa systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 08 01:15:18 aiueos-update-qa systemd[1]: aiueos-update.service: Deactivated successfully.
+Oct 08 01:15:18 aiueos-update-qa systemd[1]: Finished Verify, stage and apply signed AiueOS releases.
+Oct 08 01:15:18 aiueos-update-qa systemd[1]: aiueos-update.service: Consumed 2min 25.010s CPU time over 2min 46.276s wall clock time, 2.3G memory peak, 1.2G read from disk, 1.3G written to disk.
+Oct 08 01:15:26 aiueos-update-qa systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 08 01:16:33 aiueos-update-qa systemd[1]: aiueos-update.service: Deactivated successfully.
+Oct 08 01:16:33 aiueos-update-qa systemd[1]: Stopped Verify, stage and apply signed AiueOS releases.
+Oct 08 01:16:33 aiueos-update-qa systemd[1]: aiueos-update.service: Consumed 1min 344ms CPU time over 1min 7.153s wall clock time, 712M memory peak, 606.3M read from disk, 44K written to disk.
+-- Boot 329f94a6488149fab4d2d5c3a6f8e02c --
+Oct 09 05:17:11 murakumo-node systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 09 05:17:19 murakumo-node systemd[1]: aiueos-update.service: Deactivated successfully.
+Oct 09 05:17:19 murakumo-node systemd[1]: Finished Verify, stage and apply signed AiueOS releases.
+Oct 09 05:17:19 murakumo-node systemd[1]: aiueos-update.service: Consumed 8.643s CPU time over 8.009s wall clock time, 39.5M memory peak, 4K read from disk, 4K written to disk.
+-- Boot ef8dd4ec6cc849549e2596f5a9d58281 --
+Oct 09 13:57:34 murakumo-node systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 09 13:57:37 murakumo-node systemd[1]: aiueos-update.service: Deactivated successfully.
+Oct 09 13:57:37 murakumo-node systemd[1]: Finished Verify, stage and apply signed AiueOS releases.
+Oct 09 13:57:37 murakumo-node systemd[1]: aiueos-update.service: Consumed 3.536s CPU time over 3.002s wall clock time, 39.5M memory peak, 4K written to disk.
+-- Boot 0a66d09b6d50437cb5252413bd418a3c --
+Oct 10 02:53:42 murakumo-node systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 10 03:11:14 murakumo-node flock[1198]: incomplete or corrupted closure
+Oct 10 03:11:14 murakumo-node systemd[1]: aiueos-update.service: Main process exited, code=exited, status=1/FAILURE
+Oct 10 03:11:14 murakumo-node systemd[1]: aiueos-update.service: Failed with result 'exit-code'.
+Oct 10 03:11:14 murakumo-node systemd[1]: Failed to start Verify, stage and apply signed AiueOS releases.
+Oct 10 03:11:14 murakumo-node systemd[1]: aiueos-update.service: Consumed 18min 47.366s CPU time over 17min 31.928s wall clock time, 3.2G memory peak, 13.6G read from disk, 7G written to disk, 6.9G incoming IP traffic, 4.9M outgoing IP traffic.

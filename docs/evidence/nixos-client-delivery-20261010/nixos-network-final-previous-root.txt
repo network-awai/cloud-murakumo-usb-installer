@@ -1,0 +1,1 @@
+/nix/store/6904529k5ragcl7dy2ww58q54dvjnvl7-nixos-system-murakumo-node-26.05pre-git
