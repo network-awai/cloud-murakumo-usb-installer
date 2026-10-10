@@ -49,3 +49,7 @@ run has passed; a local unit-test run does not qualify it.
 ```sh
 node scripts/check-setup-vm-negative.mjs "$pin" /absolute/path/to/qa-logs
 ```
+
+## User journey scores
+
+The same proof now requires a recomputed [user journey quality scorecard](user-journey-quality.md). Four VM-covered journeys must individually score at least 95/100; unverified physical/phone/voice journeys remain explicitly unqualified. Older proofs without `journeyScore` are rejected.

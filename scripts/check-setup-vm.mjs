@@ -1,3 +1,4 @@
+import {scoreJourneys,validateJourneyScore} from '../nixos/tests/journey-score.mjs';
 import {spawnSync} from 'node:child_process';
 import {readFileSync, readdirSync, existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
@@ -23,6 +24,7 @@ export function validateVMGate(proof, systemPath, expectedSource){
      !/^\/nix\/store\/[a-z0-9]{32}-vm-test-run-murakumo-setup-services$/.test(proof.testPath)||
      !Array.isArray(proof.checks)||JSON.stringify(proof.checks)!==JSON.stringify([...checks,'reboot']))
     throw Error('missing or incompatible VM release gate');
+  validateJourneyScore(proof.journeyScore);
   return proof;
 }
 export function runVMGate(nixpkgs, {systemPath, run=spawnSync, repo=root}={}){
@@ -54,14 +56,18 @@ export function runVMGate(nixpkgs, {systemPath, run=spawnSync, repo=root}={}){
   const testPath=command('nix-build',[repo+'/nixos/tests/setup-services.nix','--arg','nixpkgs',nixpkgs,
     '--no-out-link','--option','max-jobs','1','--option','cores','2']);
   command('nix-store',['--verify-path',testPath]);
+  const boots={};
   for(const boot of ['first-boot','second-boot']){
     const result=JSON.parse(readFileSync(join(testPath,boot,'ci-setup-result.json'),'utf8'));
+    boots[boot]=result;
     if(result.schema!=='murakumo.setup-vm.v1'||JSON.stringify(result.checks)!==JSON.stringify(checks)||result.hardwareRecoveryQualified!==false||result.savedConsent!==(boot==='second-boot'))
       throw Error('VM gate output lacks successful boot assertions');
   }
+  const journeyScore=validateJourneyScore(scoreJourneys({first:boots['first-boot'],second:boots['second-boot'],
+    gui:JSON.parse(readFileSync(join(testPath,'journey-gui.json'),'utf8'))}));
   if(sourceDigest(repo)!==digest)throw Error('source changed during VM gate');
   return validateVMGate({schema:'murakumo.release-vm-gate.v1',systemPath:production,
-    sourceSha256:digest,nixpkgsRevision:revision,testPath,checks:[...checks,'reboot']},production);
+    sourceSha256:digest,nixpkgsRevision:revision,testPath,checks:[...checks,'reboot'],journeyScore},production);
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
   try{console.log(JSON.stringify(runVMGate(process.argv[2])));}

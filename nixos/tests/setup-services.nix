@@ -37,6 +37,10 @@ in pkgs.testers.runNixOSTest {
     system.stateVersion = "26.05";
   };
   testScript = ''
+    gui_keys = []
+    def press(key):
+        gui_keys.append(key)
+        node.send_key(key, delay=0.2)
     start_all()
     node.wait_for_unit("NetworkManager.service")
     node.wait_for_unit("murakumo-remote.service")
@@ -63,9 +67,9 @@ in pkgs.testers.runNixOSTest {
         node.wait_until_succeeds("test -n \"$(find /run/murakumo-ui -name ui.sock -print -quit)\"", timeout=90)
         node.wait_for_text("Choose your language", timeout=90)
         node.screenshot("language-selection")
-        node.send_key("tab", delay=0.2)
-        node.send_key("tab", delay=0.2)
-        node.send_key("ret", delay=0.2)
+        press("tab")
+        press("tab")
+        press("ret")
         node.wait_until_succeeds("test -n \"$(find /run/murakumo-ui -name started -print -quit)\"", timeout=30)
         node.wait_until_succeeds("grep -qx en /var/lib/murakumo/ui-language", timeout=30)
         node.wait_for_text("Choose how to use this device", timeout=60)
@@ -73,6 +77,33 @@ in pkgs.testers.runNixOSTest {
         print(node.succeed("find /run/murakumo-ui -name '*.log' -exec cat {} +"))
         raise
     node.screenshot("setup-first-boot")
+    # Use real GTK keyboard actions: no IPC injection or mocked menu here.
+    press("ret")
+    node.wait_for_text("completed locally", timeout=60)
+    try:
+        node.wait_for_text("Node details", timeout=30)
+        node.wait_for_text("NixOS updates", timeout=30)
+    except Exception:
+        print("MURAKUMO-UX-MENU-FAIL: essential choices are clipped")
+        raise
+    node.screenshot("setup-local-complete")
+    press("tab")
+    press("tab")
+    press("ret")
+    node.wait_for_text("Normal checks run", timeout=60)
+    press("esc")
+    try:
+        node.wait_for_text("completed locally", timeout=30)
+    except Exception:
+        print("MURAKUMO-UX-ESC-FAIL: update screen did not return to local completion")
+        raise
+    node.screenshot("setup-escape-return")
+    node.succeed("test -s /var/lib/murakumo/local-setup.json")
+    node.succeed("test ! -s /var/lib/murakumo/account-link.json")
+    import json, os
+    with open(os.path.join(os.environ["out"], "journey-gui.json"), "w") as report:
+        json.dump({"languageSelected": True, "completed": True, "accountNotClaimed": True,
+                   "escapeReturned": True, "actionsVisible": True, "decisions": gui_keys.count("ret"), "keys": len(gui_keys)}, report)
     node.shutdown()
     node.start()
     node.wait_for_unit("murakumo-account-link.service", timeout=180)

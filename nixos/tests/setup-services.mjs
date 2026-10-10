@@ -21,12 +21,15 @@ const t = (_ja, en) => en;
 const saved = existsSync('/var/lib/aiueos-update/config.json');
 const choices = saved ? ['resume', 'back'] : ['enable', 'enable', 'back'];
 const notices = [];
-await showUpdates({menu:()=>choices.shift(), message:s=>notices.push(s)}, t);
+let updateMenus=0, ownerConsent=saved;
+await showUpdates({menu:(message,items)=>{updateMenus++;const choice=choices.shift();assert(items.some(([id])=>id===choice));if(message.includes('Automatic activation stays on hold')){assert.equal(choice,'enable');ownerConsent=true;}return choice;}, message:s=>notices.push(s)}, t);
 assert.equal(choices.length, 0);
 assert(notices.some(s=>/checks (enabled|resumed)/.test(s)), notices.join('\n'));
 const config = JSON.parse(readFileSync('/var/lib/aiueos-update/config.json'));
 const journal = JSON.parse(readFileSync('/var/lib/aiueos-update/journal.json'));
 assert.equal(config.enabled, true);
+assert.equal(config.ownerPolicyAuthorized, true);
+assert.equal(ownerConsent, true);
 assert.equal(config.watchdogQualified, false);
 assert.equal(config.trust.threshold, 2);
 assert.equal(journal.highestSequence, 4);
@@ -82,7 +85,9 @@ assert.equal(menus,2);
 assert.equal((await request('/status')).status,403);
 writeFileSync('/var/lib/murakumo/ci-setup-result.json',JSON.stringify({
   schema:'murakumo.setup-vm.v1', checks:['service-path','state-directory','timer','pairing','revocation'],
-  savedConsent:saved, hardwareRecoveryQualified:config.watchdogQualified
+  savedConsent:saved, hardwareRecoveryQualified:config.watchdogQualified,
+  journeys:{updates:{completed:true,consentPreserved:true,activationHeld:true,returned:true,decisions:updateMenus},
+    remote:{completed:true,certificateCompared:true,approvalRequired:true,revoked:true,decisions:menus}}
 }),{mode:0o600});
 }
 try{await main();}catch(e){

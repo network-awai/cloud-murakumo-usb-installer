@@ -1,4 +1,4 @@
-// Qualification: both known regressions must fail for their specific reason.
+// Qualification: known runtime and keyboard regressions must fail for their specific reason.
 // Disposable copies only; never edits the checkout under review.
 import {cpSync,mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -9,14 +9,20 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),pin=process.arg
 if(!pin)throw Error('pinned nixpkgs path required');
 const evidence=process.argv[3];
 if(evidence)mkdirSync(evidence,{recursive:true});
+const only=process.argv[4];
 const mutations=[
   {name:'state-directory',file:'node-base.nix',expected:/(?:ENOENT|EROFS|EACCES).*aiueos-update/,
    change:s=>s.replace('StateDirectory = [ "murakumo" "aiueos-update" ];','StateDirectory = [ "murakumo" ];')},
   {name:'service-path',file:'remote-ui.mjs',expected:/hostname.*ENOENT|ENOENT.*hostname/,
    change:s=>"import {spawnSync} from 'node:child_process';\n"+s.replace(/export function remoteAddresses\(interfaces=networkInterfaces\)\{[\s\S]*?\n\}/,
     "export function remoteAddresses(){const r=spawnSync('hostname',['-I'],{encoding:'utf8'});if(r.error)throw r.error;return r.stdout.trim().split(/\\s+/);}\n")}
+  ,{name:'escape-return',file:'graphical-ui.js',expected:/MURAKUMO-UX-ESC-FAIL/,
+    change:s=>s.replace('active?.back?.();','/* mutation: Esc action omitted */')}
+  ,{name:'menu-visibility',file:'graphical-ui.js',expected:/MURAKUMO-UX-MENU-FAIL/,
+    change:s=>s.replace('min_content_height:240,','')}
 ];
-for(const m of mutations){
+if(only&&!mutations.some(m=>m.name===only))throw Error('unknown mutation: '+only);
+for(const m of mutations.filter(m=>!only||m.name===only)){
   const dir=mkdtempSync(join(tmpdir(),'murakumo-vm-negative-'));
   try{
     cpSync(join(root,'nixos'),join(dir,'nixos'),{recursive:true});
