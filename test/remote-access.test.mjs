@@ -20,3 +20,10 @@ test('real HTTP handler denies unapproved status, foreign origins and Internet p
 });
 test('SSH approval is bound to the displayed fingerprint, not a replacement key',()=>{const p=new Pairing({code:()=> '12345678'});p.open();const {ticket}=p.pair('12345678','mac','127.0.0.1');p.approve();const first=p.requestSSH(ticket,key());const secondKey=key();p.requestSSH(ticket,secondKey);assert.throws(()=>p.approvedSSH(first.fingerprint),/changed_request/);assert.equal(p.approvedSSH(p.info().ssh.fingerprint),secondKey);assert.throws(()=>p.approvedSSH(first.fingerprint),/changed_request/);});
 test('LAN-only handoff permits remote setup without starting account registration',async()=>{const actions=['connect','remote','continue','shutdown'];let remote=0;await runSetup({t:(_j,e)=>e,ui:{menu:(_,items)=>{const a=actions.shift();assert.ok(items.some(([k])=>k===a));return a;},busy:()=>{}},readSaved:async()=>null,network:async()=> 'local-connected',showRemote:async()=>remote++,register:()=>assert.fail('LAN must not imply Internet registration'),poweroff:async()=>true});assert.equal(remote,1);assert.equal(actions.length,0);});
+
+import {remoteAddresses} from '../nixos/remote-ui.mjs';
+test('remote URLs use native interface discovery without relying on a service PATH',()=>{
+ const a=remoteAddresses(()=>({lo:[{family:'IPv4',internal:true,address:'127.0.0.1'}],eth:[{family:'IPv4',internal:false,address:'192.168.1.2'},{family:'IPv6',internal:false,address:'fd00::1'}],vpn:[{family:4,internal:false,address:'100.84.1.2'},{family:'IPv4',internal:false,address:'192.168.1.2'}],public:[{family:'IPv4',internal:false,address:'8.8.8.8'}]}));
+ assert.deepEqual(a,['192.168.1.2','100.84.1.2']);
+ assert.deepEqual(remoteAddresses(()=>({eth:undefined})),[]);
+});

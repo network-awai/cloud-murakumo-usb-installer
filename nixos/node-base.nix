@@ -32,7 +32,8 @@
       Type = "simple";
       RemainAfterExit = true;
       ExecStart = "${pkgs.bash}/bin/bash /etc/murakumo/launch-ui ${pkgs.nodejs_22}/bin/node /etc/murakumo/setup-ui.mjs";
-      StateDirectory = "murakumo";
+      # Provision update consent without making all of /var writable.
+      StateDirectory = [ "murakumo" "aiueos-update" ];
       StateDirectoryMode = "0700";
       RuntimeDirectory = [ "murakumo-ui" "murakumo-voice" ];
       RuntimeDirectoryMode = "0700";
