@@ -27,3 +27,31 @@ test('remote URLs use native interface discovery without relying on a service PA
  assert.deepEqual(a,['192.168.1.2','100.84.1.2']);
  assert.deepEqual(remoteAddresses(()=>({eth:undefined})),[]);
 });
+test('Kekkai onboarding needs no account but binds both keys to local approval',()=>{
+ const p=new Pairing({code:()=> '12345678'});p.open();const {ticket}=p.pair('12345678','Mac','127.0.0.1');
+ assert.throws(()=>p.requestSSH(ticket,key(),{publicKey:'a'.repeat(64),host:'127.0.0.1'}),/unauthorized/);
+ p.approve();const k=key();const first=p.requestSSH(ticket,k,{publicKey:'a'.repeat(64),host:'127.0.0.1'});
+ p.requestSSH(ticket,k,{publicKey:'b'.repeat(64),host:'127.0.0.1'});
+ assert.throws(()=>p.approvedSSH(first.fingerprint,first.kekkaiFingerprint),/changed_request/);
+ assert.throws(()=>p.requestSSH(ticket,k,{publicKey:'0'.repeat(64),host:'8.8.8.8'}),/invalid_key/);
+ assert.equal(p.approvedSSH(p.info().ssh.fingerprint,p.info().ssh.kekkaiFingerprint),k);
+});
+
+import {approveSSHGrant} from '../nixos/remote-access.mjs';
+function grant(){const p=new Pairing({code:()=> '12345678'});p.open();const {ticket}=p.pair('12345678','Mac','127.0.0.1');p.approve();const approval=p.requestSSH(ticket,key(),{publicKey:'a'.repeat(64),host:'127.0.0.1'});return {p,approval};}
+test('closing or replacing pairing during publication refuses activation and removes the grant',async()=>{
+ for(const cancel of [p=>p.close(),p=>p.open()]){const {p,approval}=grant();let revoked=0;
+  await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>{cancel(p);return {authority:'fixture'};},install:()=>assert.fail('cancelled grant installed'),start:()=>assert.fail('cancelled grant started'),revoke:async()=>revoked++}),/unauthorized/);
+  assert.equal(revoked,1);assert.equal(p.kekkaiProfile,null);
+ }
+});
+test('failed Kekkai activation cannot publish a successful profile or retain an SSH key',async()=>{
+ const {p,approval}=grant();let revoked=0,installed=0;
+ await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>({authority:'fixture'}),install:async()=>installed++,start:()=>{throw Error('kekkai_start_failed');},revoke:async()=>revoked++}),/kekkai_start_failed/);
+ assert.equal(installed,1);assert.equal(revoked,1);assert.equal(p.kekkaiProfile,null);
+});
+test('revoke during key installation cannot restart an approved overlay',async()=>{
+ const {p,approval}=grant();let revoked=0;
+ await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>({authority:'fixture'}),install:async()=>p.close(),start:()=>assert.fail('revoked overlay restarted'),revoke:async()=>revoked++}),/unauthorized/);
+ assert.equal(revoked,1);
+});

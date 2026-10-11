@@ -8,7 +8,8 @@ let
   bios = target "bios";
 in
 {
-  imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ./console-ui.nix ];
+  imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix" ./console-ui.nix ./remote-access.nix ];
+  services.murakumoRemote.enable = true;
   # Keep boot diagnostics from overwriting the disk selection screen.
   boot.consoleLogLevel = 3;
   boot.kernelParams = [ "quiet" "systemd.show_status=false" "rd.systemd.show_status=false" ];

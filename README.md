@@ -165,3 +165,11 @@ physical-phone setup remain unverified. An iPhone native companion, public
 HTTPS companion deployment, Nix runtime evaluation and USB rewrite are not
 included in this host verification. See the machine-readable evidence under
 `docs/evidence/ble-setup-2026-10-07/`.
+
+### Kekkai SSH during installation
+
+The live installer and installed client support [8-digit, locally approved
+Kekkai SSH](docs/kekkai-install-ssh.md) before Passkey or account registration.
+The manager pins the Node certificate and both public keys; approved SSH and
+Kekkai identities survive installation and reboot. The release gate tests the
+real encrypted overlay with direct LAN SSH blocked.

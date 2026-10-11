@@ -94,11 +94,17 @@ async function main() {
   chooseLanguage(dialogUI("installer"));
   for (;;) {
   const mode = dialogUI('installer').menu(text('NixOSを更新、または新しくインストールします。更新は設定とデータを保持します。', 'Update NixOS or install a new system. Updates preserve settings and data.'), [
+    ['remote', text('8桁コードで別のPCから接続・Kekkai SSH（Passkey不要）', 'Connect another PC / Kekkai SSH with 8 digits (no Passkey)')],
     ['update', text('既存NixOSを更新（データを保持）', 'Update existing NixOS (keep data)')],
     ['install', text('新規インストール（選択したディスクを消去）', 'New installation (erase selected disk)')],
     ['shutdown', text('電源を切る', 'Shut down')],
   ]);
   if (mode == null) continue;
+  if (mode === 'remote') {
+    if (await setupNetwork(dialogUI('installer')) === 'back') continue;
+    const {showRemote}=await import('/etc/murakumo/remote-ui.mjs');
+    await showRemote(dialogUI('installer'),text);continue;
+  }
   if (mode === 'shutdown') { run('systemctl', ['poweroff']); return; }
   if (mode === 'update') { const {updateFromUSB}=await import('/etc/murakumo/usb-update.mjs'); if(await updateFromUSB({ui:dialogUI('installer'),t:text,diskReason,fingerprint,offlineSystem,configureBoot}))return; continue; }
   if (mode !== 'install') throw Error('Unknown installation action.');
@@ -122,7 +128,7 @@ async function main() {
     run('nix-store', ['--check-validity', ...closure]);
     directory = mkdtempSync(join(tmpdir(), 'murakumo-install-'));
     configFiles = ['node-base.nix', 'update-service.nix', 'update-release.mjs', 'update-controller.mjs', 'update-linux.mjs', 'update-policy.mjs', 'update-defaults.json', 'node-status.mjs', 'account-link.mjs', 'offline-base.nix', 'offline-uefi.nix', 'offline-bios.nix', 'console-ui.nix', 'network-setup.mjs', 'setup-ui.mjs', 'registration-ui.mjs', 'graphical-ui.js', 'graphical-dialog.mjs', 'murakumo-logo.svg', 'local-setup.mjs', 'language.mjs', 'acoustic-code.mjs', 'setup-sound.mjs', 'sound-link.html', 'voice-runtime.nix', 'voice-agent.mjs', 'voice-control.mjs', 'voice-policy.json', 'voice-tts.py', 'voice-NOTICES.txt', 'ble-setup.nix', 'ble-controller.mjs', 'ble-protocol.mjs', 'ble-gatt.js', 'ble-client.mjs', 'ble-setup.html'];
-    configFiles.push('remote-access.nix','remote-access.mjs','remote-ui.mjs','remote-access.html','remote-client.js');
+    configFiles.push('kekkai-runtime.nix','kekkai-runtime.tar.gz','kekkai-bootstrap.cljk','kekkai-setup-client.mjs','remote-access.nix','remote-access.mjs','remote-ui.mjs','remote-access.html','remote-client.js');
     configFiles.push('update-ui.mjs','production-update-trust.json');
     for (const name of configFiles) copyFileSync(`/etc/murakumo/${name}`, join(directory, name));
     run('cp', ['-a', '/etc/murakumo/update-policy-runtime', join(directory, 'update-policy-runtime')]);
@@ -169,6 +175,16 @@ async function main() {
     if (existsSync('/var/lib/murakumo/ui-language')) copyFileSync('/var/lib/murakumo/ui-language', `${mount}/var/lib/murakumo/ui-language`);
     // Copy persistent Wi-Fi profiles, never print them or put them in the Nix store.
     if (existsSync('/etc/NetworkManager/system-connections')) run('cp', ['-a', '/etc/NetworkManager/system-connections', `${mount}/etc/NetworkManager/`]);
+    // Preserve physically approved administration keys and the pinned local overlay identity.
+    if (existsSync('/etc/ssh/authorized_keys.d/murakumo-admin')) {
+      run('mkdir', ['-p', `${mount}/etc/ssh/authorized_keys.d`]);
+      run('cp', ['-a', '/etc/ssh/authorized_keys.d/murakumo-admin', `${mount}/etc/ssh/authorized_keys.d/`]);
+      if (existsSync('/var/lib/murakumo-remote')) run('cp', ['-a', '/var/lib/murakumo-remote', `${mount}/var/lib/`]);
+      // Keep the approved host identity: otherwise the same overlay alias would
+      // correctly fail SSH host-key verification after installing to disk.
+      for (const name of readdirSync('/etc/ssh').filter(n => /^ssh_host_(ed25519|rsa|ecdsa)_key(?:\.pub)?$/.test(n)))
+        run('cp', ['-a', `/etc/ssh/${name}`, `${mount}/etc/ssh/${name}`]);
+    }
     dialog(['--infobox', text('NixOSをインストールしています…\nネット接続は不要です。電源を切らずにお待ちください。', 'Installing NixOS… Keep the power connected.'), '0', '0']);
     run('nixos-install', ['--root', mount, '--system', system, '--no-root-passwd', '--no-channel-copy'], {env: {...process.env, NIX_CONFIG: 'substituters =\nfallback = false\nconnect-timeout = 1\n'}});
     if (!uefi) run('grub-install', ['--target=i386-pc', `--boot-directory=${mount}/boot`, selected]);
