@@ -40,11 +40,9 @@ export async function setup({url,fingerprint,identity,runtime,code,name='Mac',as
  const prepared=prepareSSHKey(identity);identity=prepared.identity;const key=prepared.key;
  const call=(...args)=>{const r=spawnSync(process.execPath,[join(runtime,'engine/cli.js'),'--classpath',join(runtime,'src'),join(runtime,'bootstrap.cljk'),...args],{encoding:'utf8'});if(r.status!==0)throw Error(r.stderr||'Kekkai runtime failed');return JSON.parse(r.stdout);};
  const staticKey=call('client-key','unused');
- const {ticket}=await pinnedRequest(url,fingerprint,'/pair',{code,name});askApproval('本体で「このPCを承認する」を選んでください。');
+ const {ticket}=await pinnedRequest(url,fingerprint,'/pair',{code,name,key,publicKey:staticKey.pub});askApproval('2 / 3 · 本体で「このPCに接続と管理を許可」を一度選んでください / Approve once on the Node.\nPC: '+name+'\nSSH: SHA256:'+createHash('sha256').update(Buffer.from(key.split(' ')[1],'base64')).digest('base64').replace(/=+$/,'')+'\nKekkai: '+createHash('sha256').update(Buffer.from(staticKey.pub,'hex')).digest('hex'));
  const until=Date.now()+300000;const delay=()=>new Promise(r=>setTimeout(r,1000));
  while((await pinnedRequest(url,fingerprint,'/poll',{},ticket)).state!=='approved'){if(Date.now()>until)throw Error('Pairing expired');await delay();}
- const request=await pinnedRequest(url,fingerprint,'/ssh',{key,publicKey:staticKey.pub},ticket);
- askApproval('本体でSSH鍵とKekkai機器鍵を確認し、承認してください。SSH: '+request.fingerprint+' / Kekkai: '+request.kekkaiFingerprint);
  let profile;for(;;){profile=await pinnedRequest(url,fingerprint,'/kekkai-profile',{},ticket);if(profile.authority)break;if(Date.now()>until)throw Error('Approval expired');await delay();}
  const root=join(homedir(),'.kekkai','murakumo',createHash('sha256').update(profile.authority).digest('hex'));
  mkdirSync(root,{recursive:true,mode:0o700});chmodSync(root,0o700);const p=join(root,'profile.json');

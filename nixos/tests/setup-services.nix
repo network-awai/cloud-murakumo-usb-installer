@@ -33,7 +33,7 @@ in pkgs.testers.runNixOSTest {
   nodes.peer = { ... }: {
     virtualisation.memorySize = 384;
     virtualisation.cores = 1;
-    environment.systemPackages = [ pkgs.curl ];
+    environment.systemPackages = [ pkgs.curl pkgs.openssh ];
     system.stateVersion = "26.05";
   };
   testScript = ''
@@ -98,12 +98,36 @@ in pkgs.testers.runNixOSTest {
         print("MURAKUMO-UX-ESC-FAIL: update screen did not return to local completion")
         raise
     node.screenshot("setup-escape-return")
+    local_decisions, local_keys = gui_keys.count("ret"), len(gui_keys)
+    # The actual GTK screen discovers requests without Refresh or IPC approval.
+    import json, shlex
+    press("ret")
+    node.wait_for_text("Enter the code", timeout=60)
+    peer.succeed("ssh-keygen -q -t ed25519 -N \"\" -f /tmp/gui-key")
+    public_key = peer.succeed("cat /tmp/gui-key.pub").strip()
+    info_command = "node --input-type=module -e " + shlex.quote("import {control} from '/etc/murakumo/remote-access.mjs'; console.log(JSON.stringify(await control({action:'info'})))")
+    info = json.loads(node.succeed(info_command))
+    body = json.dumps({'code':info['window']['code'],'name':'GUI peer','key':public_key})
+    paired = json.loads(peer.succeed("curl -fsk https://192.168.1.1:8443/pair -H 'Content-Type: application/json' -d " + shlex.quote(body)))
+    node.wait_for_text("Approve this computer", timeout=30)
+    node.wait_for_text("GUI peer", timeout=30)
+    node.screenshot("remote-one-approval")
+    press("ret")
+    node.wait_for_text("SSH is ready", timeout=60)
+    peer.wait_until_succeeds("curl -fsk https://192.168.1.1:8443/poll -H " + shlex.quote("Authorization: Bearer " + paired['ticket']) + " -H 'Content-Type: application/json' -d '{}' | grep -q '\"sshReady\":true'", timeout=30)
+    host_key = node.succeed("cat /etc/ssh/ssh_host_ed25519_key.pub").strip()
+    peer.succeed("printf '%s\\n' " + shlex.quote('192.168.1.1 ' + host_key) + " > /tmp/gui-known-hosts")
+    assert peer.succeed("ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/gui-known-hosts -i /tmp/gui-key murakumo-admin@192.168.1.1 id -un").strip() == 'murakumo-admin'
+    node.screenshot("remote-ready")
+    press("esc")
+    node.wait_for_text("completed locally", timeout=30)
+
     node.succeed("test -s /var/lib/murakumo/local-setup.json")
     node.succeed("test ! -s /var/lib/murakumo/account-link.json")
     import json, os
     with open(os.path.join(os.environ["out"], "journey-gui.json"), "w") as report:
         json.dump({"languageSelected": True, "completed": True, "accountNotClaimed": True,
-                   "escapeReturned": True, "actionsVisible": True, "decisions": gui_keys.count("ret"), "keys": len(gui_keys)}, report)
+                   "escapeReturned": True, "actionsVisible": True, "remoteAutoRefresh": True, "singlePhysicalApproval": True, "actualSSH": True, "decisions": local_decisions, "keys": local_keys}, report)
     node.shutdown()
     node.start()
     node.wait_for_unit("murakumo-account-link.service", timeout=180)

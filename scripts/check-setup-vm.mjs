@@ -62,7 +62,7 @@ export function runVMGate(nixpkgs, {systemPath, run=spawnSync, repo=root}={}){
     '--no-out-link','--option','max-jobs','1','--option','cores','2']);
   command('nix-store',['--verify-path',kekkaiTestPath]);
   const kekkai=JSON.parse(readFileSync(join(kekkaiTestPath,'kekkai-ssh.json'),'utf8'));
-  if(kekkai.schema!=='murakumo.kekkai-ssh-vm.v1'||['prePasskey','tlsPin','twoKeyApproval','realOverlaySSH','directLANBlocked','reboot','revoked'].some(k=>kekkai[k]!==true))
+  if(kekkai.schema!=='murakumo.kekkai-ssh-vm.v1'||['prePasskey','tlsPin','twoKeyApproval','singleApproval','realOverlaySSH','directLANBlocked','reboot','revoked'].some(k=>kekkai[k]!==true))
     throw Error('Kekkai SSH VM gate incomplete');
   const boots={};
   for(const boot of ['first-boot','second-boot']){
@@ -71,8 +71,9 @@ export function runVMGate(nixpkgs, {systemPath, run=spawnSync, repo=root}={}){
     if(result.schema!=='murakumo.setup-vm.v1'||JSON.stringify(result.checks)!==JSON.stringify(checks)||result.hardwareRecoveryQualified!==false||result.savedConsent!==(boot==='second-boot'))
       throw Error('VM gate output lacks successful boot assertions');
   }
-  const journeyScore=validateJourneyScore(scoreJourneys({first:boots['first-boot'],second:boots['second-boot'],
-    gui:JSON.parse(readFileSync(join(testPath,'journey-gui.json'),'utf8'))}));
+  const gui=JSON.parse(readFileSync(join(testPath,'journey-gui.json'),'utf8'));
+  if(['remoteAutoRefresh','singlePhysicalApproval','actualSSH'].some(k=>gui[k]!==true))throw Error('guided remote SSH GUI gate incomplete');
+  const journeyScore=validateJourneyScore(scoreJourneys({first:boots['first-boot'],second:boots['second-boot'],gui}));
   if(sourceDigest(repo)!==digest)throw Error('source changed during VM gate');
   return validateVMGate({schema:'murakumo.release-vm-gate.v2',systemPath:production,
     sourceSha256:digest,nixpkgsRevision:revision,testPath,kekkaiTestPath,checks:[...checks,'reboot'],journeyScore},production);

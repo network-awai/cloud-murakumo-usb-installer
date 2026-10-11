@@ -2,8 +2,9 @@
 
 The installer and installed NixOS client offer **8-digit pairing / Kekkai SSH**
 before any account or Passkey registration. The code is a pairing credential;
-it is not an SSH password. The Node owner approves the computer and then its
-Ed25519 SSH key and X25519 Kekkai machine key on the physical Node screen.
+it is not an SSH password. The client submits the computer name, Ed25519 SSH public key and X25519
+Kekkai machine key together. The Node owner reviews their fingerprints and
+administrative scope in one physical approval.
 This grants administrative `murakumo-admin` access, including sudo.
 
 1. Connect the Node and manager computer to the same LAN (Ethernet or Wi-Fi).
@@ -21,12 +22,21 @@ node ./setup-client.mjs --runtime "$PWD" --url https://NODE_IP:8443 \
   --fingerprint NODE_CERTIFICATE_SHA256 --identity "$HOME/.ssh/murakumo"
 ```
 
-Enter the eight digits when prompted. Select **Refresh connection status** on
-the Node to see the pending computer. Approve the computer, refresh to see
-both key fingerprints, compare them with the manager terminal, and approve
-administrative SSH. OpenSSH performs its usual host-key confirmation. The
-client prints the command for subsequent connections using its saved profile;
+Enter the eight digits when prompted. Both screens show three steps:
+**Enter code → Allow on the Node → Connected**. The Node screen detects the
+request automatically; there is no Refresh action or second confirmation dialog.
+Compare the displayed computer name and both key fingerprints, then select
+**Allow this computer to connect and administer** once. The terminal waits while
+the grant activates and connects when ready. OpenSSH still performs its usual
+host-key confirmation. The client prints the command for subsequent connections;
 no additional Passkey or pairing code is required until the key is revoked.
+
+Browser LAN setup offers the same single-approval flow when the public SSH key
+is supplied with the code. Leaving it empty requests status viewing only and
+does not implicitly grant SSH. Expiry returns to an editable input with a specific
+new-code instruction; SSH success is shown only after activation. The installed
+GTK screen updates in place while waiting and advances only on a state change.
+The text-console fallback polls every two seconds.
 
 The code expires after five minutes and five attempts; the HTTPS pairing
 session expires after ten minutes. Approval persists until the owner removes

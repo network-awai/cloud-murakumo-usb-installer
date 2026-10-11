@@ -56,9 +56,9 @@ const request = (path, body={}) => new Promise((resolve,reject)=>{
 let menus=0;
 const errors=[];
 await showRemote({menu:(message,items)=>{
-  assert.match(message, /https:\/\/[0-9.]+:8443\//);
-  assert(message.includes(cert.fingerprint256));
   if(menus++===0){
+    assert.match(message,/Approve this computer/);
+    assert.match(message,/VM companion/);
     assert(items.some(([id])=>id==='approve'));
     return 'approve';
   }

@@ -11,7 +11,7 @@ let
     import {control} from '/etc/murakumo/remote-access.mjs';
     const action=process.argv[2];
     let value={action};
-    if(action==='approve-ssh') {const info=await control({action:'info'});value={...value,...info.ssh};}
+    if(action==='approve-ssh'||action==='approve') {const info=await control({action:'info'});value={...value,...info.ssh};}
     console.log(JSON.stringify(await control(value)));
   '';
 in pkgs.testers.runNixOSTest {
@@ -52,13 +52,12 @@ in pkgs.testers.runNixOSTest {
     except Exception:
         print(peer.succeed("cat /tmp/ssh-result"))
         raise
-    node.succeed(ctl + "approve")
     node.wait_until_succeeds(ctl + "info | grep -q kekkaiFingerprint", timeout=60)
     assert not node.succeed("systemctl is-active sshd || true").strip() == "active"
     # Pin the real VM's SSH host key to its independently pinned overlay authority.
     # publish occurs only on approval, so delay the client profile read until known_hosts exists.
     peer.succeed("kill -STOP $(cat /tmp/client-pid)")
-    node.succeed(ctl + "approve-ssh")
+    node.succeed(ctl + "approve")
     info = json.loads(node.succeed("cat /var/lib/murakumo-remote/kekkai/identity.edn >/dev/null; " + ctl + "info"))
     # Public authority is available through the authenticated profile; read only that field.
     authority_match = re.search(r':netmap-authority-spki-b64 "([^"]+)"', node.succeed("cat /var/lib/murakumo-remote/kekkai/node.edn"))
@@ -93,6 +92,6 @@ in pkgs.testers.runNixOSTest {
     peer.fail("timeout 45 " + reconnect + " > /tmp/revoked 2>&1")
     assert "KEKKAI-REBOOT-OK" not in peer.succeed("cat /tmp/revoked")
     with open(os.path.join(os.environ['out'], 'kekkai-ssh.json'),'w') as f:
-        json.dump({'schema':'murakumo.kekkai-ssh-vm.v1','prePasskey':True,'tlsPin':True,'twoKeyApproval':True,'realOverlaySSH':True,'directLANBlocked':True,'reboot':True,'revoked':True},f)
+        json.dump({'schema':'murakumo.kekkai-ssh-vm.v1','prePasskey':True,'tlsPin':True,'twoKeyApproval':True,'singleApproval':True,'realOverlaySSH':True,'directLANBlocked':True,'reboot':True,'revoked':True},f)
   '';
 }

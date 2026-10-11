@@ -55,3 +55,31 @@ test('revoke during key installation cannot restart an approved overlay',async()
  await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>({authority:'fixture'}),install:async()=>p.close(),start:()=>assert.fail('revoked overlay restarted'),revoke:async()=>revoked++}),/unauthorized/);
  assert.equal(revoked,1);
 });
+
+import {approveConnection} from '../nixos/remote-access.mjs';
+test('one physical approval grants the frozen SSH and Kekkai keys without a second request',async()=>{
+ const p=new Pairing({code:()=> '12345678'}),k=key();p.open();
+ const {ticket}=p.pairWithSSH('12345678','Mac','127.0.0.1',k,{publicKey:'a'.repeat(64),host:'127.0.0.1'});
+ assert.equal(p.poll(ticket).state,'pending');assert.throws(()=>p.authorize(ticket),/unauthorized/);
+ const approval=p.info().ssh;let installs=0,starts=0;
+ await assert.rejects(approveConnection(p,{...approval,fingerprint:'different'}),/changed_request/);
+ assert.equal(p.poll(ticket).state,'pending');
+ await approveConnection(p,approval,{publish:async()=>({authority:'fixture'}),install:async installed=>{assert.equal(installed,k);installs++;},start:()=>starts++,revoke:()=>assert.fail()});
+ assert.equal(installs,1);assert.equal(starts,1);assert.equal(p.poll(ticket).sshReady,true);
+});
+test('invalid upfront SSH key preserves the code and expired requests never grant access',async()=>{
+ let now=0;const p=new Pairing({now:()=>now,code:()=> '12345678'});p.open();
+ assert.throws(()=>p.pairWithSSH('12345678','Mac','127.0.0.1','private key'),/invalid_key/);
+ assert.equal(p.info().window.attempts,0);
+ const {ticket}=p.pairWithSSH('12345678','Mac','127.0.0.1',key());now=300001;
+ await assert.rejects(approveConnection(p,p.info().ssh||{}),/no_request/);
+ assert.equal(p.info().ssh,null);assert.throws(()=>p.poll(ticket),/expired/);
+});
+test('guided Node flow watches incoming requests and needs one explicit administrative approval',async()=>{
+ const calls=[],actions=['refresh','approve','back'];let phase=0;
+ await showRemote({watch:(message,items)=>{assert.match(message,/\/ 3/);assert.ok(!items.some(([id])=>id==='refresh'));const action=actions.shift();assert.ok(action==='refresh'||items.some(([id])=>id===action));return action;},busy:()=>{},message:()=>assert.fail()},(_j,e)=>e,async v=>{
+ calls.push(v.action);if(v.action==='info')return phase++===0?{window:{code:'12345678'},certificate:'pin'}:phase===2?{pending:{name:'Mac',address:'127.0.0.1'},ssh:{fingerprint:'SHA256:fixed'}}:{session:{name:'Mac'}};
+ return {};
+ },()=>['192.168.1.2']);
+ assert.equal(calls.filter(x=>x==='approve').length,1);assert.ok(!calls.includes('approve-ssh'));assert.equal(actions.length,0);
+});

@@ -67,6 +67,7 @@ function heading(type,message,args){
     if(ids.includes('local'))return tr('使い方を選ぶ','Choose how to use this device');
     if(ids.includes('network'))return tr('Murakumo Clientのセットアップ','Set up Murakumo Client');
   }
+  if(/1 \/ 3|2 \/ 3|3 \/ 3/.test(message))return tr('別のPCから接続','Connect from another computer');
   if(type==='--textbox')return tr('アカウントを連携','Link an account');
   if(type==='--passwordbox')return tr('Wi-Fiに接続','Connect to Wi-Fi');
   if(message.includes('ERASE /dev/'))return tr('このディスクにインストール','Install on this disk');
@@ -189,6 +190,23 @@ function serve(request,connection,input){
     const next=button(/再起動|restart/i.test(message)?tr('再起動する','Restart'):tr('続ける','Continue'),()=>respond(0),'primary');content.append(next);next.grab_focus();
   }
   if(active===token){token.back=actions.back;voicePublish(voice,actions);}
+  if(type==='--menu'&&args.includes('--remote-watch')){
+    let previous=args[args.indexOf('--remote-state')+1]||null;
+    GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,1,()=>{
+      if(active!==token)return GLib.SOURCE_REMOVE;
+      try{
+        const client=new Gio.SocketClient({timeout:2});
+        const c=client.connect(new Gio.UnixSocketAddress({path:'/run/murakumo-remote/control.sock'}),null);
+        c.get_output_stream().write_all(ByteArray.fromString('{"action":"info"}\n'),null);
+        const [line]=new Gio.DataInputStream({base_stream:c.get_input_stream()}).read_line_utf8(null);c.close(null);
+        const info=JSON.parse(line);
+        const state=JSON.stringify([Boolean(info.window),info.pending,info.session,info.ssh]);
+        if(previous!==null&&state!==previous){respond(0,'refresh');return GLib.SOURCE_REMOVE;}
+        previous=state;
+      }catch{respond(0,'refresh');return GLib.SOURCE_REMOVE;}
+      return GLib.SOURCE_CONTINUE;
+    });
+  }
   if(active===token){
     input.read_line_async(GLib.PRIORITY_DEFAULT,null,(stream,result)=>{
       try{stream.read_line_finish_utf8(result);}catch{}
