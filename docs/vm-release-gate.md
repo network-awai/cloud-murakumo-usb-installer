@@ -53,3 +53,16 @@ node scripts/check-setup-vm-negative.mjs "$pin" /absolute/path/to/qa-logs
 ## User journey scores
 
 The same proof now requires a recomputed [user journey quality scorecard](user-journey-quality.md). Four VM-covered journeys must individually score at least 95/100; unverified physical/phone/voice journeys remain explicitly unqualified. Older proofs without `journeyScore` are rejected.
+
+## Kekkai installation SSH
+
+Proof schema v2 additionally requires the immutable `kekkaiTestPath` output
+from `nixos/tests/kekkai-setup.nix`. The publisher builds that two-VM test and
+checks its certificate pin, two-key local approval, account-free encrypted
+SSH connection, reboot and revocation assertions. Old proofs are rejected.
+The existing GUI quality score remains independently required. See
+[kekkai installation SSH](kekkai-install-ssh.md) for the owner workflow and
+limits of this LAN bootstrap.
+The source digest covers `nixos`, `scripts` and `ci`, including installer entry
+points and the gate itself. Changing a script after qualification invalidates
+the transported proof even if its installed system derivation stays the same.

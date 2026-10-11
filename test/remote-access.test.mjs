@@ -27,3 +27,59 @@ test('remote URLs use native interface discovery without relying on a service PA
  assert.deepEqual(a,['192.168.1.2','100.84.1.2']);
  assert.deepEqual(remoteAddresses(()=>({eth:undefined})),[]);
 });
+test('Kekkai onboarding needs no account but binds both keys to local approval',()=>{
+ const p=new Pairing({code:()=> '12345678'});p.open();const {ticket}=p.pair('12345678','Mac','127.0.0.1');
+ assert.throws(()=>p.requestSSH(ticket,key(),{publicKey:'a'.repeat(64),host:'127.0.0.1'}),/unauthorized/);
+ p.approve();const k=key();const first=p.requestSSH(ticket,k,{publicKey:'a'.repeat(64),host:'127.0.0.1'});
+ p.requestSSH(ticket,k,{publicKey:'b'.repeat(64),host:'127.0.0.1'});
+ assert.throws(()=>p.approvedSSH(first.fingerprint,first.kekkaiFingerprint),/changed_request/);
+ assert.throws(()=>p.requestSSH(ticket,k,{publicKey:'0'.repeat(64),host:'8.8.8.8'}),/invalid_key/);
+ assert.equal(p.approvedSSH(p.info().ssh.fingerprint,p.info().ssh.kekkaiFingerprint),k);
+});
+
+import {approveSSHGrant} from '../nixos/remote-access.mjs';
+function grant(){const p=new Pairing({code:()=> '12345678'});p.open();const {ticket}=p.pair('12345678','Mac','127.0.0.1');p.approve();const approval=p.requestSSH(ticket,key(),{publicKey:'a'.repeat(64),host:'127.0.0.1'});return {p,approval};}
+test('closing or replacing pairing during publication refuses activation and removes the grant',async()=>{
+ for(const cancel of [p=>p.close(),p=>p.open()]){const {p,approval}=grant();let revoked=0;
+  await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>{cancel(p);return {authority:'fixture'};},install:()=>assert.fail('cancelled grant installed'),start:()=>assert.fail('cancelled grant started'),revoke:async()=>revoked++}),/unauthorized/);
+  assert.equal(revoked,1);assert.equal(p.kekkaiProfile,null);
+ }
+});
+test('failed Kekkai activation cannot publish a successful profile or retain an SSH key',async()=>{
+ const {p,approval}=grant();let revoked=0,installed=0;
+ await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>({authority:'fixture'}),install:async()=>installed++,start:()=>{throw Error('kekkai_start_failed');},revoke:async()=>revoked++}),/kekkai_start_failed/);
+ assert.equal(installed,1);assert.equal(revoked,1);assert.equal(p.kekkaiProfile,null);
+});
+test('revoke during key installation cannot restart an approved overlay',async()=>{
+ const {p,approval}=grant();let revoked=0;
+ await assert.rejects(approveSSHGrant(p,approval,{publish:async()=>({authority:'fixture'}),install:async()=>p.close(),start:()=>assert.fail('revoked overlay restarted'),revoke:async()=>revoked++}),/unauthorized/);
+ assert.equal(revoked,1);
+});
+
+import {approveConnection} from '../nixos/remote-access.mjs';
+test('one physical approval grants the frozen SSH and Kekkai keys without a second request',async()=>{
+ const p=new Pairing({code:()=> '12345678'}),k=key();p.open();
+ const {ticket}=p.pairWithSSH('12345678','Mac','127.0.0.1',k,{publicKey:'a'.repeat(64),host:'127.0.0.1'});
+ assert.equal(p.poll(ticket).state,'pending');assert.throws(()=>p.authorize(ticket),/unauthorized/);
+ const approval=p.info().ssh;let installs=0,starts=0;
+ await assert.rejects(approveConnection(p,{...approval,fingerprint:'different'}),/changed_request/);
+ assert.equal(p.poll(ticket).state,'pending');
+ await approveConnection(p,approval,{publish:async()=>({authority:'fixture'}),install:async installed=>{assert.equal(installed,k);installs++;},start:()=>starts++,revoke:()=>assert.fail()});
+ assert.equal(installs,1);assert.equal(starts,1);assert.equal(p.poll(ticket).sshReady,true);
+});
+test('invalid upfront SSH key preserves the code and expired requests never grant access',async()=>{
+ let now=0;const p=new Pairing({now:()=>now,code:()=> '12345678'});p.open();
+ assert.throws(()=>p.pairWithSSH('12345678','Mac','127.0.0.1','private key'),/invalid_key/);
+ assert.equal(p.info().window.attempts,0);
+ const {ticket}=p.pairWithSSH('12345678','Mac','127.0.0.1',key());now=300001;
+ await assert.rejects(approveConnection(p,p.info().ssh||{}),/no_request/);
+ assert.equal(p.info().ssh,null);assert.throws(()=>p.poll(ticket),/expired/);
+});
+test('guided Node flow watches incoming requests and needs one explicit administrative approval',async()=>{
+ const calls=[],actions=['refresh','approve','back'];let phase=0;
+ await showRemote({watch:(message,items)=>{assert.match(message,/\/ 3/);assert.ok(!items.some(([id])=>id==='refresh'));const action=actions.shift();assert.ok(action==='refresh'||items.some(([id])=>id===action));return action;},busy:()=>{},message:()=>assert.fail()},(_j,e)=>e,async v=>{
+ calls.push(v.action);if(v.action==='info')return phase++===0?{window:{code:'12345678'},certificate:'pin'}:phase===2?{pending:{name:'Mac',address:'127.0.0.1'},ssh:{fingerprint:'SHA256:fixed'}}:{session:{name:'Mac'}};
+ return {};
+ },()=>['192.168.1.2']);
+ assert.equal(calls.filter(x=>x==='approve').length,1);assert.ok(!calls.includes('approve-ssh'));assert.equal(actions.length,0);
+});

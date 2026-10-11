@@ -36,12 +36,14 @@ export function dialogUI(stage) {
   function screen(args) {
     const r = spawnSync('dialog', [...(args.includes('--infobox') ? [] : ['--clear']), '--stdout', '--no-collapse', '--title', 'Murakumo',
       '--backtitle', stage === 'installer' ? text('1 ネット接続 → 2 インストール → 3 セットアップ', '1 Network → 2 Install → 3 Setup') : text('インストール完了 · ネット接続 → アカウント連携', 'OS installed · Network → Account linking'),
-      '--ok-label', text('次へ', 'Continue'), '--cancel-label', text('戻る', 'Back'), ...args],
+      '--ok-label', text('次へ', 'Continue'), '--cancel-label', text('戻る', 'Back'), ...args.filter(a=>a!=='--remote-watch'||process.env.MURAKUMO_UI_SOCKET)],
       {stdio: ['inherit','pipe','inherit'], env: {...process.env, TERM: 'linux', LC_ALL: 'C.UTF-8'}});
     if (r.error) throw r.error;
+    if(args.includes('--timeout')&&r.status===255)return 'refresh';
     return r.status === 0 ? r.stdout.toString().replace(/\n$/, '') : null;
   }
   return {
+    watch: (message, items, state) => screen([...(process.env.MURAKUMO_UI_SOCKET?['--remote-watch','--remote-state',state]:[]),'--timeout','2','--no-tags','--menu',message,'0','0','9',...items.flat()]),
     menu: (message, items) => screen(['--no-tags','--menu',message,'0','0','9',...items.flat()]),
     input: message => screen(['--inputbox',message,'0','0']),
     password: message => screen(['--insecure','--passwordbox',message,'0','0']),

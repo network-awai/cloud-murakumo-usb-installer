@@ -103,7 +103,7 @@ export async function updateFromUSB({ui,t,diskReason,fingerprint,offlineSystem,c
   configureBoot(mount,{uefi:true,rootUuid:binding.root,bootUuid:binding.boot});
   // Retain the installed UUID/hardware configuration and update only shipped
   // source modules. Never replace host policy, credentials or identity files.
-  for(const name of readdirSync('/etc/murakumo'))if(/\.(nix|mjs|js|svg|json|html|py|txt)$/.test(name)&&!['configuration.example.nix','offline-systems.json','voice-policy.json'].includes(name))replaceShippedSource('/etc/murakumo/'+name,mount+'/etc/nixos/'+name);
+  for(const name of readdirSync('/etc/murakumo'))if(/\.(nix|mjs|js|svg|json|html|py|txt|cljk|tar\.gz)$/.test(name)&&!['configuration.example.nix','offline-systems.json','voice-policy.json'].includes(name))replaceShippedSource('/etc/murakumo/'+name,mount+'/etc/nixos/'+name);
   replaceShippedSource('/etc/murakumo/update-policy-runtime',mount+'/etc/nixos/update-policy-runtime',{directory:true});
   // The USB source is newer than production sequence 4. Preserve all journal
   // fields and prevent an older published image from replacing this manual update.
