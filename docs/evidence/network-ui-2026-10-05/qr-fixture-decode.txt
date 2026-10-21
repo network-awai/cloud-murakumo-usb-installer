@@ -1,0 +1,1 @@
+https://murakumo.cloud/register?qa=network-ui-font-fixture&device=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&challenge=fixture-only-not-an-approval

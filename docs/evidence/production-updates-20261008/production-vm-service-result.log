@@ -1,0 +1,20 @@
+× aiueos-update.service - Verify, stage and apply signed AiueOS releases
+     Loaded: loaded (/etc/systemd/system/aiueos-update.service; linked; preset: ignored)
+    Drop-In: /run/systemd/system/aiueos-update.service.d
+             └─production-runtime.conf
+     Active: failed (Result: exit-code) since Thu 2026-10-08 04:50:16 UTC; 98ms ago
+ Invocation: 21ad189cff57469da7d04f36785da26a
+TriggeredBy: ● aiueos-update.timer
+    Process: 1036 ExecStart=/run/current-system/sw/bin/flock -n /run/aiueos-update.lock /run/current-system/sw/bin/node /opt/aiueos-production-update/update-linux.mjs check (code=exited, status=1/FAILURE)
+   Main PID: 1036 (code=exited, status=1/FAILURE)
+         IP: 7.1K in, 2.2K out
+         IO: 52.5M read, 12K written
+   Mem peak: 99.5M
+        CPU: 7.135s
+
+Oct 08 04:50:08 aiueos-update-qa systemd[1]: Starting Verify, stage and apply signed AiueOS releases...
+Oct 08 04:50:16 aiueos-update-qa flock[1038]: insufficient staging space
+Oct 08 04:50:16 aiueos-update-qa systemd[1]: aiueos-update.service: Main process exited, code=exited, status=1/FAILURE
+Oct 08 04:50:16 aiueos-update-qa systemd[1]: aiueos-update.service: Failed with result 'exit-code'.
+Oct 08 04:50:16 aiueos-update-qa systemd[1]: Failed to start Verify, stage and apply signed AiueOS releases.
+Oct 08 04:50:16 aiueos-update-qa systemd[1]: aiueos-update.service: Consumed 7.135s CPU time over 7.689s wall clock time, 99.5M memory peak, 52.5M read from disk, 12K written to disk, 7.1K incoming IP traffic, 2.2K outgoing IP traffic.

@@ -1,0 +1,6 @@
+{
+  "bytes": 7488910320,
+  "sha256": "c7863f64de569525d41167ec6ff6ed99e0da6f8d6944d66ab7ec142c5ff584ea",
+  "producerPhase": "nix-store export ended; guest independently hashing",
+  "hostCompleteReadback": true
+}

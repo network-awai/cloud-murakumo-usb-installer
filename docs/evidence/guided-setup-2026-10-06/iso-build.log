@@ -1,0 +1,161 @@
+evaluation warning: `boot.zfs.forceImportRoot` is using the default value of `true`. It is highly recommended to set it to `false`, the new default from 26.11 on, to reduce the risk of data loss. Alternatively, you can silence this warning by explicitly setting it to `true`.
+these 15 derivations will be built:
+  /nix/store/js9ppqgln7yrrmcjk2jymyxz7a9czzyp-etc.drv
+  /nix/store/dp3xkcmwlhqg07pqmn2vl1rzy3vdwd4f-activate.drv
+  /nix/store/6nl5ammlz8fjf28ffdsmw1dzhc952afc-nixos-system-murakumo-node-26.05pre-git.drv
+  /nix/store/55xwmldfhvabjcm5ixfs0n5mq85023mh-etc.drv
+  /nix/store/lzj29yc700pfqsk1c0h42m0dh0acpn6v-activate.drv
+  /nix/store/vw2cf3wjhnlfvrw28jxjrb8zfps51gff-nixos-system-murakumo-node-26.05pre-git.drv
+  /nix/store/l1q7hxqi71hscr2q010zip9qy63bms6w-etc-murakumo-offline-systems.json.drv
+  /nix/store/xlrfc9qa7vlm4wyyr42mygrngp0s50vk-etc.drv
+  /nix/store/3idybgzvacaa00ydjn55bgpj7c0jpq0l-activate.drv
+  /nix/store/88i0dcp9qdr6m00acl754awlz56rk172-nixos-system-nixos-26.05pre-git.drv
+  /nix/store/7f109rsa4lay5pia2mvbxgq3dvhsvh4s-closure-info.drv
+  /nix/store/w16wsvd0r92l8ixvfq7h36kn6bli53gi-efi-directory.drv
+  /nix/store/8jwzw8xdir0bbyw6mawsa9x1pbkzb2ai-efi-image_eltorito.drv
+  /nix/store/id9f2hml3k1s194n6n99x9qbmc807iwl-isolinux.cfg.drv
+  /nix/store/3z2hk2i64lqilmpz67pkafxmqasw72qj-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv
+building '/nix/store/55xwmldfhvabjcm5ixfs0n5mq85023mh-etc.drv'...
+building '/nix/store/js9ppqgln7yrrmcjk2jymyxz7a9czzyp-etc.drv'...
+building '/nix/store/lzj29yc700pfqsk1c0h42m0dh0acpn6v-activate.drv'...
+building '/nix/store/dp3xkcmwlhqg07pqmn2vl1rzy3vdwd4f-activate.drv'...
+building '/nix/store/vw2cf3wjhnlfvrw28jxjrb8zfps51gff-nixos-system-murakumo-node-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/6nl5ammlz8fjf28ffdsmw1dzhc952afc-nixos-system-murakumo-node-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/l1q7hxqi71hscr2q010zip9qy63bms6w-etc-murakumo-offline-systems.json.drv'...
+building '/nix/store/xlrfc9qa7vlm4wyyr42mygrngp0s50vk-etc.drv'...
+building '/nix/store/3idybgzvacaa00ydjn55bgpj7c0jpq0l-activate.drv'...
+building '/nix/store/88i0dcp9qdr6m00acl754awlz56rk172-nixos-system-nixos-26.05pre-git.drv'...
+structuredAttrs is enabled
+building '/nix/store/7f109rsa4lay5pia2mvbxgq3dvhsvh4s-closure-info.drv'...
+structuredAttrs is enabled
+building '/nix/store/w16wsvd0r92l8ixvfq7h36kn6bli53gi-efi-directory.drv'...
+Building GRUB with modules:
+ - fat
+ - iso9660
+ - part_gpt
+ - part_msdos
+ - normal
+ - boot
+ - linux
+ - configfile
+ - loopback
+ - chain
+ - halt
+ - efifwsetup
+ - efi_gop
+ - ls
+ - search
+ - search_label
+ - search_fs_uuid
+ - search_fs_file
+ - echo
+ - serial
+ - gfxmenu
+ - gfxterm
+ - gfxterm_background
+ - gfxterm_menu
+ - test
+ - loadenv
+ - all_video
+ - videoinfo
+ - png
+Adding additional modules:
+ - efi_uga
+'/nix/store/y5b7003yidg3aavnmaxj15xpb7ksx92x-refind-0.14.2/share/refind/refind_x64.efi' -> '/nix/store/sl1pdgrc65xf758rqmpj5gkhhj5c5srz-efi-directory/EFI/BOOT/refind_x64.efi'
+building '/nix/store/id9f2hml3k1s194n6n99x9qbmc807iwl-isolinux.cfg.drv'...
+building '/nix/store/8jwzw8xdir0bbyw6mawsa9x1pbkzb2ai-efi-image_eltorito.drv'...
+Usage size: 2097152
+Image size: 3145728
+mkfs.fat 4.2 (2021-01-31)
+Copying BOOTX64.EFI
+Copying grub.cfg
+Copying refind_x64.efi
+fsck.fat 4.2 (2021-01-31)
+Checking we can access the last sector of the filesystem
+Boot sector contents:
+System ID "mkfs.fat"
+Media byte 0xf8 (hard disk)
+       512 bytes per logical sector
+      2048 bytes per cluster
+         1 reserved sector
+First FAT starts at byte 512 (sector 1)
+         2 FATs, 12 bit entries
+      2560 bytes per FAT (= 5 sectors)
+Root directory starts at byte 5632 (sector 11)
+       512 root directory entries
+Data area starts at byte 22016 (sector 43)
+      1525 data clusters (3123200 bytes)
+32 sectors/track, 2 heads
+         0 hidden sectors
+      6144 sectors total
+Checking for unused clusters.
+/nix/store/wmmhr68bbmyjb8sg5hdhjb3w1i80h08z-efi-image_eltorito: 6 files, 719/1525 clusters
+building '/nix/store/3z2hk2i64lqilmpz67pkafxmqasw72qj-nixos-minimal-26.05pre-git-x86_64-linux.iso.drv'...
+structuredAttrs is enabled
+Parallel mksquashfs: Using 2 processors
+Creating 4.0 filesystem on nix-store.squashfs, block size 1048576.
+
+
+Exportable Squashfs 4.0 filesystem, zstd compressed, data block size 1048576
+        compressed data, compressed metadata, compressed fragments,
+        compressed xattrs, compressed ids
+        duplicates are removed
+Filesystem size 1909274.08 Kbytes (1864.53 Mbytes)
+        48.40% of uncompressed filesystem size (3945007.97 Kbytes)
+Inode table size 2410983 bytes (2354.48 Kbytes)
+        19.82% of uncompressed inode table size (12164548 bytes)
+Directory table size 2900233 bytes (2832.26 Kbytes)
+        38.86% of uncompressed directory table size (7463256 bytes)
+Number of duplicate files found 59397
+Number of inodes 291799
+Number of files 163660
+Number of fragments 1523
+Number of symbolic links 40234
+Number of device nodes 0
+Number of fifo nodes 0
+Number of socket nodes 0
+Number of directories 87905
+Number of hard-links 0
+Number of ids (unique uids + gids) 1
+Number of uids 1
+        root (0)
+Number of gids 1
+        root (0)
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
+
+xorriso : NOTE : Environment variable SOURCE_DATE_EPOCH encountered with value 315532800
+Drive current: -outdev 'stdio:/nix/store/dqgpmqxin7a0am5q3ijxm9vgyz84k5ba-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso'
+Media current: stdio file, overwriteable
+Media status : is blank
+Media summary: 0 sessions, 0 data blocks, 0 data, 9499m free
+xorriso : WARNING : -volid text does not comply to ISO 9660 / ECMA 119 rules
+xorriso : UPDATE :     194 files added in 1 seconds
+Added 12 items from file 'pathlist'
+xorriso : UPDATE :     194 files added in 1 seconds
+xorriso : NOTE : Copying to System Area: 432 bytes from file '/nix/store/q786wfxhzaz94mp8644n6hg43lnp2lp8-syslinux-unstable-2019-02-07/share/syslinux/isohdpfx.bin'
+libisofs: NOTE : Automatically adjusted MBR geometry to 1023/120/32
+libisofs: NOTE : Aligned image size to cylinder size by 765 blocks
+xorriso : UPDATE :  0.46% done
+xorriso : UPDATE :  6.71% done
+xorriso : UPDATE :  17.27% done
+xorriso : UPDATE :  23.68% done, estimate finish Tue Oct 06 02:15:43 2026
+xorriso : UPDATE :  29.24% done, estimate finish Tue Oct 06 02:15:44 2026
+xorriso : UPDATE :  37.26% done, estimate finish Tue Oct 06 02:15:44 2026
+xorriso : UPDATE :  44.75% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  49.85% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  57.59% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  63.77% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  72.65% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  78.96% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  86.21% done, estimate finish Tue Oct 06 02:15:45 2026
+xorriso : UPDATE :  95.77% done
+ISO image produced: 982080 sectors
+Written to medium : 982080 sectors at LBA 0
+Writing to 'stdio:/nix/store/dqgpmqxin7a0am5q3ijxm9vgyz84k5ba-nixos-minimal-26.05pre-git-x86_64-linux.iso/iso/nixos-minimal-26.05pre-git-x86_64-linux.iso' completed successfully.
+
+/nix/store/dqgpmqxin7a0am5q3ijxm9vgyz84k5ba-nixos-minimal-26.05pre-git-x86_64-linux.iso
+ae196687f5677e9f4a12adb2c1b1f1d75d2db38adb9c1d614828927964210188  /mnt/output/murakumo-guided-setup-20261006.iso
+
+AUTO_BUILD_EXIT=0

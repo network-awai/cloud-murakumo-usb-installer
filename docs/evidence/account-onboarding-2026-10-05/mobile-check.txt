@@ -1,0 +1,10 @@
+LOCAL TEST ONLY - authentication verdict is a fixture; no real Passkey performed.
+Frozen Worker e8fda133; frozen Portal bc21021a; current client 87d49c1.
+In-app Chromium viewport: 390x844; documentWidth=390, innerWidth=390.
+Unverified approval refused with Passkey verification handoff.
+Handoff: https://auth.murakumo.cloud/sign-in?return_to=https%3A%2F%2Fmurakumo.cloud%2Fportal%2F%23device-link%3Fcode%3DFSATU7MRME
+Fixture admission enabled locally; exact device was approved.
+Completion: 端末の登録が完了しました。端末画面へ戻ってください。
+Public device DID displayed untruncated and wrapped within viewport.
+Registered-devices link navigated to /portal/#devices. Page requires actual sign-in.
+Actual account session and registered-device listing remain unverified.

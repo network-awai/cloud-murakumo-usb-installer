@@ -1,0 +1,15 @@
+GUIDED_MEDIA_MODULE_CHECK
+/etc/murakumo/setup-ui.mjs: OK
+/etc/murakumo/registration-ui.mjs: OK
+/etc/murakumo/network-setup.mjs: OK
+/etc/murakumo/account-link.mjs: OK
+{"bios":"/nix/store/dd93k9xy77zv9rhl8n8gyg26yphv22vc-nixos-system-murakumo-node-26.05pre-git","bootLabel":"MURA_BOOT","rootLabel":"MURAKUMO_ROOT","uefi":"/nix/store/l8jv9z0y7p58p1hj3z5rmljciafkj5sl-nixos-system-murakumo-node-26.05pre-git","version":1}
+uefi setup-ui.mjs matches frozen source
+uefi registration-ui.mjs matches frozen source
+uefi network-setup.mjs matches frozen source
+uefi account-link.mjs matches frozen source
+bios setup-ui.mjs matches frozen source
+bios registration-ui.mjs matches frozen source
+bios network-setup.mjs matches frozen source
+bios account-link.mjs matches frozen source
+GUIDED_MEDIA_CHECK_PASS

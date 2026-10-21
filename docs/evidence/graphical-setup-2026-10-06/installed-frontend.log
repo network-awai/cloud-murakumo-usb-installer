@@ -1,0 +1,2 @@
+
+(gjs:974): Gtk-WARNING **: 07:31:44.300: Unable to acquire session bus: Cannot autolaunch D-Bus without X11 $DISPLAY

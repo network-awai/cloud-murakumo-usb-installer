@@ -1,0 +1,4 @@
+/mnt/qa/var/lib/murakumo/account-device.json: OK
+/mnt/qa/var/lib/murakumo/account-link.json: OK
+/mnt/qa/var/lib/murakumo/usb-preserve-fixture: OK
+/mnt/qa/etc/NetworkManager/system-connections/usb-preserve-fixture.nmconnection: OK

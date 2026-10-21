@@ -1,0 +1,15 @@
+Running as unit: setup-fixed-probe.service
+UPDATE_CONFIG_SAVED automatic-stable false
+Periodic checks resumed.
+Set up from another computer
+https://10.0.2.15:8443/
+Connection code: 00665093
+Open the URL on a computer on the same LAN. Compare its certificate SHA256 fingerprint with this screen before entering the 8-digit code.
+SHA256 Fingerprint=04:A9:4F:43:16:E8:E2:D6:F0:3F:65:4E:D2:F6:68:43:E2:18:E5:09:DB:1D:47:C7:E1:78:67:51:0C:BF:C7:3C
+Code: 5 minutes, 5 attempts. Session: 10 minutes. No account required.
+          Finished with result: success
+Main processes terminated with: code=exited, status=0/SUCCESS
+               Service runtime: 1.027s
+             CPU time consumed: 875ms
+                   Memory peak: 19.3M (swap: 0B)
+                      IO Bytes: read 6.3M, written 8K

@@ -1,0 +1,168 @@
+{
+  "schema": "murakumo.kekkai-runtime.v1",
+  "engineRepository": "https://github.com/kotoba-lang/org-babashka-nbb",
+  "engineCommit": "95ff779a659dbb344ab87017908c0acba4300b87",
+  "sources": [
+    {
+      "namespace": "kekkai.node.agent",
+      "sha256": "f2ac5a842c1250c2d09068ff10968db8a872e6a897bb7233021fa072704ac41e"
+    },
+    {
+      "namespace": "kotoba.lang.text",
+      "sha256": "9bca2502af40e236e5075601d814be0adcc0557a58c6318d1faab0c704fa54ad"
+    },
+    {
+      "namespace": "kekkai.node.dns-server",
+      "sha256": "18aa2229fabb751a299d6aae2af1916227a2c91081cd7a1fc7e4b9c875d5f383"
+    },
+    {
+      "namespace": "kekkai.node.magicdns",
+      "sha256": "22e2a1bec2e95fa3a1ced37d1220a4fa872488c20dd83b39315e2fdf7d27c18a"
+    },
+    {
+      "namespace": "kekkai.node.netmap",
+      "sha256": "57bd4138b8da87d3573c046cb2135ad52f6b04c999b334ac1cd9bc4f9018be38"
+    },
+    {
+      "namespace": "kotoba.lang.coll",
+      "sha256": "209242a6117559293797e59f6370976f017ba168bfb6500fb4017c629802ebb3"
+    },
+    {
+      "namespace": "nameserver.resolver",
+      "sha256": "43b1406663b55fa0a059293885babadfcb86668485c24591f4f079fa3eeaad88"
+    },
+    {
+      "namespace": "nameserver.store",
+      "sha256": "d3d8016065d9c09f145fd5ecb59eaee6ec810fefbfbbc24f127d992570db4301"
+    },
+    {
+      "namespace": "nameserver.names",
+      "sha256": "f13eb8bf81ed29d517bc9202a1f3e2404dea7222493c8b24090e076d2a3489e9"
+    },
+    {
+      "namespace": "kekkai.node.udp",
+      "sha256": "040b58d8e26233076341351f66d8fd50bd5861f72b0b12ff15425e8c9e5b2199"
+    },
+    {
+      "namespace": "nameserver.wire",
+      "sha256": "aa94b914bb6576f6ea1729cc7875452360f89f97923870ce80b7bc8108c4078b"
+    },
+    {
+      "namespace": "kekkai.node.endpoint",
+      "sha256": "b54657881b1ef8243b2ca608a839bd809f5030be4b041266fe9c5d9c9f34257c"
+    },
+    {
+      "namespace": "kekkai.node.peer",
+      "sha256": "df48303a1459e7038825c0143c81cb4ae579525c13ec1748384388ce3c2b1cad"
+    },
+    {
+      "namespace": "kotoba.lang.edn",
+      "sha256": "beb295043ea8677809342af96eda20c8d8fb323101a2cac6ae793775adcef1e7"
+    },
+    {
+      "namespace": "kotoba.bytes",
+      "sha256": "c7cc3771e3e68e4bcec95549a781a22922960abd7987caa1ea88785b22be180d"
+    },
+    {
+      "namespace": "kekkai.node.disco",
+      "sha256": "6abd10bf73a3175abeaba8390c45e8a7fd166e5f4b78d6e35213e3cf1e37485d"
+    },
+    {
+      "namespace": "noise.core",
+      "sha256": "f536f9957a27c688b87b08c9d0c423717ff05c0a48563cc5a2e648d1cb7f12da"
+    },
+    {
+      "namespace": "noise.provider.jvm",
+      "sha256": "c1fa98b0b2d2da195b1c5331c341b139a704fd7ebeeb78903c4bc9b4fbc8a6f3"
+    },
+    {
+      "namespace": "noise.handshake-state",
+      "sha256": "65dbbc469b4a0b2bce0cd7bb553311a20795a92e25279abf1bd18da7c3487ac7"
+    },
+    {
+      "namespace": "noise.patterns",
+      "sha256": "8017203c4a62d439126539246d4a841bb4fc6944879d8fb042c30a032d7a272d"
+    },
+    {
+      "namespace": "noise.suite",
+      "sha256": "322dd926df09137b05dfe43e6dca87f1f208f7d27a75e55d488f30a8be40aae2"
+    },
+    {
+      "namespace": "kotoba.bytes.sha256",
+      "sha256": "f9c5d99468675835d0245cfab63bc48182262fcd58fa5fbade15290c5100b792"
+    },
+    {
+      "namespace": "noise.blake2s",
+      "sha256": "041194819949756e1315928213778d76cad64ed10a54bc4d1705d3559717fd5e"
+    },
+    {
+      "namespace": "noise.symmetric-state",
+      "sha256": "6f3de9860ce76e3387892a4bdc3967e82745955c3b6dac1862f24ee3bd095d0e"
+    },
+    {
+      "namespace": "noise.cipher-state",
+      "sha256": "f95755d0108768150270d71352859a165f35dcae54146cfc19e8ab002541405b"
+    },
+    {
+      "namespace": "noise.kdf",
+      "sha256": "967f6ba16bec9f9dcec6abc8d4b29d131cb55cc2cf33f04a56f35a8a696f0e9c"
+    },
+    {
+      "namespace": "noise.session",
+      "sha256": "fc7265810d34563362dd7e4a715ac17649632da4d370e79de6d0b91bd5de40ae"
+    },
+    {
+      "namespace": "kekkai.node.relay",
+      "sha256": "4ede0681c1e8116e8d75bff55d4f6ced433affb7ac90cd38a1005e0274496e0e"
+    },
+    {
+      "namespace": "kekkai.node.signed-netmap",
+      "sha256": "79a247a87a4c3ef39d59bbe9c2770e54a2e790e7d2fdc419c8b2b5e23cd11934"
+    },
+    {
+      "namespace": "kekkai.node.stun",
+      "sha256": "3cbe1f2a1a0ed43b84fe81e860a2ab8fb55640e746bcd95d02978ce4dc50b173"
+    },
+    {
+      "namespace": "kotoba.turn.stun",
+      "sha256": "4ab4d210d24377e844e662bb23a746563c2c4351422c1293ef8233a787aa0ba2"
+    },
+    {
+      "namespace": "kotoba.turn.credential",
+      "sha256": "8eb6e920d516ae2a5a8e59e78420b39855a1bd1426ed433a8aaa0d9c731bddcd"
+    },
+    {
+      "namespace": "kotoba.bytes.sha1",
+      "sha256": "3129a9ba6fdda7407ddb804ea7c2ac8a067b089eb7ff98b6ddf64f4769ea322a"
+    },
+    {
+      "namespace": "noise.provider.node",
+      "sha256": "232229e68bb9e0d5bb895ccd5084e6fa73383f798e9b5ad0bf2341d0d484a9fb"
+    },
+    {
+      "namespace": "kekkai.node.stream-edge",
+      "sha256": "553541a77783066370014a5642a061a0f6ab20a5896ed628a0a044a2d3545df6"
+    },
+    {
+      "namespace": "kekkai.node.stream",
+      "sha256": "e88b0dc164e2a9c1bb43459644da2b141a942971a2d980387548d37474c67698"
+    },
+    {
+      "namespace": "kekkai.node.relay-server",
+      "sha256": "5c843953006ec06c5c5a381a07b40c195aad7cc295f8ea87757051ddc150dd43"
+    },
+    {
+      "namespace": "kekkai.cli.ssh",
+      "sha256": "7f471647077a83a9c298df8389baa11a4d18458973fcf28ba88b98df861099c9"
+    },
+    {
+      "namespace": "kekkai.cli.config",
+      "sha256": "86a65fc489b1ad71ed583766615e7608857124bddb50bcfd4ef9e443528f4c9f"
+    },
+    {
+      "namespace": "kekkai.cli.sign",
+      "sha256": "16a7ee9fe8b04fa69307dfb9965a2fc0f8d5aaff1cd4d4f0984ec4d150f2f4da"
+    }
+  ],
+  "bundleSha256": "bd25b9e769717950759819fd139b4052652f5edd943d05af67911ff563f9e070"
+}

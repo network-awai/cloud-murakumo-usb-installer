@@ -1,0 +1,11 @@
+{
+  "fixtureOnly": true,
+  "code": "5QBV_4YZNK",
+  "decodedUri": "https://murakumo.cloud/portal/#device-link?code=5QBV_4YZNK",
+  "qrMatchesVmAudio": true,
+  "physicalPhoneMicrophoneQualified": false,
+  "realPasskeyQualified": false,
+  "nativeVmPlayback": true,
+  "outputWarmupSeconds": 1,
+  "readerViewportWidth": 390
+}

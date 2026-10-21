@@ -1,0 +1,31 @@
+initrd=\EFI\nixos\l1lix10ylilx2rwdix2sfi9x45l7hq40-initrd-linux-6.18.53-initrd.efi init=/nix/store/zv4hmqhjq5gaavnilx11i6qwnaym6q99-nixos-system-murakumo-node-26.05pre-git/init loglevel=4 lsm=landlock,yama,bpf murakumo.root_uuid=06560e0a-358c-4b67-8720-8bd8d212f042 murakumo.boot_uuid=26A3-350F
+TARGET SOURCE         FSTYPE OPTIONS
+/      /dev/nvme0n1p2 ext4   rw,relatime
+TARGET SOURCE         FSTYPE OPTIONS
+/boot  /dev/nvme0n1p1 vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro
+NAME         SIZE SERIAL             LABEL         UUID                                 MOUNTPOINTS
+sr0         1024M QM00005                                                               
+nvme0n1       24G GRAPHICAL-SELECTED                                                    
+├─nvme0n1p1  512M                    MURA_BOOT     26A3-350F                            /boot
+└─nvme0n1p2 23.5G                    MURAKUMO_ROOT 06560e0a-358c-4b67-8720-8bd8d212f042 /nix/store
+                                                                                        /
+nvme1n1       24G GRAPHICAL-PRESERVE                                                    
+├─nvme1n1p1  512M                    MURA_BOOT     2D7B-4FDF                            
+└─nvme1n1p2 23.5G                    MURAKUMO_ROOT c7335637-2af8-408e-b79d-aa224959873b 
+/dev/nvme0n1p2
+/dev/nvme0n1p1
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="06560e0a-358c-4b67-8720-8bd8d212f042", SYMLINK+="murakumo-root", TAG+="systemd"
+SUBSYSTEM=="block", ENV{ID_FS_UUID}=="26A3-350F", SYMLINK+="murakumo-boot", TAG+="systemd"
+title NixOS
+sort-key nixos
+version Generation 1 NixOS Yarara 26.05pre-git (Linux 6.18.53), built on 2026-10-06
+linux /EFI/nixos/yb2l9ixaj5m3klhq2zq0h13jgrgv206h-linux-6.18.53-bzImage.efi
+initrd /EFI/nixos/l1lix10ylilx2rwdix2sfi9x45l7hq40-initrd-linux-6.18.53-initrd.efi
+options init=/nix/store/zv4hmqhjq5gaavnilx11i6qwnaym6q99-nixos-system-murakumo-node-26.05pre-git/init loglevel=4 lsm=landlock,yama,bpf murakumo.root_uuid=06560e0a-358c-4b67-8720-8bd8d212f042 murakumo.boot_uuid=26A3-350F
+{ ... }: { imports = [ ./offline-uefi.nix ]; boot.kernelParams = ["murakumo.root_uuid=06560e0a-358c-4b67-8720-8bd8d212f042" "murakumo.boot_uuid=26A3-350F"]; }
+633028a67e7271afbc229c008119fc5f6104753fa290a449771277d242a47dd8  /etc/murakumo/graphical-ui.js
+73c1caea93bf4a7d34bd7c3b54c766aff2f634eaa0ab015498f23b10484b758f  /etc/nixos/offline-base.nix
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+tailscale0       UNKNOWN        <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> 
+NO_INSTALLATION_MEDIA
+active

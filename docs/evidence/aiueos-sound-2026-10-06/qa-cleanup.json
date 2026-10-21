@@ -1,0 +1,20 @@
+{
+  "vms": {
+    "murakumo-offline-builder": {
+      "pidFileRemoved": true,
+      "stopped": true
+    },
+    "aiueos-sound-installed-20261006": {
+      "pidFileRemoved": true,
+      "stopped": true
+    },
+    "aiueos-sound-media-20261006": {
+      "pidFileRemoved": true,
+      "stopped": true
+    }
+  },
+  "taskBrowserSessionsClosed": true,
+  "fixtureWorkerStopped": true,
+  "readerServerStopped": true,
+  "fixtureStateRemoved": true
+}

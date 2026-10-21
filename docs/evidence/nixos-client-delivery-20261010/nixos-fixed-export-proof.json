@@ -1,0 +1,6 @@
+{
+  "bytes": 5248696320,
+  "sha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+  "source": "/nix/store/ydkzlj60wd02vchz7q0g3lv19sh4q5k1-nixos-minimal-26.05pre-git-x86_64-linux.iso",
+  "transport": "guest to host loopback"
+}

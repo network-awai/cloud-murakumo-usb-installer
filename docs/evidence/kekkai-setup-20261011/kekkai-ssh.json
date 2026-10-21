@@ -1,0 +1,1 @@
+{"schema": "murakumo.kekkai-ssh-vm.v1", "prePasskey": true, "tlsPin": true, "twoKeyApproval": true, "realOverlaySSH": true, "directLANBlocked": true, "reboot": true, "revoked": true}

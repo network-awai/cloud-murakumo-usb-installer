@@ -1,17 +1,32 @@
 # cloud-murakumo-usb-installer
 
-NixOS installation media definition and target-host configuration for Murakumo
-nodes. This repository owns the OS installation boundary: boot media, disk
-selection, target configuration, recovery and rollback. It never chooses or
-formats a disk automatically.
+NixOS installation media and Murakumo Client setup for Murakumo Nodes.
+NixOS is the current operating system. Murakumo Client names the software suite;
+Murakumo Node names a participating instance or host. AiueOS is an unfinished
+future OS intended to replace NixOS, not the OS delivered by this installer. This repository owns the OS installation boundary: boot media, disk
+selection, target configuration, recovery and rollback. The ISO opens a guided
+installer on boot: choose Wi-Fi, Ethernet or offline continuation, then select
+and approve the internal disk. The bundled OS
+is copied and installed without Internet or host-side compilation. Registration
+opens the same network guide after the installed PC boots. See
+[network onboarding](docs/network-onboarding.md).
+The [account-linking guide](docs/account-onboarding.md) continues through a phone
+QR, Passkey approval, cancellation/retry and saved versus online-verified status.
+The [native graphical guide](docs/graphical-setup.md) describes the new disk cards,
+selected-disk confirmation and UUID-based boot routing.
+See [the guided installation procedure](docs/automatic-install.md). Initial
+password entry is no longer required; see [password-free verification](docs/verification-passwordless-2026-10-05.md).
 
-Status: the revised NixOS 26.05 ISO was built and booted in BIOS and UEFI
-QEMU VMs on 2026-09-30. The bundled preflight script and target templates,
-including `community.nix`, were checked in the live image. See [the current
-verification record](docs/verification-2026-09-30.md) for the exact image hash
-and remaining hardware checks. Physical
-USB boot, physical target-disk installation and recovery have not been tested; do not
-replace a serving host until those checks succeed.
+Status: guided disk installation and account onboarding were added on 2026-10-05. See
+[the account onboarding verification record](docs/verification-account-onboarding-2026-10-05.md) for the
+reviewed source, ISO hash and VM checks. Physical PC installation, real phone
+Passkey linking and inference still require separate verification. The
+[2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
+installation image.
+The device-claim agent, local model-readiness check and `community.nix`
+template were last built and booted in the BIOS and UEFI QEMU checks of
+[the 2026-09-30 record](docs/verification-2026-09-30.md), against an older
+revision; an ISO from this combined source has not been built.
 
 Phone-only setup, Wi-Fi provisioning, Kotoba authority pairing, remote model
 download and model switching are not present in this source. A read-only local
@@ -31,6 +46,8 @@ release gate; GitHub Actions is not required:
 ./scripts/release-iso.sh /absolute/path/to/nixpkgs /absolute/new/evidence-directory
 ```
 
+The [VM release gate](docs/vm-release-gate.md) must pass against the same source
+and package pin before ISO creation or system-export publication.
 The gate runs the factory-claim and model-readiness tests, builds
 `result/iso/*.iso`, then records the ISO SHA-256, size, installer commit and
 nixpkgs commit in the new evidence directory. `scripts/build-iso.sh` remains
@@ -43,9 +60,14 @@ USB stick. Use the
 for USB writing, partitioning, mounting and `nixos-install`. An ISO built from
 this source includes the read-only preflight and local-inference checks,
 device claim agent and target templates under `/etc/murakumo/`,
-but does not run an install automatically.
+and the guided installer, but does not run an install automatically.
+Previously written USB sticks must be rewritten with the new ISO separately,
+after confirming and approving the USB's erasure.
 
 ## Install a target host
+
+The normal path is now [guided installation](docs/automatic-install.md).
+The steps below are the manual recovery/custom configuration path.
 
 1. Boot the USB media. Run `sh /etc/murakumo/preflight.sh` to inspect boot
    mode, disks, network interfaces and GPU devices.
@@ -53,14 +75,18 @@ but does not run an install automatically.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `/etc/murakumo/node-base.nix`,
-   `/etc/murakumo/community.nix`,
-   `/etc/murakumo/node-readiness.mjs`,
-   `/etc/murakumo/device-claim.mjs`, and an edited copy of
-   `/etc/murakumo/configuration.example.nix` to `/mnt/etc/nixos/` (rename the
-   latter to `configuration.nix`). Set a real SSH public
-   key, confirm UEFI or replace its boot loader settings, and review the
-   network and filesystem configuration before `nixos-install`.
+4. Copy `node-base.nix`, `community.nix`, `node-readiness.mjs`,
+   `device-claim.mjs`, `console-ui.nix`, `offline-base.nix`, `offline-uefi.nix`,
+   `offline-bios.nix`, `network-setup.mjs`, `setup-ui.mjs`, `registration-ui.mjs`,
+   `account-link.mjs`, `local-setup.mjs`, `language.mjs`, `graphical-ui.js`,
+   `graphical-dialog.mjs`, `murakumo-logo.svg`, `acoustic-code.mjs`,
+   `setup-sound.mjs` and `sound-link.html` from `/etc/murakumo/` to
+   `/mnt/etc/nixos/`, along with
+   an edited `configuration.example.nix` renamed to `configuration.nix`. For
+   the guided network screen, set `networking.networkmanager.enable = true`
+   and `networking.useDHCP = false` in that edited configuration. Set a real
+   SSH public key, confirm UEFI or replace the boot loader settings, and review
+   the network and filesystem configuration before `nixos-install`.
 5. Reboot from the installed disk. Confirm remote access and RADV/Vulkan on
    physical hardware. Install and start a reviewed OpenAI-compatible model
    server and model separately. Run the local inference check with its exact
@@ -93,3 +119,98 @@ installation until those checks and a recovery plan succeed.
 `cloud-murakumo-usb-installer` owns NixOS boot media and OS installation.
 Windows node installation is a separate future platform path and is not
 advertised as supported by the current CLI script.
+
+## Passwordless account registration
+
+The example enables `services.murakumoAccountLink.enable`. On the installed system,
+TTY1 shows a five-minute QR/device code and the public Device ID. Scan it with a phone,
+compare the full Device ID, and open the canonical `auth.kotoba.cloud` signer.
+Approve with a user-owned Base-account Passkey or an external wallet connected
+through Privy. Privy sessions and historical cookies do not grant Node ownership.
+The node does not request an account ID/password. Administrative SSH access is configured
+separately with the operator's public key; account linking does not grant remote shell access.
+
+The node keeps a local signing key with mode 0600 and a public registration receipt.
+Before saving ownership it independently verifies the user proof against the
+original Node, flow, challenge and expiry, including current Base-chain verification.
+A server `registered` projection alone is refused. The generated verifier's
+source commit and digest are recorded in `nixos/node-root-receipt-provenance.json`.
+On reboot it loads the previously verified local record and checks online status;
+this is not a fresh user ceremony or a claim of fresh chain verification on every boot.
+Legacy receipts are preserved but require fresh user proof. Revocation fails closed; an intentional local
+relink uses `node /etc/murakumo/account-link.mjs --relink`, preserving the device key.
+No model service or fleet worker is enabled by account linking.
+
+This requires the matching dedicated registration Worker, canonical signer and
+database migration to be published. Synthetic proof qualification exercised the
+compiled verifier and Node persistence with live Base RPC and an unfunded test
+wallet; its registration transport was a fixture. It does not verify a real
+phone Passkey ceremony, deployment or fleet admission.
+
+Run `node --test test/*.test.mjs` for registration and offline/disk safety tests.
+On Linux with the pinned NixOS channel, run `bash scripts/check-install-config.sh`
+to parse and evaluate both generated boot configurations with Nix.
+
+## Product names and roles
+
+- **NixOS**: current operating system, installation and system updates.
+- **Murakumo Client**: software suite installed and configured on NixOS.
+- **Murakumo Daemon**: name for the resident participation process, when supplied.
+- **Murakumo CLI**: command interface; **Murakumo App**: user-facing application.
+- **Murakumo Node**: running participant, host and its observed status.
+- **AiueOS**: future replacement OS; incomplete and not delivered here.
+
+The journey is **Install NixOS → Set up Murakumo Client → Participate as a
+Murakumo Node**. Local configuration and account linking alone do not prove a
+running daemon, inference readiness or fleet admission. See
+[naming and compatibility](docs/product-naming.md).
+
+## Local setup and startup language
+
+Startup offers Japanese and English. The installed guide can complete local setup
+without a phone, an account or Internet, preserving its device identity across boots.
+Account linking remains an explicit later choice. See
+[local setup](docs/local-setup-and-updates.md) and [the integrated update lifecycle](docs/os-update-lifecycle.md).
+Signed OS update services require owner provisioning; see [operations](docs/update-operations.md).
+Updating a USB does not update an
+already installed PC.
+
+## Setup audio
+
+The startup language page plays a quiet, original ambient piece with a visible
+stop/replay control. The QR page can send the same expiring approval code by sound.
+See [sound linking](docs/sound-linking.md) for the included companion reader,
+Passkey approval boundary and public-release/physical-phone qualification gaps.
+
+## Bluetooth Wi-Fi provisioning
+
+The network chooser offers Bluetooth when a controller is present. Opening it
+creates a ten-minute, one-use secret shown locally as a QR code or a masked key.
+The companion encrypts Wi-Fi credentials with HKDF/AES-GCM before sending
+fragmented GATT writes; expired, modified and replayed messages are refused.
+Closing the page stops advertising. This transfers Wi-Fi settings only; account
+ownership still requires the separate Passkey flow.
+
+`nixos/ble-setup.nix` integrates the services into the next installer build.
+`scripts/install-ble-host.sh` installs the Ubuntu adapter on the explicitly
+selected existing node. Its services start at boot but do not advertise until
+a setup window is opened. `scripts/serve-ble-client.mjs` provides a localhost
+companion for Mac Chrome testing; it is not a published phone application.
+
+On 2026-10-07, 6600hs-2 registered the GATT service and started/stopped its
+advertisement. The live controller accepted WebCrypto-encrypted, fragmented
+settings, reconnected its existing Wi-Fi, refused replay and removed its consumed
+secret. That test uses private local IPC, not a Bluetooth radio transfer.
+The Mac Bluetooth chooser did not discover the node, so radio transfer and
+physical-phone setup remain unverified. An iPhone native companion, public
+HTTPS companion deployment, Nix runtime evaluation and USB rewrite are not
+included in this host verification. See the machine-readable evidence under
+`docs/evidence/ble-setup-2026-10-07/`.
+
+### Kekkai SSH during installation
+
+The live installer and installed client support [8-digit, locally approved
+Kekkai SSH](docs/kekkai-install-ssh.md) before Passkey or account registration.
+The manager pins the Node certificate and both public keys; approved SSH and
+Kekkai identities survive installation and reboot. The release gate tests the
+real encrypted overlay with direct LAN SSH blocked.

@@ -1,0 +1,2 @@
+[agent-browser] launched browser
+PASS local browser: 390px/full DID, Passkey return URL, completion text, stale response refusal, existing setup redirect/label

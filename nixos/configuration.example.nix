@@ -7,6 +7,9 @@
 
   networking.hostName = "murakumo-node";
   networking.useDHCP = true;
+  # tty1 displays a QR/device code. The phone approves with its Passkey.
+  # Local operator administration remains independent of account linking.
+  services.murakumoAccountLink.enable = true;
   # This example assumes UEFI. Check the actual boot mode before applying it.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

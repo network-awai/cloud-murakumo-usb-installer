@@ -1,0 +1,26 @@
+{
+  "recognized": [
+    {
+      "name": "en-lowercase",
+      "words": "Lowercase b"
+    },
+    {
+      "name": "en-digit",
+      "words": "Digit 7"
+    },
+    {
+      "name": "en-done",
+      "words": "Done!"
+    },
+    {
+      "name": "en-erase",
+      "words": "Erase 1234 and install."
+    }
+  ],
+  "controls": [
+    "secret",
+    "erase"
+  ],
+  "actualDiskErased": false,
+  "physicalMicrophone": false
+}

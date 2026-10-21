@@ -1,0 +1,10 @@
+{
+  "tests": 123,
+  "passed": 123,
+  "failed": 0,
+  "skipped": 0,
+  "realKotobaPolicy": true,
+  "sourceCommit": "8279ee3",
+  "isoIncludesNetworkSkip": false,
+  "usbWritten": false
+}

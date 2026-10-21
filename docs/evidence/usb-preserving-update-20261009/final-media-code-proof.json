@@ -1,0 +1,15 @@
+{
+  "code": {
+    "usb-update.mjs": "f54121caaf57bdb4421da772fa2d3a65c164823039cfa2299c55b6bf1f90643e",
+    "install-disk.mjs": "45066bd3ddc48a38a317ed65877517752323a0de91039915f4d0366e3d5b843b",
+    "update-ui.mjs": "8cf19f731094cbe5db3293beeb248483cabcb749741a95171069c4a90f5e134b"
+  },
+  "offlineSystems": {
+    "bios": "/nix/store/iqpsw8rk1n6ihhhd8zpyfxwczbqs73xg-nixos-system-murakumo-node-26.05pre-git",
+    "bootLabel": "MURA_BOOT",
+    "rootLabel": "MURAKUMO_ROOT",
+    "uefi": "/nix/store/v8w7ikffywn6narhhl0g9k0kfylx3g0a-nixos-system-murakumo-node-26.05pre-git",
+    "version": 2
+  },
+  "system": "/nix/store/9m299nkk48ry192yz6d3rf1p3ivg55kb-nixos-system-nixos-26.05pre-git"
+}
