@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-08T04:51:07.373Z",
+  "installerMain": "dec1db6f1f1eb306c1c7eca888610dd79e987ecb",
+  "grantMain": "2e0496249fb969b52cf3bdbbc1d8b0238c7ac559",
+  "keychainSignaturesVerified": true,
+  "independentSigningAuthorities": false,
+  "usb": {
+    "bytes": 5248696320,
+    "disk": "disk6",
+    "iso_sha256": "8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3",
+    "serial": "0022CFF6B899CA205987CBC4",
+    "status": "verified-and-ejected",
+    "usb_sha256": "8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3"
+  },
+  "productionDeployed": true,
+  "releasePublished": true,
+  "automaticUpdateActivated": false,
+  "blocker": "Physical AiueOS target needed for real-node activation; production published, VM guard verified",
+  "productionClosureExported": true,
+  "productionClosureBytes": 7488473952,
+  "distribution": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev",
+    "version": "17642593-b248-4446-a6d3-8c8e1c345abd",
+    "bucket": "aiueos-releases"
+  },
+  "vmTimer": {
+    "activeAtVerification": true,
+    "enabled": true,
+    "nowPoweredDown": true,
+    "policy": "automatic-stable",
+    "ownerAuthorization": "QA fixture only",
+    "runtimeOverride": "transient /run systemd drop-in"
+  },
+  "isoPublicReadback": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3.iso",
+    "head": 200,
+    "range": 206,
+    "size": 5248696320,
+    "sha256": "8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3",
+    "verifiedAt": "2026-10-08T04:46:38.080Z"
+  },
+  "productionManifestSequence": 4,
+  "temporaryUploadWorkerDeleted": true,
+  "physicalActivation": {
+    "enabled": false,
+    "reason": "Installed AiueOS target not supplied; 100.84.134.120 is Ubuntu 24.04.4",
+    "target": "100.84.134.120"
+  },
+  "vmManifestVerification": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/manifest.json",
+    "manifestHash": "c2d5ec25a81f5fba995e4f1297ad3a83b89fbec25fe23d003767cccfd00fd2fe",
+    "release": {
+      "arch": "x86_64-linux",
+      "channel": "stable",
+      "sequence": 4,
+      "issuedAt": 1791433915954,
+      "expiresAt": 1794025915954,
+      "securityRisk": "low",
+      "applyRisk": "medium",
+      "systemPath": "/nix/store/rh66qxk7wy88pavi6vnxllcranq21c1c-nixos-system-murakumo-node-26.05pre-git",
+      "hostContract": "uuid-v1",
+      "sourceCommit": "efb39056e3b3abc5b5673b9ec5d55a19b5c3dc20",
+      "policySourceCommit": "2e0496249fb969b52cf3bdbbc1d8b0238c7ac559",
+      "schema": "aiueos.release.v1",
+      "closureSha256": "60530f0ffcbb8b4f6ecaecdb82e876b9dd3a558e0c06a4081fa2e7152bd8df60",
+      "closureBytes": 7488473952,
+      "installerIsoSha256": "8f671359a2fec6dcd88b5e5242531adaaabd1cf231d2ceea66e6fbe19449aed3",
+      "installerIsoBytes": 5248696320
+    },
+    "signers": [
+      "aiueos-production-release-20261008",
+      "aiueos-production-owner-20261008"
+    ]
+  },
+  "vmUpdateResult": {
+    "action": "hold",
+    "reason": "insufficient staging space",
+    "observedAt": 1791435016220
+  },
+  "narPublicReadback": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/60530f0ffcbb8b4f6ecaecdb82e876b9dd3a558e0c06a4081fa2e7152bd8df60.nar-export",
+    "head": 200,
+    "range": 206,
+    "size": 7488473952,
+    "sha256": "60530f0ffcbb8b4f6ecaecdb82e876b9dd3a558e0c06a4081fa2e7152bd8df60",
+    "verifiedAt": "2026-10-08T04:49:20.779Z"
+  },
+  "postCleanup": {
+    "uploaderStatus": 404,
+    "readerStatus": 200,
+    "readerMutationStatus": 405
+  },
+  "productionClosureSha256": "60530f0ffcbb8b4f6ecaecdb82e876b9dd3a558e0c06a4081fa2e7152bd8df60"
+}

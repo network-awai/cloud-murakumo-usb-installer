@@ -1,0 +1,5 @@
+NEXT                         LEFT LAST                           PASSED UNIT                ACTIVATES
+Thu 2026-10-08 05:05:54 UTC 15min Thu 2026-10-08 04:37:02 UTC 13min ago aiueos-update.timer aiueos-update.service
+
+1 timers listed.
+Pass --all to see loaded but inactive timers, too.

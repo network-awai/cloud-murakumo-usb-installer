@@ -1,0 +1,46 @@
+{
+   "blockdevices": [
+      {
+         "name": "loop0",
+         "size": "4.8G",
+         "type": "loop",
+         "serial": null,
+         "mountpoints": [
+             "/nix/.ro-store"
+         ]
+      },{
+         "name": "sr0",
+         "size": "4.9G",
+         "type": "rom",
+         "serial": "cd",
+         "mountpoints": [
+             "/iso"
+         ]
+      },{
+         "name": "nvme0n1",
+         "size": "32G",
+         "type": "disk",
+         "serial": "AIUEOS-VOICE-QA",
+         "mountpoints": [],
+         "children": [
+            {
+               "name": "nvme0n1p1",
+               "size": "512M",
+               "type": "part",
+               "serial": null,
+               "mountpoints": [
+                   "/mnt/murakumo-install-kc7mZw/boot"
+               ]
+            },{
+               "name": "nvme0n1p2",
+               "size": "31.5G",
+               "type": "part",
+               "serial": null,
+               "mountpoints": [
+                   "/mnt/murakumo-install-kc7mZw"
+               ]
+            }
+         ]
+      }
+   ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "murakumo.release-vm-gate.v1",
+  "systemPath": "/nix/store/v1rmq3wz941vf6gq9k368gmadlzmyqpf-nixos-system-murakumo-node-26.05pre-git",
+  "sourceSha256": "ef11e9228c4bd5b1e91e8db833169df22348a47ba82c3bae9d1bd947d3666d24",
+  "nixpkgsRevision": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
+  "testPath": "/nix/store/bkl9x2gm5n8ld6zgd1ys51hh48502ky1-vm-test-run-murakumo-setup-services",
+  "checks": [
+    "service-path",
+    "state-directory",
+    "timer",
+    "pairing",
+    "revocation",
+    "reboot"
+  ]
+}

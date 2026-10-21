@@ -1,0 +1,26 @@
+{
+  "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+  "networkSequence": 5,
+  "system": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+  "originalProviderResult": {
+    "action": "hold",
+    "reason": "incomplete or corrupted closure",
+    "observedAt": 1791601874133
+  },
+  "continuation": {
+    "status": "committed-and-normal-reboot-verified",
+    "installedSequence": 5,
+    "pending": null,
+    "fixtureHashesMatch": true,
+    "previousGeneration": "/nix/store/6904529k5ragcl7dy2ww58q54dvjnvl7-nixos-system-murakumo-node-26.05pre-git",
+    "timerEnabledAndActive": true,
+    "normalBootId": "e23cf438-a4d1-429c-94a4-6b51370cfd4a",
+    "qaOnlyAdjustment": "Full nix-store --verify-path subprocess timeout 120 to 1800 seconds in transient /run runtime copy; no hash or signature checks removed",
+    "runningRecoveryAndProviderUnmodified": true,
+    "virtualWatchdogAndFixtureOwnerPolicy": true,
+    "qaApplyNowConsent": true,
+    "ntpSynchronized": true
+  },
+  "physicalNodeUpdateVerified": false,
+  "verifiedAt": "2026-10-10T03:28:31.909154+00:00"
+}

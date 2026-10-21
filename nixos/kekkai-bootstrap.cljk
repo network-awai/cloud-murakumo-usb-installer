@@ -1,0 +1,75 @@
+(ns murakumo.kekkai-bootstrap
+  (:require [cljs.reader :as reader]
+            [kekkai.cli.sign :as sign]
+            [kekkai.cli.ssh :as ssh]
+            [kekkai.node.agent :as agent]
+            [kekkai.node.netmap :as netmap]
+            [kekkai.node.relay-server :as relay]
+            [kekkai.node.stream-edge :as edge]
+            [noise.core :as noise]
+            [noise.provider.node :as provider]
+            [kotoba.bytes :as b]
+            ["node:fs" :as fs]
+            ["node:child_process" :as cp]
+            ["node:path" :as path]))
+
+(def suite (noise/suite (provider/ports)))
+(defn keypair [] (let [{:keys [priv pub]} (noise/keypair suite)] {:priv (b/hex priv) :pub (b/hex pub)}))
+(defn read-edn [p] (reader/read-string (.readFileSync fs p "utf8")))
+(defn put [p v] (.writeFileSync fs p (str (pr-str v) "\n") #js {:mode 384}))
+(defn emit [v] (println (.stringify js/JSON (clj->js v))))
+(def args (vec *command-line-args*))
+(def mode (first args))
+(def root (second args))
+(def identity-path (.join path root "identity.edn"))
+(defn identity []
+  (.mkdirSync fs root #js {:recursive true :mode 448})
+  (if (.existsSync fs identity-path) (read-edn identity-path)
+      (let [v {:authority (sign/generate-authority) :node (keypair) :relay (keypair)}]
+        (.writeFileSync fs identity-path (pr-str v) #js {:mode 384 :flag "wx"}) v)))
+
+(case mode
+  "client-key" (emit (keypair))
+  "publish"
+  (let [v (js->clj (.parse js/JSON (nth args 2)) :keywordize-keys true)
+        id (identity) tailnet (str "murakumo-setup-" (:public-b64 (:authority id)))
+        client-id (str "manager-" (subs (:publicKey v) 0 12))
+        base {:netmap/version 1 :netmap/tailnet tailnet
+              :netmap/edges [{:edge/from client-id :edge/to "murakumo-node" :edge/capabilities [:overlay :ssh] :edge/ports [22]}
+                             {:edge/from "murakumo-node" :edge/to client-id :edge/capabilities [:overlay]}]
+              :netmap/relays [{:relay/name "setup" :relay/region "local" :relay/host (:host v) :relay/port 41642 :relay/key (:pub (:relay id))}]}
+        server {:node/id "murakumo-node" :node/key (:pub (:node id)) :node/status "authorized" :node/overlay-ip "100.64.0.2"}
+        client {:node/id client-id :node/key (:publicKey v) :node/status "authorized" :node/overlay-ip "100.64.0.1"}
+        node-map (assoc base :netmap/self server :netmap/peers [client])
+        client-map (assoc base :netmap/self client :netmap/peers [server])
+        authority (:authority id)]
+    (put (.join path root "netmap.edn") (sign/seal node-map authority))
+    (put (.join path root "node.edn") {:node/id "murakumo-node" :static (:node id)
+                                      :netmap-file (.join path root "netmap.edn")
+                                      :netmap-authority-spki-b64 (:public-b64 authority) :listen-port 41643 :dns {:enabled? false}})
+    (emit {:nodeId client-id :target "murakumo-node" :authority (:public-b64 authority)
+           :netmap (sign/envelope-string (sign/seal client-map authority))}))
+  "serve"
+  (let [id (identity) cfg (read-edn (.join path root "node.edn"))
+        nm (agent/load-netmap (:netmap-file cfg) cfg) registry (atom {}) handle (atom nil)]
+    (-> (relay/start {:port 41642 :static {:priv (b/unhex (:priv (:relay id))) :pub (b/unhex (:pub (:relay id)))}
+                      :prologue (b/utf8-encode (netmap/prologue-string nm)) :on-event (fn [_])})
+        (.then (fn [_] (agent/start {:config cfg :on-event (fn [e] (when (and @handle (= :data (:event e))) (edge/on-peer-data registry @handle e)))})))
+        (.then (fn [h]
+                 (reset! handle h)
+                 (js/setInterval #(edge/tick! registry h) edge/tick-ms)
+                 (when (.-NOTIFY_SOCKET (.-env js/process))
+                   (let [r (.spawnSync cp "systemd-notify" (clj->js ["--ready" "--no-block" (str "--pid=" (.-pid js/process))]))]
+                     (when-not (= 0 (.-status r)) (throw (ex-info "readiness notification failed" {})))))
+                 (println "Kekkai setup SSH ready")))
+        (.catch (fn [_] (.error js/console "Kekkai setup service failed") (.exit js/process 1)))))
+  "client"
+  (let [v (js->clj (.parse js/JSON (.readFileSync fs (nth args 2) "utf8")) :keywordize-keys true)
+        cfg-path (.join path root "node.edn")]
+    (.mkdirSync fs root #js {:recursive true :mode 448})
+    (.writeFileSync fs (.join path root "netmap.edn") (:netmap v) #js {:mode 384})
+    (put cfg-path {:node/id (:nodeId v) :static (:static v) :netmap-file (.join path root "netmap.edn")
+                  :netmap-authority-spki-b64 (:authority v) :listen-port 0 :dns {:enabled? false}})
+    (ssh/run {:config-file cfg-path :node "murakumo-node" :port 22 :login "murakumo-admin"
+              :ssh-args (into ["-i" (:sshIdentity v) "-o" "IdentitiesOnly=yes" "-o" (str "HostKeyAlias=murakumo-setup-" (sign/fingerprint (:authority v)))] (drop 3 args))}))
+  (throw (ex-info "unknown bootstrap mode" {:mode mode})))

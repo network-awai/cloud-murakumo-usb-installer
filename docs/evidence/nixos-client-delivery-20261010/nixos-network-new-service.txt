@@ -1,0 +1,19 @@
+# /etc/systemd/system/aiueos-update.service -> /nix/store/pw1373wsh8m9bpppd5bl6gqalzh686w4-unit-aiueos-update.service/aiueos-update.service
+[Unit]
+After=network.target aiueos-update-recover.service
+ConditionPathExists=/var/lib/aiueos-update/config.json
+Description=Verify, stage and apply signed NixOS releases
+
+[Service]
+Environment="ALSA_AUDIO_IN="
+Environment="ALSA_AUDIO_OUT="
+Environment="LOCALE_ARCHIVE=/nix/store/qfxqcsrsl9mmgq319a218c0xijz3d0qx-glibc-locales-2.42-84/lib/locale/locale-archive"
+Environment="PATH=/nix/store/f82xir6jh4ad169dpcs8hf32pjzs7sgy-nix-2.34.8/bin:/nix/store/psv7zqls5fm0glvlnq7i29s3yr4m6rkg-systemd-260.4/bin:/nix/store/833invqvsk7anqnqrki5hqncrcllj825-coreutils-9.11/bin:/nix/store/833invqvsk7anqnqrki5hqncrcllj825-coreutils-9.11/bin:/nix/store/g6d53gb3cw6x1imfbw5v4088lkdkkc6i-findutils-4.10.0/bin:/nix/store/2d2jxw071wai1hh6dj0shlgqmlz8zmy1-gnugrep-3.12/bin:/nix/store/sazlbkll5x2dw1kkx0l2a8b74w6rgdxm-gnused-4.10/bin:/nix/store/b4b1x5fhxpc78qlclj3kdbl9dd49g917-systemd-260.4/bin:/nix/store/f82xir6jh4ad169dpcs8hf32pjzs7sgy-nix-2.34.8/sbin:/nix/store/psv7zqls5fm0glvlnq7i29s3yr4m6rkg-systemd-260.4/sbin:/nix/store/833invqvsk7anqnqrki5hqncrcllj825-coreutils-9.11/sbin:/nix/store/833invqvsk7anqnqrki5hqncrcllj825-coreutils-9.11/sbin:/nix/store/g6d53gb3cw6x1imfbw5v4088lkdkkc6i-findutils-4.10.0/sbin:/nix/store/2d2jxw071wai1hh6dj0shlgqmlz8zmy1-gnugrep-3.12/sbin:/nix/store/sazlbkll5x2dw1kkx0l2a8b74w6rgdxm-gnused-4.10/sbin:/nix/store/b4b1x5fhxpc78qlclj3kdbl9dd49g917-systemd-260.4/sbin"
+Environment="TZDIR=/nix/store/xl5gj173j6x670xn9xhldj7giiygclrm-tzdata-2026c/share/zoneinfo"
+ExecStart=/nix/store/5m2ah9zf8zsp7a6y1hv2lfq6gzhv25xh-util-linux-2.42.3-bin/bin/flock -n /run/aiueos-update.lock /nix/store/j8fnxyagi3vngxdjs433vmljl5sb4h2q-nodejs-22.23.3/bin/node /nix/store/b8vp8jg3xxgz1f1ffm3zki4k8p9slyz6-aiueos-update-runtime/update-linux.mjs check
+StateDirectory=aiueos-update
+StateDirectoryMode=0700
+TimeoutStartSec=45min
+Type=oneshot
+UMask=0077
+User=root

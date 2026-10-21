@@ -1,0 +1,1 @@
+{"date":"2026-10-06","method":"POST","url":"https://murakumo.cloud/api/devices/link/start","body":{},"httpStatus":404,"response":{"error":"unknown devices route"},"enrollmentCreated":false}

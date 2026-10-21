@@ -1,0 +1,31 @@
+{
+  "recognized": [
+    {
+      "name": "language",
+      "words": "日本語"
+    },
+    {
+      "name": "lowercase",
+      "words": "小文字のBを入力"
+    },
+    {
+      "name": "digit",
+      "words": "数字の7を入力"
+    },
+    {
+      "name": "done",
+      "words": "入力完了。"
+    },
+    {
+      "name": "erase",
+      "words": "番号1234のディスクを消してインストール。"
+    }
+  ],
+  "controls": [
+    "language",
+    "secret",
+    "erase"
+  ],
+  "actualDiskErased": false,
+  "physicalMicrophone": false
+}

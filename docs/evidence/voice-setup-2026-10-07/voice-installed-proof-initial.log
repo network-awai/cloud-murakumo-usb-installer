@@ -1,0 +1,9 @@
+file:///mnt/output/voice-installed-proof.mjs:17
+if(!proof.retainedSourcesMatch||!proof.voiceRuntimePermissionsMatch||proof.localModelHealth!==200||proof.interfaces.some(x=>x!=='lo')||proof.language!=='ja'||!proof.rootSource.includes('nvme0n1p2')||!proof.service.includes('ProtectSystem=strict')||!proof.service.includes('NoNewPrivileges=yes'))throw Error('Installed proof did not match');
+                                                                                                                                                                                                                                                                                                             ^
+
+Error: Installed proof did not match
+    at file:///mnt/output/voice-installed-proof.mjs:17:302
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+Node.js v22.23.3

@@ -1,0 +1,206 @@
+{
+  "schema": "murakumo.release-vm-gate.v1",
+  "systemPath": "/nix/store/ai93izjvdm8l3av0k186hk9gqmb8sx5p-nixos-system-murakumo-node-26.05pre-git",
+  "sourceSha256": "a31f97d9bf35a09d0b94414e0f97b084b324257a57c32d2585b908f3a7d158e9",
+  "nixpkgsRevision": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
+  "testPath": "/nix/store/dggzn8hl23n21pwhxyick12pviah55ac-vm-test-run-murakumo-setup-services",
+  "checks": [
+    "service-path",
+    "state-directory",
+    "timer",
+    "pairing",
+    "revocation",
+    "reboot"
+  ],
+  "journeyScore": {
+    "schema": "murakumo.journey-score.v1",
+    "policy": {
+      "schema": "murakumo.journey-policy.v1",
+      "minimum": 95,
+      "weights": {
+        "completion": 40,
+        "safety": 30,
+        "recovery": 20,
+        "effort": 10
+      },
+      "required": [
+        "keyboard-local",
+        "updates-first-boot",
+        "updates-returning",
+        "lan-companion"
+      ],
+      "unverified": [
+        "disk-installation",
+        "phone-passkey",
+        "wifi-provisioning",
+        "bluetooth-provisioning",
+        "voice-conversation",
+        "administrative-ssh",
+        "hardware-update-recovery"
+      ]
+    },
+    "observations": {
+      "first": {
+        "schema": "murakumo.setup-vm.v1",
+        "checks": [
+          "service-path",
+          "state-directory",
+          "timer",
+          "pairing",
+          "revocation"
+        ],
+        "savedConsent": false,
+        "hardwareRecoveryQualified": false,
+        "journeys": {
+          "updates": {
+            "completed": true,
+            "consentPreserved": true,
+            "activationHeld": true,
+            "returned": true,
+            "decisions": 3
+          },
+          "remote": {
+            "completed": true,
+            "certificateCompared": true,
+            "approvalRequired": true,
+            "revoked": true,
+            "decisions": 2
+          }
+        }
+      },
+      "second": {
+        "schema": "murakumo.setup-vm.v1",
+        "checks": [
+          "service-path",
+          "state-directory",
+          "timer",
+          "pairing",
+          "revocation"
+        ],
+        "savedConsent": true,
+        "hardwareRecoveryQualified": false,
+        "journeys": {
+          "updates": {
+            "completed": true,
+            "consentPreserved": true,
+            "activationHeld": true,
+            "returned": true,
+            "decisions": 2
+          },
+          "remote": {
+            "completed": true,
+            "certificateCompared": true,
+            "approvalRequired": true,
+            "revoked": true,
+            "decisions": 2
+          }
+        }
+      },
+      "gui": {
+        "languageSelected": true,
+        "completed": true,
+        "accountNotClaimed": true,
+        "escapeReturned": true,
+        "actionsVisible": true,
+        "decisions": 3,
+        "keys": 8
+      }
+    },
+    "journeys": [
+      {
+        "id": "keyboard-local",
+        "user": "Owner: no phone / no account",
+        "evidence": "vm-keyboard-ocr",
+        "dimensions": {
+          "completion": true,
+          "safety": true,
+          "recovery": true,
+          "effort": true
+        },
+        "score": 100,
+        "passed": true
+      },
+      {
+        "id": "updates-first-boot",
+        "user": "Owner: enable signed checks",
+        "evidence": "vm-service-scripted-menu",
+        "dimensions": {
+          "completion": true,
+          "safety": true,
+          "recovery": true,
+          "effort": true
+        },
+        "score": 100,
+        "passed": true
+      },
+      {
+        "id": "updates-returning",
+        "user": "Returning owner: retain update consent",
+        "evidence": "vm-service-scripted-menu",
+        "dimensions": {
+          "completion": true,
+          "safety": true,
+          "recovery": true,
+          "effort": true
+        },
+        "score": 100,
+        "passed": true
+      },
+      {
+        "id": "lan-companion",
+        "user": "Administrator: local LAN companion",
+        "evidence": "vm-service-scripted-menu",
+        "dimensions": {
+          "completion": true,
+          "safety": true,
+          "recovery": true,
+          "effort": true
+        },
+        "score": 100,
+        "passed": true
+      }
+    ],
+    "unverified": [
+      {
+        "id": "disk-installation",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "phone-passkey",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "wifi-provisioning",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "bluetooth-provisioning",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "voice-conversation",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "administrative-ssh",
+        "status": "unverified",
+        "score": null
+      },
+      {
+        "id": "hardware-update-recovery",
+        "status": "unverified",
+        "score": null
+      }
+    ],
+    "coverage": {
+      "verified": 4,
+      "total": 11
+    },
+    "passed": true
+  }
+}

@@ -1,0 +1,24 @@
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Murakumo Node · Bluetoothセットアップ</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(125deg,#f1efff,#f8faff,#edf4ff);font:16px system-ui;color:#20232d}.card{max-width:520px;margin:24px;padding:40px;background:white;border-radius:28px;box-shadow:0 20px 60px #2832641a}img{width:230px;filter:brightness(.25)}h1{font-size:27px}p{line-height:1.65;color:#555e70}label{display:block;margin-top:20px}input,textarea,button{box-sizing:border-box;width:100%;font:inherit;padding:13px;border:1px solid #dce1ed;border-radius:12px;margin-top:8px}textarea{height:85px;resize:vertical}button{background:#4361e8;color:white;border:0;margin-top:26px;cursor:pointer}button:disabled{opacity:.5}small{color:#687387}</style>
+<main class="card"><img src="murakumo-logo.svg" alt="Murakumo"><h1>近くのNodeをセットアップ</h1><p>端末画面の一時キーを読み込み、BluetoothでWi-Fi設定を送ります。アカウント連携は接続後に行えます。</p>
+<label>端末の一時キー<input id="pair" type="password" autocomplete="off" spellcheck="false" placeholder="端末画面の一時キー"></label>
+<label>Wi-Fi名<input id="ssid" autocomplete="off" maxlength="32"></label><label>Wi-Fiパスワード<input id="password" type="password" autocomplete="off" maxlength="63"></label>
+<button id="connect">近くのNodeを選んで接続</button><p id="status" role="status" aria-live="polite">端末側でBluetoothセットアップを開始してください。</p><small>Androidの対応ブラウザ、またはMacのChromeで利用できます。iPhone向けBluetooth経路は専用アプリが必要です。スマホなしの音声・画面セットアップも利用できます。</small></main>
+<script type="module">
+import {SERVICE,provision} from './ble-client.mjs';
+const el=id=>document.getElementById(id),button=el('connect'),status=el('status');
+const token=location.hash.slice(1);history.replaceState(null,'',location.pathname);
+if(token)el('pair').value=decodeURIComponent(token);
+else try{const r=await fetch('/pair',{cache:'no-store'});if(r.ok)el('pair').value=await r.text();}catch{}
+if(!navigator.bluetooth){button.disabled=true;status.textContent='このブラウザはBluetooth接続に対応していません。端末のWi-Fi設定画面、または対応ブラウザをご利用ください。';}
+button.onclick=async()=>{
+ let pair;try{pair=JSON.parse(atob(el('pair').value.trim().replace(/-/g,'+').replace(/_/g,'/')));if(pair.v!==1||!pair.key||Date.now()>=pair.expires)throw Error();}catch{status.textContent='一時キーが無効、または期限切れです。端末でセットアップを再開してください。';return;}
+ const ssid=el('ssid').value;if(!ssid||new TextEncoder().encode(ssid).length>32||!/^[\x20-\x7e]{8,63}$/.test(el('password').value)){status.textContent='Wi-Fi名と8〜63文字のWi-Fiパスワードを確認してください。';return;}
+ button.disabled=true;
+ try{
+  const device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE]}]});
+  status.textContent='選んだNodeを確認しています…';const password=el('password').value;el('password').value='';el('pair').value='';
+  await provision(device,pair,ssid,password,s=>{status.textContent=s==='connected'?'Wi-Fiに接続しました。端末でセットアップを続けられます。':'Wi-Fiに接続しています…';});
+ }catch(e){const reasons={NotFoundError:'端末を選択できませんでした。近くの端末を確認して、もう一度お試しください。',NotAllowedError:'Bluetoothへのアクセスが許可されていません。ブラウザとOSの設定を確認してください。',SecurityError:'この画面ではBluetoothへのアクセスが許可されていません。対応ブラウザで開いてください。',NotSupportedError:'Bluetoothを利用できません。MacやスマホのBluetoothが有効か確認してください。',NetworkError:'Bluetooth接続が切れました。端末に近づいて再試行してください。'};status.textContent=reasons[e.name]||'接続できませんでした。端末との距離、Wi-Fi情報、一時キーの有効期限を確認してください。';console.warn('BLE setup failed',e.name, ['wrong-device','expired','timeout','connection-failed'].includes(e.message)?e.message:'transport');}finally{pair=null;el('password').value='';button.disabled=false;}
+};
+</script></html>

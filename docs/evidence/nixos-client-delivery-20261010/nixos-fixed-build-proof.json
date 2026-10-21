@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+  "result": "/nix/store/ydkzlj60wd02vchz7q0g3lv19sh4q5k1-nixos-minimal-26.05pre-git-x86_64-linux.iso",
+  "live": "/nix/store/xrmrcbjcz4cqkvdm280n5fkd3cpvdn3m-nixos-system-nixos-26.05pre-git",
+  "offline": {
+    "bios": "/nix/store/xslsyl42cpbmmwpvnz4v9q3x1wxmmdmc-nixos-system-murakumo-node-26.05pre-git",
+    "bootLabel": "MURA_BOOT",
+    "rootLabel": "MURAKUMO_ROOT",
+    "uefi": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+    "version": 2
+  },
+  "hashes": {
+    "install-disk.mjs": "223e178aa4b0a20997b45aef36f88f6b6e099680c33d856cc541072c0c25fc94",
+    "usb-update.mjs": "e93eabe02bd357c7b922a9940cbb8c066981b9acf3948588cea19fde56f8c5d2",
+    "update-ui.mjs": "9595df03b80d7a730e8c565267bdd51451922260be4be9cafe0cfaacdd757316",
+    "update-linux.mjs": "8b52b6b270c0a8d9e3c090bb65b9830f6f806007609fcf330013451f3efe4dcf",
+    "registration-ui.mjs": "b229f0cbe20d16822650dbd8793682f21ec450121ee9cfd74584cdf650bc6968",
+    "graphical-ui.js": "9f31cec2bebe521c2649d6b00f15c582b234feec852bd8b5210c21ebd807ad30"
+  }
+}

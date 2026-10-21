@@ -1,0 +1,8 @@
+{
+  "threshold": 2,
+  "channel": "stable",
+  "keys": {
+    "aiueos-production-release-20261008": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAxgOZhXZhIW8/py52JyRypFNMxylHqFucJF4qDSiqlU8=\n-----END PUBLIC KEY-----\n",
+    "aiueos-production-owner-20261008": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAD/8pjav5IF1wnY2Uo+ThcROUeyIaVO6VOxOxijI3pxE=\n-----END PUBLIC KEY-----\n"
+  }
+}

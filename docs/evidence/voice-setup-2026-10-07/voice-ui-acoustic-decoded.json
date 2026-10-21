@@ -1,0 +1,8 @@
+{
+  "audio": "voice-ui-acoustic-fixture.wav",
+  "rate": 16000,
+  "channels": 1,
+  "frames": 64640,
+  "code": "ABCD123456",
+  "uri": "https://murakumo.cloud/portal/#device-link?code=ABCD123456"
+}

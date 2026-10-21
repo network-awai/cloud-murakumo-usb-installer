@@ -1,0 +1,7 @@
+{
+  "runtime": "/nix/store/b8vp8jg3xxgz1f1ffm3zki4k8p9slyz6-aiueos-update-runtime/update-linux.mjs",
+  "floor": 4,
+  "installed": 4,
+  "admitted": 3,
+  "signedSequence4Refused": true
+}

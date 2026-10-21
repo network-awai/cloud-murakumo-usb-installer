@@ -1,0 +1,18 @@
+{
+  "languageDetection": "auto",
+  "recognized": [
+    {
+      "name": "language",
+      "words": "日本語"
+    },
+    {
+      "name": "en-language",
+      "words": "English"
+    }
+  ],
+  "choices": [
+    "ja",
+    "en"
+  ],
+  "physicalMicrophone": false
+}

@@ -1,0 +1,19 @@
+{
+  "realModel": true,
+  "model": "/Users/junkawasaki/github/murakumo-usb-auto-install-qa/Qwen3-1.7B-Q8_0.gguf",
+  "realWhisperCpp": true,
+  "asr": "Wi-Fiに接続したいです。",
+  "actions": [
+    "wifi",
+    "local",
+    "wired"
+  ],
+  "speech": [
+    "まだ連携していません。",
+    "はい、アカウントも連携できました。"
+  ],
+  "elapsedMs": 9507,
+  "platform": "macOS native CPU",
+  "physicalMicrophone": false,
+  "realPasskey": false
+}

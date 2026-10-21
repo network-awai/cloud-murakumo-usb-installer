@@ -1,0 +1,14 @@
+{
+  "source": "afc0762",
+  "iso": "aiueos-sound-setup-20261006.iso",
+  "bytes": 2306211840,
+  "sha256": "c1d28f40e6834613c2ca50da550fddb734378db3bd05456c9aa3d36d64932cad",
+  "nixpkgs": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
+  "isoStorePath": "/nix/store/4rmsk8p83ymljkl5wi4w7q1calz87r6b-nixos-minimal-26.05pre-git-x86_64-linux.iso",
+  "sourceTestsPassed": 45,
+  "workerFixtureTestsPassed": 21,
+  "realAccountLinked": false,
+  "publicRegistrationStatus": 404,
+  "publicSoundReaderPublished": false,
+  "physicalPhoneMicrophoneQualified": false
+}

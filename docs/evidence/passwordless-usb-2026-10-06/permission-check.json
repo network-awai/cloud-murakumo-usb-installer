@@ -1,0 +1,12 @@
+{
+  "helper_sha256": "3b424555f51c72c90860cb1393d242ab6586750775c16a9938bf09da385da689",
+  "helper_owner": "root:wheel",
+  "helper_mode": "0755",
+  "rule_owner": "root:wheel",
+  "rule_mode": "0440",
+  "uncached_preflight": "passed",
+  "general_command_without_password": "refused",
+  "extra_arguments_without_password": "refused",
+  "unrelated_finch_lima_rule": "not changed",
+  "full_disk_access_changes": false
+}

@@ -1,0 +1,29 @@
+{
+  "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/manifest.json",
+  "status": 200,
+  "cacheControl": "no-store",
+  "tamperRejected": true,
+  "manifestHash": "8c99bb1e7975b8aa17cf557d833df181fee2fb3ea8340514bdef3b8fa75bebad",
+  "release": {
+    "arch": "x86_64-linux",
+    "channel": "stable",
+    "sequence": 5,
+    "issuedAt": 1791597966751,
+    "expiresAt": 1794189966751,
+    "securityRisk": "low",
+    "applyRisk": "medium",
+    "systemPath": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+    "hostContract": "uuid-v1",
+    "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+    "policySourceCommit": "2e0496249fb969b52cf3bdbbc1d8b0238c7ac559",
+    "schema": "aiueos.release.v1",
+    "closureSha256": "c7863f64de569525d41167ec6ff6ed99e0da6f8d6944d66ab7ec142c5ff584ea",
+    "closureBytes": 7488910320,
+    "installerIsoSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+    "installerIsoBytes": 5248696320
+  },
+  "signers": [
+    "aiueos-production-release-20261008",
+    "aiueos-production-owner-20261008"
+  ]
+}

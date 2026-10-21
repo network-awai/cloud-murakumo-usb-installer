@@ -1,0 +1,131 @@
+{
+  "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+  "publicRelease": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/manifest.json",
+    "status": 200,
+    "cacheControl": "no-store",
+    "tamperRejected": true,
+    "manifestHash": "8c99bb1e7975b8aa17cf557d833df181fee2fb3ea8340514bdef3b8fa75bebad",
+    "release": {
+      "arch": "x86_64-linux",
+      "channel": "stable",
+      "sequence": 5,
+      "issuedAt": 1791597966751,
+      "expiresAt": 1794189966751,
+      "securityRisk": "low",
+      "applyRisk": "medium",
+      "systemPath": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+      "hostContract": "uuid-v1",
+      "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+      "policySourceCommit": "2e0496249fb969b52cf3bdbbc1d8b0238c7ac559",
+      "schema": "aiueos.release.v1",
+      "closureSha256": "c7863f64de569525d41167ec6ff6ed99e0da6f8d6944d66ab7ec142c5ff584ea",
+      "closureBytes": 7488910320,
+      "installerIsoSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+      "installerIsoBytes": 5248696320
+    },
+    "signers": [
+      "aiueos-production-release-20261008",
+      "aiueos-production-owner-20261008"
+    ]
+  },
+  "isoReadback": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779.iso",
+    "head": 200,
+    "range": 206,
+    "size": 5248696320,
+    "sha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+    "verifiedAt": "2026-10-10T02:28:00.037Z"
+  },
+  "closureReadback": {
+    "url": "https://aiueos-updates.04-feasts-minded.workers.dev/stable/c7863f64de569525d41167ec6ff6ed99e0da6f8d6944d66ab7ec142c5ff584ea.nar-export",
+    "head": 200,
+    "range": 206,
+    "size": 7488910320,
+    "sha256": "c7863f64de569525d41167ec6ff6ed99e0da6f8d6944d66ab7ec142c5ff584ea",
+    "verifiedAt": "2026-10-10T02:52:50.866Z"
+  },
+  "usb": {
+    "status": "readback-verified-reconnected-and-ejected",
+    "serial": "0022CFF6B899CA205987CBC4",
+    "capacity": 61949214720,
+    "bytes": 5248696320,
+    "isoSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+    "usbSha256": "10159e4339fdcbedf058f47d2e5785a4470e4921eee92ec3d58a47cffde31779",
+    "readbackBasis": "Installed fixed helper completed exact byte digest and passed SHA256 equality before its post-close diskutil info failed. Same fixed media was reidentified after reconnect; no second write occurred.",
+    "helperSha256": "3b424555f51c72c90860cb1393d242ab6586750775c16a9938bf09da385da689",
+    "ejection": "Disk /dev/disk6 ejected",
+    "verifiedAt": "2026-10-10T02:39:04.415Z"
+  },
+  "offlinePreservation": {
+    "receipt": {
+      "schema": "aiueos.usb-update.v1",
+      "previous": "/nix/store/6904529k5ragcl7dy2ww58q54dvjnvl7-nixos-system-murakumo-node-26.05pre-git",
+      "target": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+      "rootUuid": "00000000-0000-0000-0000-000000000001",
+      "bootUuid": "ABCD-1234",
+      "state": "installed"
+    },
+    "profile": "system-9-link",
+    "system": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+    "verifierHash": "ac71377f95afd1d25c5767fe1f470a887b77020fbe28dd2eee64a70eedd2a3a0",
+    "legacyRefused": true,
+    "relinkOffered": true,
+    "highestSequence": 4,
+    "pending": null,
+    "bootEntries": [
+      "aiueos-previous.conf",
+      "aiueos-trial.conf",
+      "nixos-generation-1.conf",
+      "nixos-generation-2.conf",
+      "nixos-generation-3.conf",
+      "nixos-generation-4.conf",
+      "nixos-generation-5.conf",
+      "nixos-generation-6.conf",
+      "nixos-generation-7.conf",
+      "nixos-generation-8.conf",
+      "nixos-generation-9.conf"
+    ],
+    "fixtureHashesMatch": true,
+    "previousRootRetained": true
+  },
+  "replayRefusal": {
+    "runtime": "/nix/store/b8vp8jg3xxgz1f1ffm3zki4k8p9slyz6-aiueos-update-runtime/update-linux.mjs",
+    "floor": 4,
+    "installed": 4,
+    "admitted": 3,
+    "signedSequence4Refused": true
+  },
+  "networkVM": {
+    "sourceCommit": "77fb99583916640d725dd2fed48707093b8ef956",
+    "networkSequence": 5,
+    "system": "/nix/store/y2s98laxaq1fk39hz5pc3bmr41ps0swx-nixos-system-murakumo-node-26.05pre-git",
+    "originalProviderResult": {
+      "action": "hold",
+      "reason": "incomplete or corrupted closure",
+      "observedAt": 1791601874133
+    },
+    "continuation": {
+      "status": "committed-and-normal-reboot-verified",
+      "installedSequence": 5,
+      "pending": null,
+      "fixtureHashesMatch": true,
+      "previousGeneration": "/nix/store/6904529k5ragcl7dy2ww58q54dvjnvl7-nixos-system-murakumo-node-26.05pre-git",
+      "timerEnabledAndActive": true,
+      "normalBootId": "e23cf438-a4d1-429c-94a4-6b51370cfd4a",
+      "qaOnlyAdjustment": "Full nix-store --verify-path subprocess timeout 120 to 1800 seconds in transient /run runtime copy; no hash or signature checks removed",
+      "runningRecoveryAndProviderUnmodified": true,
+      "virtualWatchdogAndFixtureOwnerPolicy": true,
+      "qaApplyNowConsent": true,
+      "ntpSynchronized": true
+    },
+    "physicalNodeUpdateVerified": false,
+    "verifiedAt": "2026-10-10T03:28:31.909154+00:00"
+  },
+  "physicalAutomaticApplicationQualified": false,
+  "knownLimitations": [
+    "installer network-page Escape redisplays network page",
+    "unmodified full-store verification hit 120-second timeout under CPU emulation",
+    "real phone/physical Node registration and hardware recovery not qualified"
+  ]
+}

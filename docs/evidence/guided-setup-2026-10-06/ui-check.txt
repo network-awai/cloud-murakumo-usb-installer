@@ -1,0 +1,7 @@
+Runtime: 964b881
+Fixture: unavailable service, connected network; no real claim
+Framebuffer: Japanese 1280x800
+Idle frame comparison: exact match
+Actions: Retry -> Register later -> Shutdown
+VM PID file absent after normal menu shutdown: True
+Original installed QA disk preserved; a dedicated copy used

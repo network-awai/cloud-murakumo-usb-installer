@@ -1,0 +1,6 @@
+{
+  "source": "06009dc",
+  "bytes": 2306211840,
+  "sha256": "f97698686e0a038bbe07bf8932820d772c19ae2d40aabf1493ff3a0adf2fbda1",
+  "role": "Full offline install and account-persistence candidate; superseded by startup-silence fix afc0762"
+}

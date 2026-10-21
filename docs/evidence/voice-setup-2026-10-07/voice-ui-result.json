@@ -1,0 +1,12 @@
+{
+  "nativeGTK": true,
+  "language": "ja",
+  "networkChoice": "wifi",
+  "secretPassed": true,
+  "serialBoundConfirmation": true,
+  "continue": true,
+  "requestedMusicCompleted": true,
+  "codePlaybackCompleted": true,
+  "playerFixture": true,
+  "actualDiskErased": false
+}
