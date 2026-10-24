@@ -5,6 +5,11 @@ path for an **installed x86_64 UEFI/systemd-boot system**. The v0.1 USB is a
 temporary live workspace, so it cannot become a persistent installed OS merely
 by receiving this update. Its existing contents are not changed by this work.
 
+The pinned two-VM KVM/OVMF gate passed on 2026-10-24 (750.46 seconds), including
+both forced-power-loss cases. [Qualification receipt](evidence/native-network-update-20261024.json)
+records the exact implementation revision, 17 source hashes and outcomes.
+Physical rollout remains unqualified and disabled by default.
+
 The native profile imports the module but leaves it disabled. It does not import
 the historical Node.js/SCI signed updater. Nix, systemd, OpenSSH and a packaged
 shell administration tool manage the OS; this is not a claim that these platform
