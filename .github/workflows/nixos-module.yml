@@ -33,3 +33,11 @@ jobs:
             --expr 'import ./tests/native-profile-eval.nix { nixpkgsPath = ./nixpkgs; }'
       - name: Build the pinned Amu-native monitor and browser dapp cores
         run: nix-build nixos/native-build.nix -A package --arg nixpkgsPath ./nixpkgs --no-out-link
+      - name: Evaluate installed network update boundaries
+        run: |
+          nix-instantiate --eval --strict --json \
+            --expr 'import ./tests/network-update-eval.nix { nixpkgsPath = ./nixpkgs; }'
+      - name: Build and lint the OS update platform helper
+        run: |
+          bash -n scripts/murakumo-network-update
+          nix-build nixos/network-update-build.nix --arg nixpkgsPath ./nixpkgs --no-out-link

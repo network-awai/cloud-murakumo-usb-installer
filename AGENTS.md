@@ -30,3 +30,13 @@ fallback. Historical setup/provider/voice/update tests do not qualify this
 native profile, and this profile does not replace their release/signing gate.
 Physical GPU/firmware, networking, full Cell execution, distributed app state
 and production keys remain independent acceptance work.
+
+Installed native OS network updates are an opt-in platform administration route
+in `nixos/network-update.nix`, qualified separately by
+`nixos/tests/network-update.nix`. Nix/systemd/OpenSSH/shell here manage the OS;
+they do not replace native app/Node logic or use the historical SCI/Node updater.
+Do not enable remote access, generate keys, accept changed SSH host keys, update
+live USB sessions or claim early-kernel hardware watchdog recovery. Preserve the
+old persistent boot default until an actual one-shot trial has booted and the
+authorized operator confirms its exact ID after local health. Never make a
+production update or USB refresh a side effect of building/testing this module.
