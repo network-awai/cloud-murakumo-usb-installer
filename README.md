@@ -1,5 +1,10 @@
 # cloud-murakumo-usb-installer
 
+**Native Murakumo NixOS preview:** [profile, Itonami launcher and VM gates](docs/murakumo-nixos-native-preview.md).
+It runs Kaikei and Dandori judgment cores in browser Workers and a native host
+observer under systemd. It is an independent VM/live candidate; full network
+Node/Cell integration and physical hardware remain separate acceptance work.
+
 NixOS installation media and Murakumo Client setup for Murakumo Nodes.
 NixOS is the current operating system. Murakumo Client names the software suite;
 Murakumo Node names a participating instance or host. AiueOS is an unfinished

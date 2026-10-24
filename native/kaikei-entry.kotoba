@@ -1,0 +1,12 @@
+;; The journal reducer remains in cloud-itonami/kaikei. No JS replacement.
+(defn app-values [] :vector-i64
+  (let [count (app-number (app-arg 1))]
+    (if (or (< count 0) (> count 200)) (vector-alloc 0)
+      (loop [i 0 result (vector-alloc count)]
+        (if (= i count) result
+          (recur (+ i 1) (vector-assoc! result i (app-number (app-arg (+ i 2))))))))))
+(defn main [] :i64
+  (let [command (app-arg 0)]
+    (cond (= command "test") (test-journal)
+          (= command "validate") (validate-entry (app-values))
+          :else -1)))

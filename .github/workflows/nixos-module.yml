@@ -27,3 +27,9 @@ jobs:
           nix-instantiate --parse nixos/node-claim.nix >/dev/null
           nix-instantiate --eval --strict --json \
             --expr 'import ./tests/node-provider-eval.nix { nixpkgsPath = ./nixpkgs; }'
+      - name: Evaluate the native workspace boundary
+        run: |
+          nix-instantiate --eval --strict --json \
+            --expr 'import ./tests/native-profile-eval.nix { nixpkgsPath = ./nixpkgs; }'
+      - name: Build the pinned Amu-native monitor and browser dapp cores
+        run: nix-build nixos/native-build.nix -A package --arg nixpkgsPath ./nixpkgs --no-out-link
