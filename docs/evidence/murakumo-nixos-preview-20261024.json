@@ -84,7 +84,7 @@
     ],
     "fontconfig": "minimal-media omission found and fixed; actual final screenshot text/readiness verified",
     "liveSessionWarning": true,
-    "localReadback": "pending transfer"
+    "localReadback": "matching bytes and SHA256"
   },
   "notQualified": [
     "physical hardware/GPU/firmware/power-loss",
