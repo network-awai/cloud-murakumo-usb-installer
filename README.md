@@ -10,6 +10,10 @@ recovery](docs/native-network-updates.md). This opt-in SSH/Nix/UEFI route is
 separate from the historical updater below; it is disabled on live USB media
 and does not provision remote access or release keys.
 
+The [0.1.1 live media candidate](docs/native-media-0.1.1.md) includes those
+update tools, the installed-profile source bundle and its guide. The actual
+ISO has a separate UEFI boot, browser-readiness and no-disk-write VM gate.
+
 NixOS installation media and Murakumo Client setup for Murakumo Nodes.
 NixOS is the current operating system. Murakumo Client names the software suite;
 Murakumo Node names a participating instance or host. AiueOS is an unfinished
