@@ -9,4 +9,6 @@ in {
   package = import ./native-package.nix { inherit pkgs; };
   iso = system.config.system.build.isoImage;
   system = system.config.system.build.toplevel;
+  media = system.config.system.build.murakumoNativeMedia;
+  updateClient = system.config.system.build.murakumoNetworkUpdateClient;
 }

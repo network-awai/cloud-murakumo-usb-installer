@@ -65,6 +65,16 @@ UEFI trials and retained-generation recovery](native-network-updates.md).
 Live sessions refuse this path. It does not enable the legacy Node.js updater
 or silently grant remote administration.
 
+The 0.1.1 live image includes `murakumo-network-update`, the packaged
+`murakumo-os-update` helper, an installed-profile source bundle at
+`/etc/murakumo/native-profile`, and the guide at
+`/etc/murakumo/network-update-guide.md`. The bundle preserves relative imports
+and records SHA-256 for each included file in `media-manifest.json`. It contains
+no SSH keys or host disk configuration. The local helper refuses operations
+because the live OS has no update contract or recovery timer. The operator CLI
+can manage only an independently provisioned installed host with pinned SSH
+trust; copying this USB does not install or enable that host configuration.
+
 ## Remaining product gates
 
 The native observer is **not a complete participating Murakumo Node**. Signed

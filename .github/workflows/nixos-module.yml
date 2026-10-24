@@ -41,3 +41,9 @@ jobs:
         run: |
           bash -n scripts/murakumo-network-update
           nix-build nixos/network-update-build.nix --arg nixpkgsPath ./nixpkgs --no-out-link
+      - name: Check the live media update boundary and payload
+        run: |
+          nix-instantiate --eval --strict --json \
+            --expr 'import ./tests/native-media-eval.nix { nixpkgsPath = ./nixpkgs; }'
+          nix-build nixos/native-build.nix -A media --arg nixpkgsPath ./nixpkgs --no-out-link
+          nix-build nixos/native-build.nix -A updateClient --arg nixpkgsPath ./nixpkgs --no-out-link
