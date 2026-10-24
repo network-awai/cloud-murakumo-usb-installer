@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Operator-side platform tool. SSH keys/known_hosts must already be provisioned.
+set -euo pipefail
+exec </dev/null
+export LC_ALL=C
+[[ $# == 2 || ( $# == 3 && $3 == --stage-only ) ]] || { echo 'usage: murakumo-network-update SSH_HOST NIXOS_SYSTEM_PATH [--stage-only]' >&2; exit 2; }
+host=$1; system=$2
+[[ $host =~ ^[a-zA-Z0-9][a-zA-Z0-9_.@:-]*$ && $system =~ ^/nix/store/[0-9a-z]{32}-nixos-system-[a-zA-Z0-9._+-]+$ ]] || { echo 'invalid SSH alias or system path' >&2; exit 2; }
+export NIX_SSHOPTS='-o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2'
+remote() { ssh -n -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=10 -o ServerAliveInterval=5 -o ServerAliveCountMax=2 -- "$host" murakumo-os-update "$@"; }
+remote status >/dev/null
+hash=$(nix-store --query --hash "$system")
+echo 'Copying the missing Nix closure over authenticated SSH; activation has not begun.' >&2
+nix-copy-closure --to "$host" "$system"
+if [[ ${3:-} == --stage-only ]]; then echo 'Closure staged. No boot change or reboot requested.' >&2; exit 0; fi
+trial=$(remote begin "$system" "$hash")
+id=$(jq -er '.id | select(test("^[0-9a-f-]{36}$"))' <<<"$trial")
+echo "Trial $id requested; reconnecting with the same trusted SSH host key." >&2
+# Deliberately do not disable host-key checks or accept a changed key on reboot.
+# If this client disappears, the on-device guard keeps the previous default.
+for ((attempt=0; attempt<120; attempt++)); do
+  sleep 5
+  if status=$(remote status 2>/dev/null); then
+    [[ $(jq -r .id <<<"$status") == "$id" ]] || { echo 'Trial ID changed; refusing confirmation.' >&2; exit 1; }
+    phase=$(jq -r .phase <<<"$status")
+    [[ $phase != rolled-back && $phase != rollback-requested ]] || { echo "$status"; exit 1; }
+    if [[ $(jq -r .canConfirm <<<"$status") == true ]]; then remote confirm "$id"; exit; fi
+    [[ $phase != committed ]] || { echo "$status"; exit 0; }
+  fi
+done
+echo 'No confirmation sent. Inspect status; the on-device deadline restores the retained generation.' >&2
+exit 1

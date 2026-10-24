@@ -1,7 +1,7 @@
 { lib, ... }: {
   # Native product profile, intentionally separate from node-base.nix's
   # historical Node.js setup/provider/update tools. No legacy fallback.
-  imports = [ ./native-workspace.nix ];
+  imports = [ ./native-workspace.nix ./network-update.nix ];
   networking.hostName = lib.mkDefault "murakumo-nixos";
   networking.networkmanager.enable = lib.mkDefault true;
   services.murakumoNative = { enable = true; desktop = lib.mkDefault true; };

@@ -60,6 +60,11 @@ disk, boot-loader and hardware configuration. Remote access and model/provider
 configuration require their own qualification. This work does not reimage the
 existing Ubuntu/Mishima host or change production routes.
 
+Installed hosts can separately opt in to [SSH network updates with one-shot
+UEFI trials and retained-generation recovery](native-network-updates.md).
+Live sessions refuse this path. It does not enable the legacy Node.js updater
+or silently grant remote administration.
+
 ## Remaining product gates
 
 The native observer is **not a complete participating Murakumo Node**. Signed
