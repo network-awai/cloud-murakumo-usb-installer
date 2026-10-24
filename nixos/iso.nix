@@ -19,6 +19,8 @@ in
   environment.etc."murakumo/usb-update.mjs".source = ./usb-update.mjs;
   environment.etc."murakumo/preflight.sh".source = ../scripts/preflight.sh;
   environment.etc."murakumo/node-base.nix".source = ./node-base.nix;
+  environment.etc."murakumo/node-provider.nix".source = ./node-provider.nix;
+  environment.etc."murakumo/node-claim.nix".source = ./node-claim.nix;
   environment.etc."murakumo/update-service.nix".source = ./update-service.nix;
   environment.etc."murakumo/update-policy-runtime".source = ./update-policy-runtime;
   environment.etc."murakumo/update-linux.mjs".source = ./update-linux.mjs;
