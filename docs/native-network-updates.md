@@ -17,6 +17,9 @@ root operation or public management listener.
 Include the reviewed disk/hardware configuration and the native product profile.
 The host's existing SSH policy must authorize the operator separately. The update
 module creates no SSH keys, sudo rule, root login grant or firewall opening.
+Keep the complete pinned repository tree when vendoring this profile: its native
+package, desktop assets and update script use repository-relative paths. Copying
+only the entry `.nix` file is insufficient.
 
 ```nix
 {
@@ -135,6 +138,11 @@ activation, wrong hash/host, low state-filesystem space, serialization, confirme
 local-health rollback, managing-network loss plus wall-clock rollback, trial
 power cycle, interrupted preparation, and preservation of fixture user/network
 state and machine identity. Test-generated SSH keys remain private test fixtures.
+
+```console
+nix-build nixos/network-update-build.nix --no-out-link
+nix-build nixos/tests/network-update.nix --no-out-link
+```
 
 VM evidence is not physical qualification. Early kernel/firmware hangs before
 the guard starts cannot be rebooted by a userspace timer: a qualified hardware

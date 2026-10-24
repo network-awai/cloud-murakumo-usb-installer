@@ -73,7 +73,8 @@ pkgs.testers.runNixOSTest {
   };
   testScript = ''
     import json, shlex
-    start_all()
+    machine.start(allow_reboot=True)
+    client.start()
     machine.wait_for_unit("sshd.service")
     machine.wait_for_unit("murakumo-os-update-guard.timer")
     machine.wait_for_unit("murakumo-node-monitor.service")
@@ -133,6 +134,7 @@ pkgs.testers.runNixOSTest {
     machine.wait_until_succeeds("flock -n /var/lib/murakumo-os-update/lock true")
     # Full updater: new kernel command line, UEFI trial, same host key,
     # sustained local health, fresh SSH confirmation, persistent commit.
+    machine.connected = False
     client.succeed("bash /etc/update-client root@machine " + candidates["good"] + " >/tmp/good-update.json", timeout=240)
     good = state()
     assert good["phase"] == "committed" and good["new"] == candidates["good"]
@@ -147,8 +149,11 @@ pkgs.testers.runNixOSTest {
         path = candidates[name]
         client.succeed("bash /etc/update-client root@machine " + path + " --stage-only", timeout=180)
         nar = client.succeed("nix-store --query --hash " + path).strip()
-        return json.loads(client.succeed(ssh + "murakumo-os-update begin " + path + " " + nar))
+        result = json.loads(client.succeed(ssh + "murakumo-os-update begin " + path + " " + nar))
+        machine.connected = False
+        return result
     def wait_rollback(reason):
+        machine.connected = False
         machine.wait_until_succeeds("test $(readlink -e /run/current-system) = " + old, timeout=180)
         machine.wait_until_succeeds("test $(jq -r .phase /var/lib/murakumo-os-update/journal.json) = rolled-back", timeout=180)
         outcome = state()
@@ -172,7 +177,7 @@ pkgs.testers.runNixOSTest {
     machine.wait_until_succeeds("test $(jq -r .phase /var/lib/murakumo-os-update/journal.json) = awaiting-confirmation", timeout=180)
     client.fail(ssh + "murakumo-os-update confirm 00000000-0000-0000-0000-000000000000")
     machine.crash()
-    machine.start()
+    machine.start(allow_reboot=True)
     interrupted_outcome = wait_rollback("retained-generation-booted")
     # Interrupted preparation: journal survives; old boot remains usable.
     client.succeed("bash /etc/update-client root@machine " + candidates["lost"] + " --stage-only", timeout=180)
@@ -180,7 +185,7 @@ pkgs.testers.runNixOSTest {
     client.succeed(ssh + "murakumo-os-update begin " + candidates["lost"] + " " + nar + " --retry-failed")
     machine.succeed("systemctl stop murakumo-os-update-apply.service")
     machine.crash()
-    machine.start()
+    machine.start(allow_reboot=True)
     preparation_outcome = wait_rollback("retained-generation-booted")
     machine.succeed("! pgrep -x node; ! pgrep -x java; ! pgrep -x nbb")
     machine.succeed("test -e /var/lib/murakumo-os-update/roots/" + good["id"] + "-old")

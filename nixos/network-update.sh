@@ -191,7 +191,8 @@ case ${1:-} in
     [[ $phase != committed && $phase != rolled-back ]] || exit 0
     now=$(uptime_seconds)
     source_boot=$(jq -r .sourceBootId "$journal")
-    if [[ $phase == rollback-requested || $phase == committing ]]; then rollback interrupted-transition; exit 0; fi
+    if [[ $phase == rollback-requested ]]; then rollback "$(jq -r .reason "$journal")"; exit 0; fi
+    if [[ $phase == committing ]]; then rollback interrupted-transition; exit 0; fi
     if [[ $boot_id == "$source_boot" ]]; then
       if (( now - $(jq .startedUptime "$journal") > 300 )); then rollback preparation-timeout; fi
       exit 0
