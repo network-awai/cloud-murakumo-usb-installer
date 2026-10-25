@@ -22,6 +22,8 @@ in
   environment.etc."murakumo/community.nix".source = ./community.nix;
   environment.etc."murakumo/node-readiness.mjs".source = ./node-readiness.mjs;
   environment.etc."murakumo/device-claim.mjs".source = ./device-claim.mjs;
+  environment.etc."murakumo/node-provider.nix".source = ./node-provider.nix;
+  environment.etc."murakumo/node-claim.nix".source = ./node-claim.nix;
   environment.etc."murakumo/update-service.nix".source = ./update-service.nix;
   environment.etc."murakumo/update-policy-runtime".source = ./update-policy-runtime;
   environment.etc."murakumo/update-linux.mjs".source = ./update-linux.mjs;

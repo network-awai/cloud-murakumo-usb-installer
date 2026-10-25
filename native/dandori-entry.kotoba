@@ -1,0 +1,10 @@
+;; The workflow decisions remain in cloud-itonami/app-itonami-dandori.
+(defn main [] :i64
+  (let [command (app-arg 0)]
+    (cond (= command "test")
+            (if (and (test-priority-rank) (test-estimate-valid) (test-closed)
+                     (test-active) (test-transition-kind) (test-cycle-progress)
+                     (test-sla-status) (test-next-number)) 255 0)
+          (= command "transition") (transition-kind (app-number (app-arg 1)) (app-number (app-arg 2)))
+          (= command "priority") (priority-rank (app-number (app-arg 1)))
+          :else -1)))

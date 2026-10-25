@@ -35,6 +35,13 @@ sudo systemctl start murakumo-device-claim
 sudo systemctl status murakumo-device-claim
 ```
 
+The `murakumo-device-claim` unit ships disabled: enable it with
+`services.murakumoDeviceClaim.enable = true` (and `sudo nixos-rebuild switch`)
+before the `systemctl start` above. It is an alternative to the CLI-based
+`services.murakumoClaimResponder`; enable exactly one of the two, because the
+node profile asserts they are mutually exclusive and one device must never
+answer the same buyer challenge twice.
+
 The operator sends the returned `registration` JSON to
 `POST https://murakumo.cloud/api/devices/register` using the site admin token
 from a trusted operator environment, never from the node. The factory claim

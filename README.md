@@ -1,5 +1,19 @@
 # cloud-murakumo-usb-installer
 
+**Native Murakumo NixOS preview:** [profile, Itonami launcher and VM gates](docs/murakumo-nixos-native-preview.md).
+It runs Kaikei and Dandori judgment cores in browser Workers and a native host
+observer under systemd. It is an independent VM/live candidate; full network
+Node/Cell integration and physical hardware remain separate acceptance work.
+
+For installed native systems, see [network updates and retained-generation
+recovery](docs/native-network-updates.md). This opt-in SSH/Nix/UEFI route is
+separate from the historical updater below; it is disabled on live USB media
+and does not provision remote access or release keys.
+
+The [0.1.1 live media candidate](docs/native-media-0.1.1.md) includes those
+update tools, the installed-profile source bundle and its guide. The actual
+ISO has a separate UEFI boot, browser-readiness and no-disk-write VM gate.
+
 NixOS installation media and Murakumo Client setup for Murakumo Nodes.
 NixOS is the current operating system. Murakumo Client names the software suite;
 Murakumo Node names a participating instance or host. AiueOS is an unfinished
@@ -76,7 +90,8 @@ The steps below are the manual recovery/custom configuration path.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
 4. Copy `node-base.nix`, `community.nix`, `node-readiness.mjs`,
-   `device-claim.mjs`, `console-ui.nix`, `offline-base.nix`, `offline-uefi.nix`,
+   `device-claim.mjs`, `node-provider.nix`, `node-claim.nix`, `console-ui.nix`,
+   `offline-base.nix`, `offline-uefi.nix`,
    `offline-bios.nix`, `network-setup.mjs`, `setup-ui.mjs`, `registration-ui.mjs`,
    `account-link.mjs`, `local-setup.mjs`, `language.mjs`, `graphical-ui.js`,
    `graphical-dialog.mjs`, `murakumo-logo.svg`, `acoustic-code.mjs`,
@@ -110,7 +125,83 @@ register the JSON through the operator-only `murakumo.cloud` device API near
 dispatch. The node must never hold that API's admin token. See the
 [buyer and operator path](docs/buyer-operator-path.md) for the exact boundary.
 
-The 2026-09-30 NixOS 26.05 VM pilot booted with an emulated GPU. Bare-metal
+## Opt in to idle inference after buyer claim
+
+The base profile leaves every claim and provider unit disabled, including the
+standalone `murakumo-device-claim` agent. Before shipping, provision each
+physical device with its own DID and Ed25519
+private key, register that DID and its matching claim token with the site, and
+put the claim URL or QR code on that device's label. The factory key must never
+appear on the label or in the Nix store. The registered DID and device identity
+must match. This process still requires a real device and site registration;
+installing the OS alone cannot produce a claimable unit.
+
+Once the CLI release is published, install its verified launcher outside home
+directories so the restricted service can run it:
+
+```sh
+sudo env MURAKUMO_INSTALL_DIR=/opt/murakumo-cli \
+  MURAKUMO_BIN_DIR=/opt/murakumo-bin sh install.sh
+sudo test -f /var/lib/murakumo/device-identity.json
+sudo env MURAKUMO_NODE_IDENTITY_FILE=/var/lib/murakumo/device-identity.json \
+  /opt/murakumo-bin/murakumo node doctor \
+  --model YOUR_EXACT_MODEL_ID --local-url http://127.0.0.1:11434/v1
+```
+
+The factory identity file must be private (mode `0600`) and match the DID
+registered for this physical device. Never replace it with another identity
+after the buyer claim. To let the device answer the buyer's short-lived claim
+challenge, enable the responder on the target after the published CLI is
+installed:
+
+```nix
+services.murakumoClaimResponder.enable = true;
+```
+
+Run `sudo nixos-rebuild switch` and check
+`systemctl status murakumo-claim-responder.timer`. The timer calls
+`murakumo node claim-once` every 15 seconds and signs only the pending
+challenge for this DID. It uses systemd's private credentials and does not
+require a model server or buyer password. The buyer must still complete the
+claim in their browser. A local `claim-once` success only proves that the
+device responded to a challenge; it does not prove that ownership changed.
+
+The standalone agent needs no CLI: `services.murakumoDeviceClaim.enable =
+true` runs `device-claim.mjs serve`, which answers the same buyer challenge
+and sends signed liveness heartbeats. Enable exactly one of
+`services.murakumoClaimResponder` and `services.murakumoDeviceClaim`; the
+node profile asserts they are mutually exclusive so one device never answers
+the same challenge twice.
+
+After the buyer claim and a local `doctor` check, an exact model must be
+running locally before idle inference can be enabled. Add this to the target's
+`configuration.nix`:
+
+```nix
+services.murakumoProvider = {
+  enable = true;
+  name = "murakumo-node";
+  model = "YOUR_EXACT_MODEL_ID";
+  localUrl = "http://127.0.0.1:11434/v1";
+  idleOnly = true;
+};
+```
+
+Run `sudo nixos-rebuild switch`, then inspect
+`systemctl status murakumo-provider` and
+`journalctl -u murakumo-provider -b`. The unit waits for the network, restarts
+after a failure and reads the identity through systemd's private credentials.
+It does not download a model, bypass admission or guarantee a paid job. If the
+model server needs a private API token, configure that separately before
+enabling the service; this template does not embed one in the Nix store.
+
+`services.murakumoCommunity` is an alternative join unit that runs
+`node-readiness.mjs` before `murakumo node join --idle-only`. Enable exactly
+one of `services.murakumoProvider` and `services.murakumoCommunity`; the node
+profile asserts they are mutually exclusive.
+
+The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help with an
+llvmpipe GPU, and the 2026-09-30 pilot booted with an emulated GPU. Bare-metal
 Radeon 680M, Prism Vulkan, model throughput,
 concurrency and restart recovery remain unverified. Keep the serving Ubuntu
 installation until those checks and a recovery plan succeed.

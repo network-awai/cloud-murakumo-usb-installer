@@ -1,0 +1,99 @@
+{
+  "schema": "murakumo.nixos.preview.verification.v1",
+  "date": "2026-10-24",
+  "tracking": "JUN-379",
+  "scope": "VM first; physical hardware later per owner",
+  "qualification": "local native observation and browser dapp slices; full participating Node/Cell remains open",
+  "sourceSHA256": {
+    "desktop/desktop.css": "943c19f1f18428b666ec28a1ecb43c740505b82a10ef9a023d7f0852760cdd16",
+    "desktop/desktop.js": "34300cde8db4f0c8959db09242b0a2f4b1b0b0329ddc2e240376c89b3f5a3bce",
+    "desktop/index.html": "add5b16e1d4fe144229d0feebc585f67a97bf3af9fe1ee1505aadfe1067a6cc7",
+    "native/dandori-entry.kotoba": "a0eeea639fe9dfd06e9129a39b454ca0cf0124c070c77a4c55ee5a0e1df7356d",
+    "native/entry-input.kotoba": "c61b0717ed75d9374259ad94bd09626dcf2d9635cea281fe9753a6f8fd4688d3",
+    "native/kaikei-entry.kotoba": "d4d7a295693c4da5ab8efc2d756bd30c94c3cedd471210d1be44cb610b7ce740",
+    "nixos/native-package.nix": "012e07bda931618f3080ccb009b0bb9988485b4ffd7d2062d92b8adb929ec7af",
+    "nixos/native-sources.json": "261b80d96a35385326892d100a5f8137c84f039fbb4ed6e476f67123acd53eba",
+    "nixos/native-workspace.nix": "2d7f8a5bd36fe2c252944e795ef3a2d47e25bde0b0078ff4b70ef43ba0ebc35e",
+    "nixos/murakumo-nixos.nix": "801c010105b96fc7111feb76f64bef5d75acd88795bc0ae3754baa2ccf03d602",
+    "nixos/native-iso.nix": "21f9a7d707056cca506735ca1baa2394579cbe6b4509387550ca9b8e3171d58a",
+    "nixos/native-build.nix": "587c560373d4a36997e893b6f4c85a7afef410f1417dda964b2e177b2216bb0d",
+    "nixos/tests/native-workspace.nix": "ad0f5eeafece89fe737420bafd42201ecde5b2c4591cb65879b243b93b95ef0b",
+    "ci/nixpkgs.nix": "e860c5e5afdf6163e24079bd99b6bce411be81debe69d98441e52767cbe39b9a"
+  },
+  "nixpkgs": "f5c082a40f7571c266e74e80ae2e68aadd8a9fc7",
+  "compilerSHA256": "fd2fe6dbfcd54912d662f2f9c32c4e2489fb43aab4cc9404ae3d6b67ffa9d211",
+  "monitor": {
+    "sha256": "2df8d251bee19cd9c16291852c09cf4578f01052e86c7bef5ac500162ce10c43",
+    "bytes": 311808,
+    "PT_INTERP": false,
+    "mutatedSelfCheck": "refused exit 2",
+    "invalidLabel": "refused with no file"
+  },
+  "dapps": {
+    "kaikeiWasmSHA256": "3fddfb7a571f46051f8c7b7f778398630484ca71f182906f3a0d279a5078dbd0",
+    "dandoriWasmSHA256": "d0978509dd383d2c10d4264636b4b55b75cc557ee0f8971c030d0a5a8f48b7df",
+    "workerSelfChecks": {
+      "kaikei": 511,
+      "dandori": 255
+    },
+    "remoteOperations": 0
+  },
+  "vm": {
+    "platform": "x86_64 Linux/KVM on existing Ubuntu host",
+    "baseGate": "/nix/store/90xmapch0p9pp5716xask2q19pi35zyc-vm-test-run-murakumo-nixos-native-workspace",
+    "desktopGate": "/nix/store/f5k0b52mh63jsxf6wdajp6jiyxzzqqdz-vm-test-run-murakumo-nixos-native-workspace-desktop",
+    "desktopGateSeconds": 124.48,
+    "checks": [
+      "successive real snapshots",
+      "SIGKILL automatic restart",
+      "power-cycle and new boot/service invocation IDs",
+      "invalid label no write",
+      "static app origin observation path returns 404",
+      "no Node/JVM/nbb runtime process",
+      "Cage/Chromium normal user",
+      "browser Worker self-check readiness via OCR",
+      "browser user can read observation file"
+    ]
+  },
+  "browser": {
+    "host": "separate local IAB browser, same compiled Wasm digests as ISO",
+    "checks": [
+      "unbalanced journal refused",
+      "balanced journal saved/reloaded",
+      "Dandori added/started/completed/reloaded",
+      "recovery exported",
+      "nonempty restore refused",
+      "empty-origin restore succeeded and journal readback",
+      "actual NixOS VM unsigned snapshot imported",
+      "tampered Wasm digest refused before execution"
+    ],
+    "mobileViews": 6,
+    "width": 390,
+    "overflow": false
+  },
+  "iso": {
+    "build": "/nix/store/1yfs10nyx7pvmv2fj4zypsq9a5wl4sm0-murakumo-nixos-0.1.0-x86_64-linux.iso",
+    "filename": "murakumo-nixos-0.1.0-x86_64-linux.iso",
+    "bytes": 2220474368,
+    "sha256": "1c4647bbfca55b9286c0928e9890b119ef91984195f5ae7290b93ae174bf62ff",
+    "boot": "actual BIOS/KVM ISO boot, no disk, restricted external networking",
+    "services": [
+      "native monitor active",
+      "nginx active",
+      "Cage active"
+    ],
+    "fontconfig": "minimal-media omission found and fixed; actual final screenshot text/readiness verified",
+    "liveSessionWarning": true,
+    "localReadback": "matching bytes and SHA256"
+  },
+  "notQualified": [
+    "physical hardware/GPU/firmware/power-loss",
+    "UEFI ISO boot",
+    "signed network admission and peer heartbeat",
+    "full native hata Cell and app service dispatch",
+    "distributed app state and writer fencing",
+    "production keys/model/inference/economy",
+    "general native installer/controller/CDCI closure",
+    "public release signing or publication"
+  ]
+}

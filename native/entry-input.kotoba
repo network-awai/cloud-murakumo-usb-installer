@@ -1,0 +1,12 @@
+;; Bounded integer CLI input shared by the bundled browser Worker entries.
+;; Wires 35/38 read only page-supplied memory in the canonical Wasm host.
+(defn app-arg [i :i64] :string (typed-cap-call 38 :string :string (string-from-i64 i)))
+(defn app-number [text :string] :i64
+  (if (or (= text "") (> (string-length text) 14)) -9000000000001
+    (let [negative (= (string-substring text 0 1) "-") start (if negative 1 0)]
+      (if (= start (string-length text)) -9000000000001
+        (loop [i start n 0]
+          (if (= i (string-length text)) (if negative (- 0 n) n)
+            (let [c (string-code-point-at text i)]
+              (if (or (< c 48) (> c 57) (> n 900000000000)) -9000000000001
+                (recur (+ i 1) (+ (* n 10) (- c 48)))))))))))
