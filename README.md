@@ -37,25 +37,46 @@ reviewed source, ISO hash and VM checks. Physical PC installation, real phone
 Passkey linking and inference still require separate verification. The
 [2026-09-26 record](docs/verification-2026-09-26.md) describes the earlier manual
 installation image.
+The device-claim agent, local model-readiness check and `community.nix`
+template were last built and booted in the BIOS and UEFI QEMU checks of
+[the 2026-09-30 record](docs/verification-2026-09-30.md), against an older
+revision; an ISO from this combined source has not been built.
+
+Phone-only setup, Wi-Fi provisioning, Kotoba authority pairing, remote model
+download and model switching are not present in this source. A read-only local
+inference check and a factory device claim responder for `murakumo.cloud` are
+included in the revised image. Neither component installs or starts a model server.
+The target flow and qualification gates are recorded in
+[headless phone setup](docs/headless-phone-setup.md).
 
 ## Build the bootable ISO
 
-On a NixOS or Linux machine with Nix, use a reviewed nixpkgs checkout at an
-explicit commit, or the immutable store path behind a pinned NixOS channel:
+On a NixOS or Linux machine with Nix, use a clean installer checkout and a
+clean nixpkgs checkout at the exact commit in
+[`nixos/nixpkgs-revision.txt`](nixos/nixpkgs-revision.txt). Run the local
+release gate; GitHub Actions is not required:
 
 ```sh
-./scripts/build-iso.sh /absolute/path/to/nixpkgs
+./scripts/release-iso.sh /absolute/path/to/nixpkgs /absolute/new/evidence-directory
 ```
 
 The [VM release gate](docs/vm-release-gate.md) must pass against the same source
 and package pin before ISO creation or system-export publication.
-The script prints the nixpkgs commit and produces `result/iso/*.iso`. Review
-that commit and record the ISO SHA-256 before writing a USB stick. Use the
+The gate runs the factory-claim and model-readiness tests, builds
+`result/iso/*.iso`, then records the ISO SHA-256, size, installer commit and
+nixpkgs commit in the new evidence directory. `scripts/build-iso.sh` remains
+available for development builds, but accepts any reviewed full nixpkgs commit
+and does not create a release identity record. The local identity files are
+not signed fleet receipts or replicated ISO storage; publication still needs
+those independent checks. Review the recorded ISO identity before writing a
+USB stick. Use the
 [official NixOS installation manual](https://nixos.org/manual/nixos/stable/#sec-installation)
-for USB writing, partitioning, mounting and `nixos-install`. The ISO includes
-the read-only preflight script and target templates under `/etc/murakumo/`,
-and the guided installer. Previously written USB sticks must be rewritten with
-the new ISO separately, after confirming and approving the USB's erasure.
+for USB writing, partitioning, mounting and `nixos-install`. An ISO built from
+this source includes the read-only preflight and local-inference checks,
+device claim agent and target templates under `/etc/murakumo/`,
+and the guided installer, but does not run an install automatically.
+Previously written USB sticks must be rewritten with the new ISO separately,
+after confirming and approving the USB's erasure.
 
 ## Install a target host
 
@@ -68,7 +89,9 @@ The steps below are the manual recovery/custom configuration path.
    following the official manual. A wrong disk choice destroys data.
 3. Run `nixos-generate-config --root /mnt`. Keep the generated
    `hardware-configuration.nix` for this host.
-4. Copy `node-base.nix`, `node-provider.nix`, `node-claim.nix`, `console-ui.nix`, `offline-base.nix`, `offline-uefi.nix`,
+4. Copy `node-base.nix`, `community.nix`, `node-readiness.mjs`,
+   `device-claim.mjs`, `node-provider.nix`, `node-claim.nix`, `console-ui.nix`,
+   `offline-base.nix`, `offline-uefi.nix`,
    `offline-bios.nix`, `network-setup.mjs`, `setup-ui.mjs`, `registration-ui.mjs`,
    `account-link.mjs`, `local-setup.mjs`, `language.mjs`, `graphical-ui.js`,
    `graphical-dialog.mjs`, `murakumo-logo.svg`, `acoustic-code.mjs`,
@@ -79,14 +102,34 @@ The steps below are the manual recovery/custom configuration path.
    and `networking.useDHCP = false` in that edited configuration. Set a real
    SSH public key, confirm UEFI or replace the boot loader settings, and review
    the network and filesystem configuration before `nixos-install`.
-5. Reboot from the installed disk. Confirm remote access, RADV/Vulkan and
-   the chosen model server on physical hardware. Then install the node CLI
-   from [cloud-murakumo-installer](https://github.com/network-awai/cloud-murakumo-installer).
+5. Reboot from the installed disk. Confirm remote access and RADV/Vulkan on
+   physical hardware. Install and start a reviewed OpenAI-compatible model
+   server and model separately. Run the local inference check with its exact
+   model ID (shown by its `/v1/models` endpoint):
+
+   ```sh
+   node /etc/murakumo/node-readiness.mjs --model YOUR_MODEL_ID --local-url http://127.0.0.1:11434/v1
+   ```
+
+6. Install the node CLI from
+   [cloud-murakumo-installer](https://github.com/network-awai/cloud-murakumo-installer).
+   Follow the [buyer and operator path](docs/buyer-operator-path.md) for local
+   AI access, optional community participation and account boundaries.
+
+Factory provisioning is a separate operator step after installation: generate
+one device key and one label per shipped unit with
+`sudo node /etc/murakumo/device-claim.mjs provision --model 'Murakumo 2609'`.
+The command prints a claim URL and registration JSON containing the factory
+token. Keep that output private; print the URL as the unit's QR label and
+register the JSON through the operator-only `murakumo.cloud` device API near
+dispatch. The node must never hold that API's admin token. See the
+[buyer and operator path](docs/buyer-operator-path.md) for the exact boundary.
 
 ## Opt in to idle inference after buyer claim
 
-The base profile leaves both the claim responder and provider service disabled.
-Before shipping, provision each physical device with its own DID and Ed25519
+The base profile leaves every claim and provider unit disabled, including the
+standalone `murakumo-device-claim` agent. Before shipping, provision each
+physical device with its own DID and Ed25519
 private key, register that DID and its matching claim token with the site, and
 put the claim URL or QR code on that device's label. The factory key must never
 appear on the label or in the Nix store. The registered DID and device identity
@@ -123,6 +166,13 @@ require a model server or buyer password. The buyer must still complete the
 claim in their browser. A local `claim-once` success only proves that the
 device responded to a challenge; it does not prove that ownership changed.
 
+The standalone agent needs no CLI: `services.murakumoDeviceClaim.enable =
+true` runs `device-claim.mjs serve`, which answers the same buyer challenge
+and sends signed liveness heartbeats. Enable exactly one of
+`services.murakumoClaimResponder` and `services.murakumoDeviceClaim`; the
+node profile asserts they are mutually exclusive so one device never answers
+the same challenge twice.
+
 After the buyer claim and a local `doctor` check, an exact model must be
 running locally before idle inference can be enabled. Add this to the target's
 `configuration.nix`:
@@ -145,8 +195,14 @@ It does not download a model, bypass admission or guarantee a paid job. If the
 model server needs a private API token, configure that separately before
 enabling the service; this template does not embed one in the Nix store.
 
-The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help, but its
-GPU was llvmpipe. Bare-metal Radeon 680M, Prism Vulkan, model throughput,
+`services.murakumoCommunity` is an alternative join unit that runs
+`node-readiness.mjs` before `murakumo node join --idle-only`. Enable exactly
+one of `services.murakumoProvider` and `services.murakumoCommunity`; the node
+profile asserts they are mutually exclusive.
+
+The 2026-09-26 NixOS 26.05 VM pilot booted and ran Murakumo CLI help with an
+llvmpipe GPU, and the 2026-09-30 pilot booted with an emulated GPU. Bare-metal
+Radeon 680M, Prism Vulkan, model throughput,
 concurrency and restart recovery remain unverified. Keep the serving Ubuntu
 installation until those checks and a recovery plan succeed.
 
