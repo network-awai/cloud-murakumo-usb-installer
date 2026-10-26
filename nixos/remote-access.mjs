@@ -86,7 +86,7 @@ export function remoteHandler(pairing,{page,client,logo,bundle,collect=collectSt
  };}
 async function serve(){
  await mkdir(ROOT,{recursive:true,mode:0o700});await mkdir('/run/murakumo-remote',{recursive:true,mode:0o700});
- try{await readFile(ROOT+'/tls.key');}catch(e){if(e.code!=='ENOENT')throw e;const r=spawnSync('openssl',['req','-x509','-newkey','rsa:3072','-nodes','-keyout',ROOT+'/tls.key','-out',ROOT+'/tls.crt','-days','3650','-subj','/CN=Murakumo Node local management'],{stdio:'ignore',timeout:30000});if(r.status!==0)throw Error('tls_failed');await chmod(ROOT+'/tls.key',0o600);}
+ try{await readFile(ROOT+'/tls.key');}catch(e){if(e.code!=='ENOENT')throw e;const r=spawnSync('openssl',['req','-x509','-newkey','rsa:3072','-nodes','-keyout',ROOT+'/tls.key','-out',ROOT+'/tls.crt','-days','3650','-subj','/CN=Awai Node local management'],{stdio:'ignore',timeout:30000});if(r.status!==0)throw Error('tls_failed');await chmod(ROOT+'/tls.key',0o600);}
  const tls={key:await readFile(ROOT+'/tls.key'),cert:await readFile(ROOT+'/tls.crt')},pairing=new Pairing();
  const certificate='SHA256 Fingerprint='+new X509Certificate(tls.cert).fingerprint256;
  const page=await readFile(new URL('./remote-access.html',import.meta.url));

@@ -17,7 +17,7 @@ Node.js tools as a native profile fallback, and do not stop existing services.
   operation-consent contract, never a product-local broker.
 - Keep observations outside the static root. Unsigned snapshots are neither
   admission nor execution permission. Unknown Cell/peer state stays unknown.
-- Do not describe the observer as a complete Murakumo Node, hata conductor,
+- Do not describe the observer as a complete Awai Node, hata conductor,
   distributed state system, model provider or qualified economic participant.
 - Live sessions must warn that browser state is temporary. Validate recovery
   files and refuse to overwrite existing work. Preserve unreadable data.

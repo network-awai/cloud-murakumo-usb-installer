@@ -77,7 +77,7 @@ trust; copying this USB does not install or enable that host configuration.
 
 ## Remaining product gates
 
-The native observer is **not a complete participating Murakumo Node**. Signed
+The native observer is **not a complete participating Awai Node**. Signed
 admission/heartbeat/peer exchange, key custody and operator governance, native
 hata Cell lifecycle/calls, OCI service dispatch and kotobase/Yataverse app-state
 recovery must be connected through the existing workstreams. LocalStorage is

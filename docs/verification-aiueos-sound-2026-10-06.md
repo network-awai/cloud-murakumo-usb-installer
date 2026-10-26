@@ -1,4 +1,4 @@
-# AiueOS / Murakumo Node sound and authentication QA — 2026-10-06
+# AiueOS / Awai Node sound and authentication QA — 2026-10-06
 
 ## Scope and evidence boundaries
 

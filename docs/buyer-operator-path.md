@@ -1,4 +1,4 @@
-# Murakumo Node buyer and operator path
+# Awai Node buyer and operator path
 
 This records what the current code supports after an operator installs NixOS.
 It is not a claim that retail units are preconfigured. The ISO does not install
