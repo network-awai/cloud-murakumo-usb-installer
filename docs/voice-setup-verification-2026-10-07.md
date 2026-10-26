@@ -1,6 +1,6 @@
 # Voice setup qualification — 2026-10-07
 
-Frozen runtime source: `481cd28` (initial implementation `3d186d1`). Product naming: AiueOS operating system; Murakumo Node service.
+Frozen runtime source: `481cd28` (initial implementation `3d186d1`). Product naming: AiueOS operating system; Awai Node service.
 
 ## Verified locally
 

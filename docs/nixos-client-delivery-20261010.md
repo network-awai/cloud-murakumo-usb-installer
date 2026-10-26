@@ -1,6 +1,6 @@
 # NixOS / Murakumo Client delivery, 2026-10-10
 
-The frozen OS source is installer main `77fb99583916640d725dd2fed48707093b8ef956`, following naming PR #20 and replay-floor PR #21. The operating system is NixOS; the installed suite is Murakumo Client, and a participating machine is a Murakumo Node. AiueOS remains a future replacement. Compatibility service/schema names retain `aiueos`. No new Daemon executable is claimed by naming this role.
+The frozen OS source is installer main `77fb99583916640d725dd2fed48707093b8ef956`, following naming PR #20 and replay-floor PR #21. The operating system is NixOS; the installed suite is Murakumo Client, and a participating machine is a Awai Node. AiueOS remains a future replacement. Compatibility service/schema names retain `aiueos`. No new Daemon executable is claimed by naming this role.
 
 ## Delivered artifacts
 

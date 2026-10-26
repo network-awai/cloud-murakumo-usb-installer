@@ -237,7 +237,7 @@ window { background: linear-gradient(125deg,#f1efff,#f8faff 48%,#edf4ff); color:
     checkbutton { font-size:14px; padding:12px 0; }
   `);
   Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),css,Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-  window=new Gtk.ApplicationWindow({application:app,title:'Murakumo Node Setup',default_width:1024,default_height:768});window.connect('close-request',()=>true);
+  window=new Gtk.ApplicationWindow({application:app,title:'Awai Node Setup',default_width:1024,default_height:768});window.connect('close-request',()=>true);
   const outer=box(Gtk.Orientation.VERTICAL,20);outer.halign=Gtk.Align.CENTER;outer.valign=Gtk.Align.CENTER;outer.set_size_request(760,-1);outer.margin_top=30;outer.margin_bottom=30;
   const card=box(Gtk.Orientation.VERTICAL,20);card.add_css_class('card');
   const header=box(Gtk.Orientation.HORIZONTAL,0);header.halign=Gtk.Align.START;header.add_css_class('brand-logo');

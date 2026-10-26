@@ -14,9 +14,9 @@ The [0.1.1 live media candidate](docs/native-media-0.1.1.md) includes those
 update tools, the installed-profile source bundle and its guide. The actual
 ISO has a separate UEFI boot, browser-readiness and no-disk-write VM gate.
 
-NixOS installation media and Murakumo Client setup for Murakumo Nodes.
+NixOS installation media and Murakumo Client setup for Awai Nodes.
 NixOS is the current operating system. Murakumo Client names the software suite;
-Murakumo Node names a participating instance or host. AiueOS is an unfinished
+Awai Node names a participating instance or host. AiueOS is an unfinished
 future OS intended to replace NixOS, not the OS delivered by this installer. This repository owns the OS installation boundary: boot media, disk
 selection, target configuration, recovery and rollback. The ISO opens a guided
 installer on boot: choose Wi-Fi, Ethernet or offline continuation, then select
@@ -248,11 +248,11 @@ to parse and evaluate both generated boot configurations with Nix.
 - **Murakumo Client**: software suite installed and configured on NixOS.
 - **Murakumo Daemon**: name for the resident participation process, when supplied.
 - **Murakumo CLI**: command interface; **Murakumo App**: user-facing application.
-- **Murakumo Node**: running participant, host and its observed status.
+- **Awai Node**: running participant, host and its observed status.
 - **AiueOS**: future replacement OS; incomplete and not delivered here.
 
 The journey is **Install NixOS → Set up Murakumo Client → Participate as a
-Murakumo Node**. Local configuration and account linking alone do not prove a
+Awai Node**. Local configuration and account linking alone do not prove a
 running daemon, inference readiness or fleet admission. See
 [naming and compatibility](docs/product-naming.md).
 

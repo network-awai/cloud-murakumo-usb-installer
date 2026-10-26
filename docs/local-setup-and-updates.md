@@ -1,9 +1,9 @@
-# Murakumo Node setup, account linking, language and NixOS updates
+# Awai Node setup, account linking, language and NixOS updates
 
 ## Current implementation
 
 The current OS is **NixOS**. **Murakumo Client** is the software suite;
-**Murakumo Node** is a participating instance or host. **AiueOS** is a future
+**Awai Node** is a participating instance or host. **AiueOS** is a future
 replacement OS and remains incomplete. This installer contains an offline,
 prebuilt NixOS system. See [naming and compatibility](product-naming.md). The
 installed system now includes a signed-release timer and boot recovery service.

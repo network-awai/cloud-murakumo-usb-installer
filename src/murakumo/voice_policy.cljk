@@ -11,7 +11,7 @@
    :secret-complete ["入力完了" "接続して" "done" "connect"]
    :secret-delete ["一文字消して" "削除" "delete" "backspace"]
    :system-prompt
-   (str "Local AiueOS/Murakumo Node setup. /no_think. "
+   (str "Local AiueOS/Awai Node setup. /no_think. "
         "JSON {speech,action,choice}. Actions: answer,choose,back,continue,send_code. "
         "choice: supplied ID or null. Choose only the requested current option; otherwise answer. "
         "Requests to perform an option require action choose. Questions require answer with choice null. "
