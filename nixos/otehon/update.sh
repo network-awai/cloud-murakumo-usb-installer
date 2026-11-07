@@ -36,13 +36,21 @@ prepare() {
 
 no_default() {
   sed -i '/^default /d' /boot/loader/loader.conf
-  rm -f /boot/EFI/Linux/*.efi
 }
 
-check() {
+# systemd-boot also discovers unified kernel images here. Their ownership cannot
+# be inferred from their names, so do not remove or ignore an existing UKI when
+# arranging a trial boot. Refuse before changing either the profile or the ESP.
+check_esp() (
+  shopt -s nullglob nocaseglob
+  local images=("$1"/*.efi)
+  [ "${#images[@]}" -eq 0 ] || refuse unmanaged-uki
+)
+
+check() (
   local feed=$1 manifest version system
   manifest=$(mktemp -d)
-  trap 'rm -rf "$manifest"' RETURN
+  trap 'rm -rf "$manifest"' EXIT
   cp "$feed/manifest.json" "$manifest/manifest.json" 2>/dev/null || refuse no-manifest
   cp "$feed/manifest.json.minisig" "$manifest/manifest.json.minisig" 2>/dev/null || refuse no-signature
   minisign -q -V -p "$OTEHON_UPDATE_PUBLIC_KEY" -m "$manifest/manifest.json" >/dev/null 2>&1 || refuse bad-signature
@@ -52,23 +60,27 @@ check() {
   ! is_blocked "$version" || refuse "blocked-version $version"
   [ ! -e "$pending" ] || refuse trial-in-progress
   echo "$version $system"
-}
+)
 
 apply() {
-  local feed=$1 checked version system generation
+  local feed=$1 cache=${2:-"file://$1/cache"} checked version system generation
+  mkdir -p "$state"
+  exec 9>"$state/apply.lock"
+  flock -n 9 || refuse update-busy
   checked=$(check "$feed") || { echo "$checked"; exit 2; }
   version=${checked%% *}
   system=${checked#* }
-  prepare
+  check_esp /boot/EFI/Linux
 
   # Nix refuses any path that the pinned cache key has not signed.
-  nix copy --from "file://$feed/cache" \
+  nix copy --from "$cache" \
     --option require-sigs true \
     --option trusted-public-keys "$(cat "$OTEHON_UPDATE_CACHE_KEY")" \
     --option substituters "" \
     --extra-experimental-features nix-command \
     "$system" || refuse bad-closure
 
+  prepare
   jq -n --argjson version "$version" --arg system "$system" '{version: $version, system: $system}' > "$pending.tmp"
   mv "$pending.tmp" "$pending"
   nix-env -p "$profile" --set "$system" >/dev/null
@@ -80,6 +92,38 @@ apply() {
   sync
   log "STAGED version=$version generation=$generation"
 }
+
+# Download only the two small signed-manifest files from a configured HTTPS base.
+# A response redirect is not followed; the binary cache is authenticated separately by Nix.
+https_feed() (
+  local action=$1 base=$2 tmp status path checked
+  [ ${#base} -le 2048 ] || refuse bad-feed-url
+  [[ "$base" =~ ^https://[A-Za-z0-9][A-Za-z0-9.-]*(:[0-9]{1,5})?(/[A-Za-z0-9._~-]+)*$ ]] || refuse bad-feed-url
+  case "$base/" in *'/../'*|*'/./'*|*'..'* ) refuse bad-feed-url ;; esac
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  for path in manifest.json manifest.json.minisig; do
+    status=$(curl --silent --show-error --connect-timeout 10 --max-time 60 \
+      --max-filesize 65536 --proto '=https' --output "$tmp/$path" \
+      --write-out '%{http_code}' "$base/$path") || refuse feed-unavailable
+    [ "$status" = 200 ] || refuse feed-http-status
+  done
+  case "$action" in
+    check) check "$tmp" ;;
+    apply)
+      checked=$(check "$tmp") || {
+        printf '%s\n' "$checked"
+        if [[ "$checked" =~ ^otehon-update:\ REFUSED\ old-version\ ([0-9]+)$ ]] &&
+          [ "${BASH_REMATCH[1]}" -eq "$(installed_version)" ]; then
+          exit 3
+        fi
+        exit 2
+      }
+      apply "$tmp" "$base/cache"
+      ;;
+    *) refuse bad-feed-action ;;
+  esac
+)
 
 # Runs after otehon-update-health on each boot. The health unit decides whether systemd marks
 # the boot entry good. This settles the trial as confirmed, failed, or rolled back.
@@ -155,9 +199,12 @@ ready() {
 case "${1:-}" in
   check) check "$2" ;;
   apply) apply "$2" ;;
+  check-https) https_feed check "$2" ;;
+  apply-https) https_feed apply "$2" ;;
+  check-esp) check_esp "$2" ;;
   settle) settle ;;
   health) health ;;
   version) installed_version ;;
   ready) ready ;;
-  *) echo "usage: otehon-update check|apply <feed> | settle | health | version | ready" >&2; exit 64 ;;
+  *) echo "usage: otehon-update check|apply <directory> | check-https|apply-https <base> | check-esp <directory> | settle | health | version | ready" >&2; exit 64 ;;
 esac
